@@ -22,17 +22,18 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.core.eventbus.EventBus;
+import life.genny.message.QMessageProvider;
+import life.genny.message.QMessageFactory;
 import life.genny.qwanda.message.QDataMessageIntf;
-import life.genny.qwanda.message.QDataRuleMessage;
 import life.genny.qwanda.message.QEventMessage;
-import life.genny.qwanda.rule.Rule;
+import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.KeycloakUtils;
 
 public class EBCHandlers {
 
   private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
-
-
+  
+  
   static Gson gson = new GsonBuilder()
       .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
         @Override
@@ -50,20 +51,31 @@ public class EBCHandlers {
    final static String qwandaApiUrl = System.getenv("REACT_APP_QWANDA_API_URL");
   final static String vertxUrl = System.getenv("REACT_APP_VERTX_URL");
   final static String hostIp = System.getenv("HOSTIP");
+  final static String defaultSmsProvider = System.getenv("DEFAULT_SMS_PROVIDER_CODE");
+  final static String defaultMailProvider = System.getenv("DEFAULT_MAIL_PROVIDER_CODE");
+  final static String defaultVoiceProvider = System.getenv("DEFAULT_VOICE_PROVIDER_CODE");
+  
   static String token;
-
-
-
+  //static MessageProvider messageProvider;
+  static QMessageFactory messageFactory = new QMessageFactory();
+  
   public static void registerHandlers(final EventBus eventBus) {
-	    EBConsumers.getFromEvents().subscribe(arg -> {
+	    /*EBConsumers.getFromEvents().subscribe(arg -> {
 	        logger.info("Received EVENT :" + (System.getenv("PROJECT_REALM") == null ? "tokenRealm"
 	            : System.getenv("PROJECT_REALM")));
-
+	        
 	        final JsonObject payload = new JsonObject(arg.body().toString());
 	        final String token = payload.getString("token");
 	        System.out.println(payload);
 	        final QEventMessage eventMsg = gson.fromJson(payload.toString(), QEventMessage.class);
-	        processEvent(eventMsg, eventBus, token);
+	        
+	        if(eventMsg.getMsgMessageData() != null) {
+		        processEvent(eventMsg, eventBus, token, messageFactory.getMessageProvider(eventMsg.getMsgMessageData().getMsgMessageType()));
+	        }
+	        final JsonObject object = gson.fromJson(payload.toString(), JsonObject.class);
+	        System.out.println("object value"+object.getString("hello"));
+	        
+	        
 	      });
  
 	    EBConsumers.getFromData().subscribe(arg -> {
@@ -75,12 +87,27 @@ public class EBCHandlers {
 	        final QDataMessageIntf dataMsg = gson.fromJson(payload.toString(), QDataMessageIntf.class);
 	        processData(dataMsg, eventBus, token);
 
-	    });
+	    });*/
+	  
+	  
+	  EBConsumers.getFromMessages().subscribe(arg -> {
+	        logger.info("Received EVENT :" + (System.getenv("PROJECT_REALM") == null ? "tokenRealm"
+	            : System.getenv("PROJECT_REALM")));
+	        
+	        final JsonObject payload = new JsonObject(arg.body().toString());
+	        final String token = payload.getString("token");
+	        System.out.println(payload);
+	        logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
+	        final QMSGMessage object = gson.fromJson(payload.toString(), QMSGMessage.class);
+	        System.out.println("object value"+object.getData());
+	        
+	        
+	      });
 	    
   }
 
   public static void processEvent(final QEventMessage eventMsg, final EventBus bus,
-	      final String token) {
+	      final String token, QMessageProvider messageProvider) {
 	    Vertx.vertx().executeBlocking(future -> {
 	      // Getting decoded token in Hash Map from QwandaUtils
 	      final Map<String, Object> decodedToken = KeycloakUtils.getJsonMap(token);
@@ -110,9 +137,9 @@ public class EBCHandlers {
 	        System.out.println(entry.getKey() + ", " + entry.getValue());
 	      }
 
-	      /*
-	       *  DO STUFF HERE
-	       */
+	      //triggers message service depending on the type
+	      //messageProvider.sendMessage(eventMsg.getMsgMessageData());
+	      
 	      future.complete();
 	    }, res -> {
 	      if (res.succeeded()) {
@@ -121,6 +148,50 @@ public class EBCHandlers {
 	    });
 
 	  }
+  
+  /*public static void processEvent(final QEventMessage eventMsg, final EventBus bus,
+	      final String token, QMessageProvider messageProvider) {
+	    Vertx.vertx().executeBlocking(future -> {
+	      // Getting decoded token in Hash Map from QwandaUtils
+	      final Map<String, Object> decodedToken = KeycloakUtils.getJsonMap(token);
+	      // Getting Set of User Roles from QwandaUtils
+	      final Set<String> userRoles =
+	          KeycloakUtils.getRoleSet(decodedToken.get("realm_access").toString());
+
+	      System.out.println("The Roles value are: " + userRoles.toString());
+
+	      
+	       * Getting Prj Realm name from KeyCloakUtils - Just cheating the keycloak realm names as we
+	       * can't add multiple realms in genny keyclaok as it is open-source
+	       
+	      final String projectRealm = KeycloakUtils.getPRJRealmFromDevEnv();
+	      if ((projectRealm != null) && (!projectRealm.isEmpty())) {
+	        decodedToken.put("realm", projectRealm);
+	      } else {
+	        // Extracting realm name from iss value
+	        final String realm = (decodedToken.get("iss").toString()
+	            .substring(decodedToken.get("iss").toString().lastIndexOf("/") + 1));
+	        // Adding realm name to the decoded token
+	        decodedToken.put("realm", realm);
+	      }
+	      System.out.println("######  The realm name is:  #####  " + decodedToken.get("realm"));
+	      // Printing Decoded Token values
+	      for (final Map.Entry entry : decodedToken.entrySet()) {
+	        System.out.println(entry.getKey() + ", " + entry.getValue());
+	      }
+
+	     
+	      //triggers message service depending on the type
+	      messageProvider.sendMessage(eventMsg);
+	      
+	      future.complete();
+	    }, res -> {
+	      if (res.succeeded()) {
+	        System.out.println("ProcessedEvent");
+	      }
+	    });
+
+	  }*/
  
   public static void processData(final QDataMessageIntf dataMsg, final EventBus bus,
 	      final String token) {

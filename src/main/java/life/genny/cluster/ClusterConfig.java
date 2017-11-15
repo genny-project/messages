@@ -20,8 +20,8 @@ public class ClusterConfig {
       System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "127.0.0.1";
 
   private static String privateIP = System.getenv("MYIP");
-  private final static int portHazelcastCluster = 5705;
-  private final static int portEBCluster = 15705;
+  private final static int portHazelcastCluster = 5709;
+  private final static int portEBCluster = 15709;
 
   /**
    * @param toClientOutbount the toClientOutbount to set
@@ -54,7 +54,8 @@ public class ClusterConfig {
     final VertxOptions options = new VertxOptions();
 
     if (System.getenv("GENNYDEV") == null) {
-      final ClusterManager mgr = new HazelcastClusterManager(configHazelcastCluster());
+//      final ClusterManager mgr = new HazelcastClusterManager(configHazelcastCluster());
+      final ClusterManager mgr = new HazelcastClusterManager();
       options.setClusterManager(mgr);
       options.setEventBusOptions(configEBCluster());
     } else {

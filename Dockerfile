@@ -11,16 +11,8 @@ ADD docker-entrypoint.sh /docker-entrypoint.sh
 
 WORKDIR /
 
-EXPOSE 5701
-EXPOSE 5702
-EXPOSE 5703
-EXPOSE 5704
-EXPOSE 5705
-EXPOSE 5706
-EXPOSE 15701 
-EXPOSE 15702
-EXPOSE 15703
-EXPOSE 15704
+EXPOSE 5709
+EXPOSE 15709
 #CMD ["java"]
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD curl -f / http://localhost:8080/version || exit 1
