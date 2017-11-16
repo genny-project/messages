@@ -23,48 +23,32 @@ public class MessageTest {
 	
 	static QMessageFactory messageFactory = new QMessageFactory();
 	
-	/*@Test
+	//@Test
 	public void mailTest() throws FileNotFoundException, IOException {
-		String message = "Hello world";
-		Properties properties = new Properties();
-		properties.load(new FileInputStream(System.getProperty("user.dir")+"/credentials.properties"));
-		System.out.println("props ::"+properties.entrySet().toString());
-		//QEmailMessage.sendMail(message, toMail);
+		QBaseMSGMessage msgMessage = new QBaseMSGMessage();
+		msgMessage.setMsgMessageType(QBaseMSGMessageType.EMAIL);
+		msgMessage.setMsgMessageData("hello world");
+		msgMessage.setSource("rpgayatri@gmail.com");
+		msgMessage.setTarget("rpgayatri@gmail.com");
+		msgMessage.setSubject("test_subject");
 		
-		QEventMessage eventMessage = new QEventMessage("EVENT_TYPE", "qw1");
-		eventMessage.setMsgMessageType(QBaseMSGMessageType.EMAIL);
-		eventMessage.setSource(properties.getProperty("USERNAME"));
-		eventMessage.setTarget(properties.getProperty("USERNAME"));
-		QMessage msgmessage = new QMessage("event_msg") {
-		};
-		MessageData data = msgmessage.new MessageData("code");
-		data.setValue(message);
-		eventMessage.setData(data);
-		eventMessage.setSubject("Test_subject_outcome.life");
 		
-		QMessageProvider provider = messageFactory.getMessageProvider(eventMessage.getMsgMessageType());
-		provider.sendMessage(eventMessage);
+		QMessageProvider provider = messageFactory.getMessageProvider(msgMessage.getMsgMessageType());
+		provider.sendMessage(msgMessage);
 	}
 		
 	//@Test
 	public void messageFactorySMSTesting() throws FileNotFoundException, IOException {
+		QBaseMSGMessage msgMessage = new QBaseMSGMessage();
+		msgMessage.setMsgMessageType(QBaseMSGMessageType.SMS);
+		msgMessage.setMsgMessageData("hello world");
+		msgMessage.setSource("+61488807705");
+		msgMessage.setTarget("+61468497227");
+		msgMessage.setSubject("test_subject");
 		
-		Properties properties = new Properties();
-		properties.load(new FileInputStream(System.getProperty("user.dir")+"/credentials.properties"));
-		
-		QEventMessage eventMessage = new QEventMessage("EVENT_TYPE", "qw1");
-		eventMessage.setMsgMessageType(QBaseMSGMessageType.SMS);
-		eventMessage.setSource(properties.getProperty("TWILIO_SOURCE_PHONE"));
-		eventMessage.setTarget(properties.getProperty("TWILIO_TARGET_PHONE"));
-		QMessage msgmessage = new QMessage("event_msg") {
-		};
-		MessageData data = msgmessage.new MessageData("code");
-		data.setValue("hello world!!");
-		eventMessage.setData(data);
-		
-		QMessageProvider provider = messageFactory.getMessageProvider(eventMessage.getMsgMessageType());
-		provider.sendMessage(eventMessage);
-	}*/
+		QMessageProvider provider = messageFactory.getMessageProvider(msgMessage.getMsgMessageType());
+		provider.sendMessage(msgMessage);
+	}
 	
 	@Test
 	public void testJSON() {

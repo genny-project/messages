@@ -1,9 +1,5 @@
 package life.genny.message;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
-
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -14,27 +10,12 @@ public class QSMSMessageManager implements QMessageProvider {
 	
 	@Override
 	public void sendMessage(QBaseMSGMessage message) {
-		
-		Properties properties = getProperties();
 
 		//target is toPhoneNumber, Source is the fromPhoneNumber,
-		Twilio.init(properties.getProperty("ACCOUNT_SID"), properties.getProperty("AUTH_TOKEN"));
+		Twilio.init(System.getenv("TWILIO_ACCOUNT_SID"), System.getenv("TWILIO_AUTH_TOKEN"));
 		Message msg = Message.creator(new PhoneNumber(message.getTarget()), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
 		System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
 		
-	}
-
-	private Properties getProperties() {
-		Properties properties = new Properties();
-		
-		try {
-			properties.load(new FileInputStream(System.getProperty("user.dir") + "/credentials.properties"));
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return properties;
 	}
 
 	/*

@@ -1,8 +1,5 @@
 package life.genny.message;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -14,22 +11,21 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import life.genny.qwanda.message.QBaseMSGMessage;
-import life.genny.qwanda.message.QEventMessage;
 
-public class QEmailMessageManager implements QMessageProvider{
-	
+public class QEmailMessageManager implements QMessageProvider {
+
 	@Override
 	public void sendMessage(QBaseMSGMessage message) {
-		
-		Properties props = setProperties("emailprops");
-		Properties credentials = setProperties("credentials");
-		
-		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+
+		Properties emailProperties = setProperties();
+
+		Session session = Session.getInstance(emailProperties, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(credentials.getProperty("USERNAME"), credentials.getProperty("PASSWORD"));
+				return new PasswordAuthentication(System.getenv("EMAIL_USERNAME"),
+						System.getenv("EMAIL_PASSWORD"));
 			}
 		});
-		
+
 		try {
 
 			Message msg = new MimeMessage(session);
@@ -45,34 +41,17 @@ public class QEmailMessageManager implements QMessageProvider{
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 
-
-	private static Properties setProperties(String propertyType) {
+	private static Properties setProperties() {
 
 		Properties properties = new Properties();
-		
-		try {
-			Properties props = new Properties();
-			props.load(new FileInputStream(System.getProperty("user.dir") + "/credentials.properties"));
-			
-			if (propertyType.equalsIgnoreCase("credentials")) {
-				properties.put("USERNAME", props.getProperty("USERNAME"));
-				properties.put("PASSWORD", props.getProperty("PASSWORD"));
-			} else if (propertyType.equalsIgnoreCase("emailprops")) {
-				properties.put("mail.smtp.auth", props.getProperty("mail.smtp.auth"));
-				properties.put("mail.smtp.starttls.enable", props.getProperty("mail.smtp.starttls.enable"));
-				properties.put("mail.smtp.host", props.getProperty("mail.smtp.host"));
-				properties.put("mail.smtp.port", props.getProperty("mail.smtp.port"));
-			}
-			
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+		properties.put("mail.smtp.auth", System.getenv("MAIL_SMTP_AUTH"));
+		properties.put("mail.smtp.starttls.enable", System.getenv("MAIL_SMTP_STARTTLS_ENABLE"));
+		properties.put("mail.smtp.host", System.getenv("MAIL_SMTP_HOST"));
+		properties.put("mail.smtp.port", System.getenv("MAIL_SMTP_PORT"));
 
 		return properties;
 	}
