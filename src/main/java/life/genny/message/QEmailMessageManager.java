@@ -28,15 +28,18 @@ public class QEmailMessageManager implements QMessageProvider {
 
 		try {
 
-			Message msg = new MimeMessage(session);
-			msg.setFrom(new InternetAddress(message.getSource()));
-			msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(message.getTarget()));
-			msg.setSubject(message.getSubject());
-			msg.setText(message.getMsgMessageData());
+			if(message.getTarget() != null && !message.getTarget().isEmpty()) {
+				Message msg = new MimeMessage(session);
+				msg.setFrom(new InternetAddress(message.getSource()));
+				msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(message.getTarget()));
+				msg.setSubject(message.getSubject());
+				msg.setText(message.getMsgMessageData());
 
-			Transport.send(msg);
+				Transport.send(msg);
 
-			System.out.println("Done");
+				System.out.println("Done");
+			} 
+			
 
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);

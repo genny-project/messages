@@ -13,8 +13,12 @@ public class QSMSMessageManager implements QMessageProvider {
 
 		//target is toPhoneNumber, Source is the fromPhoneNumber,
 		Twilio.init(System.getenv("TWILIO_ACCOUNT_SID"), System.getenv("TWILIO_AUTH_TOKEN"));
-		Message msg = Message.creator(new PhoneNumber(message.getTarget()), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
-		System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
+		
+		if (message.getTarget() != null && !message.getTarget().isEmpty()) {
+			Message msg = Message.creator(new PhoneNumber(message.getTarget()), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
+			System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
+		}
+		
 		
 	}
 
