@@ -5,6 +5,8 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -105,14 +107,11 @@ public class EBCHandlers {
 			System.out.println(payload);
 			logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 			final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
-			QBaseMSGMessage basemsg = message.getMsgMessageData();
+			List<QBaseMSGMessage> baseMsgList = (List<QBaseMSGMessage>) message.getMsgMessageData();
 
-			if (basemsg != null) {
-				processMessage(basemsg, eventBus, token,
-						messageFactory.getMessageProvider(basemsg.getMsgMessageType()));
+			if (baseMsgList != null && baseMsgList.size() > 0) {
+				processMessage(baseMsgList, eventBus, token);
 			}
-
-			logger.info("object value ::" + basemsg.getSource());
 
 			logger.info("smtp host from environment variables ::" + smtp_host);
 			logger.info("twilio source phone ::" + twilio_source);
@@ -121,8 +120,7 @@ public class EBCHandlers {
 
 	}
 
-	private static void processMessage(QBaseMSGMessage basemsg, EventBus eventBus, String token,
-			QMessageProvider messageProvider) {
+	private static void processMessage(List<QBaseMSGMessage> basemsglist, EventBus eventBus, String token) {
 		Vertx.vertx().executeBlocking(future -> {
 			// Getting decoded token in Hash Map from QwandaUtils
 			final Map<String, Object> decodedToken = KeycloakUtils.getJsonMap(token);
@@ -152,10 +150,14 @@ public class EBCHandlers {
 				System.out.println(entry.getKey() + ", " + entry.getValue());
 			}
 			
-			logger.info("about to trigger message");
 			// triggers message depending on the message type
-			messageProvider.sendMessage(basemsg);
-			logger.info("message triggered");
+			basemsglist.forEach(msgMessage -> {
+				logger.info("about to trigger message");
+				QMessageProvider provider = messageFactory.getMessageProvider(msgMessage.getMsgMessageType());
+				provider.sendMessage(msgMessage);
+				logger.info("message triggered");
+			});
+			
 
 			future.complete();
 		}, res -> {
