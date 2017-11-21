@@ -20,12 +20,12 @@ public class MessageTest {
 	public void mailTest() throws FileNotFoundException, IOException {
 		QBaseMSGMessage msgMessage = new QBaseMSGMessage();
 		msgMessage.setMsgMessageType(QBaseMSGMessageType.EMAIL);
-		msgMessage.setMsgMessageData("Not the usual email body test!! ");
+		msgMessage.setMsgMessageData("Please show the attachments!!!");
 		msgMessage.setSource("rpgayatri@gmail.com");
 		msgMessage.setTarget("rpgayatri@gmail.com");
 		msgMessage.setSubject("test_subject_with attachment");
 		
-		String[] emailAttachments = {"bornstein-airbnb.png","mountains.jpg"};
+		String[] emailAttachments = {"/attachments/bornstein-airbnb.png"};
 		//String[] emailAttachments = {};
 		//String[] emailAttachments = null;
 		//String[] emailAttachments = {""};
@@ -51,7 +51,7 @@ public class MessageTest {
 		provider.sendMessage(msgMessage);
 	}
 	
-	@Test
+	//@Test
 	public void testJSON() {
 		
 		QBaseMSGMessage msgMessage = new QBaseMSGMessage();

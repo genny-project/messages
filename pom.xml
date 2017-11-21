@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>life.genny</groupId>
 			<artifactId>qwanda</artifactId>
-			<version>0.5.5</version>
+			<version>0.5.6</version>
 		</dependency>
 		<dependency>
 			<groupId>life.genny</groupId>
@@ -183,13 +183,21 @@
 			<artifactId>twilio</artifactId>
 			<version>7.11.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit-version}</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 
 	</dependencies>
 
@@ -201,6 +209,8 @@
 				<includes>
 					<include>**/*.properties</include>
 					<include>**/*.xml</include>
+					<include>**/*.png</include>
+					<include>**/*.jpg</include>
 				</includes>
 			</resource>
 		</resources>

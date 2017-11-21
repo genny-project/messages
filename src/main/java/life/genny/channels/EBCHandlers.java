@@ -59,44 +59,12 @@ public class EBCHandlers {
 	final static String defaultVoiceProvider = System.getenv("DEFAULT_VOICE_PROVIDER_CODE");
 
 	final static String twilio_source = System.getenv("TWILIO_SOURCE_PHONE");
-	final static String smtp_host = System.getenv("mail.smtp.host");
-
+	
 	static String token;
 	// static MessageProvider messageProvider;
 	static QMessageFactory messageFactory = new QMessageFactory();
 
 	public static void registerHandlers(final EventBus eventBus) {
-		/*
-		 * EBConsumers.getFromEvents().subscribe(arg -> {
-		 * logger.info("Received EVENT :" + (System.getenv("PROJECT_REALM") ==
-		 * null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
-		 * 
-		 * final JsonObject payload = new JsonObject(arg.body().toString());
-		 * final String token = payload.getString("token");
-		 * System.out.println(payload); final QEventMessage eventMsg =
-		 * gson.fromJson(payload.toString(), QEventMessage.class);
-		 * 
-		 * if(eventMsg.getMsgMessageData() != null) { processEvent(eventMsg,
-		 * eventBus, token,
-		 * messageFactory.getMessageProvider(eventMsg.getMsgMessageData().
-		 * getMsgMessageType())); } final JsonObject object =
-		 * gson.fromJson(payload.toString(), JsonObject.class);
-		 * System.out.println("object value"+object.getString("hello"));
-		 * 
-		 * 
-		 * });
-		 * 
-		 * EBConsumers.getFromData().subscribe(arg -> {
-		 * 
-		 * logger.info("Received DATA :" + (System.getenv("PROJECT_REALM") ==
-		 * null ? "tokenRealm" : System.getenv("PROJECT_REALM"))); final
-		 * JsonObject payload = new JsonObject(arg.body().toString()); final
-		 * String token = payload.getString("token"); final QDataMessageIntf
-		 * dataMsg = gson.fromJson(payload.toString(), QDataMessageIntf.class);
-		 * processData(dataMsg, eventBus, token);
-		 * 
-		 * });
-		 */
 
 		EBConsumers.getFromMessages().subscribe(arg -> {
 			logger.info("Received EVENT :"
@@ -107,48 +75,18 @@ public class EBCHandlers {
 			System.out.println(payload);
 			logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 			final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
-			List<QBaseMSGMessage> baseMsgList = (List<QBaseMSGMessage>) message.getMsgMessageData();
+			logger.info("message object ::"+message);
+			List<QBaseMSGMessage> baseMsgList =  message.getMsgMessageData();
 
-			if (baseMsgList != null && baseMsgList.size() > 0) {
+			if(baseMsgList != null && baseMsgList.size() > 0){
 				processMessage(baseMsgList, eventBus, token);
 			}
-
-			logger.info("smtp host from environment variables ::" + smtp_host);
-			logger.info("twilio source phone ::" + twilio_source);
 
 		});
 
 	}
 
 	private static void processMessage(List<QBaseMSGMessage> basemsglist, EventBus eventBus, String token) {
-		Vertx.vertx().executeBlocking(future -> {
-			// Getting decoded token in Hash Map from QwandaUtils
-			final Map<String, Object> decodedToken = KeycloakUtils.getJsonMap(token);
-			// Getting Set of User Roles from QwandaUtils
-			final Set<String> userRoles = KeycloakUtils.getRoleSet(decodedToken.get("realm_access").toString());
-
-			System.out.println("The Roles value are: " + userRoles.toString());
-
-			/*
-			 * Getting Prj Realm name from KeyCloakUtils - Just cheating the
-			 * keycloak realm names as we can't add multiple realms in genny
-			 * keyclaok as it is open-source
-			 */
-			final String projectRealm = KeycloakUtils.getPRJRealmFromDevEnv();
-			if ((projectRealm != null) && (!projectRealm.isEmpty())) {
-				decodedToken.put("realm", projectRealm);
-			} else {
-				// Extracting realm name from iss value
-				final String realm = (decodedToken.get("iss").toString()
-						.substring(decodedToken.get("iss").toString().lastIndexOf("/") + 1));
-				// Adding realm name to the decoded token
-				decodedToken.put("realm", realm);
-			}
-			System.out.println("######  The realm name is:  #####  " + decodedToken.get("realm"));
-			// Printing Decoded Token values
-			for (final Map.Entry entry : decodedToken.entrySet()) {
-				System.out.println(entry.getKey() + ", " + entry.getValue());
-			}
 			
 			// triggers message depending on the message type
 			basemsglist.forEach(msgMessage -> {
@@ -157,138 +95,7 @@ public class EBCHandlers {
 				provider.sendMessage(msgMessage);
 				logger.info("message triggered");
 			});
-			
-
-			future.complete();
-		}, res -> {
-			if (res.succeeded()) {
-				System.out.println("ProcessedEvent");
-			}
-		});
-
-	}
-
-	public static void processEvent(final QEventMessage eventMsg, final EventBus bus, final String token,
-			QMessageProvider messageProvider) {
-		Vertx.vertx().executeBlocking(future -> {
-			// Getting decoded token in Hash Map from QwandaUtils
-			final Map<String, Object> decodedToken = KeycloakUtils.getJsonMap(token);
-			// Getting Set of User Roles from QwandaUtils
-			final Set<String> userRoles = KeycloakUtils.getRoleSet(decodedToken.get("realm_access").toString());
-
-			System.out.println("The Roles value are: " + userRoles.toString());
-
-			/*
-			 * Getting Prj Realm name from KeyCloakUtils - Just cheating the
-			 * keycloak realm names as we can't add multiple realms in genny
-			 * keyclaok as it is open-source
-			 */
-			final String projectRealm = KeycloakUtils.getPRJRealmFromDevEnv();
-			if ((projectRealm != null) && (!projectRealm.isEmpty())) {
-				decodedToken.put("realm", projectRealm);
-			} else {
-				// Extracting realm name from iss value
-				final String realm = (decodedToken.get("iss").toString()
-						.substring(decodedToken.get("iss").toString().lastIndexOf("/") + 1));
-				// Adding realm name to the decoded token
-				decodedToken.put("realm", realm);
-			}
-			System.out.println("######  The realm name is:  #####  " + decodedToken.get("realm"));
-			// Printing Decoded Token values
-			for (final Map.Entry entry : decodedToken.entrySet()) {
-				System.out.println(entry.getKey() + ", " + entry.getValue());
-			}
-
-			// triggers message service depending on the type
-			// messageProvider.sendMessage(eventMsg.getMsgMessageData());
-
-			future.complete();
-		}, res -> {
-			if (res.succeeded()) {
-				System.out.println("ProcessedEvent");
-			}
-		});
-
-	}
-
-	/*
-	 * public static void processEvent(final QEventMessage eventMsg, final
-	 * EventBus bus, final String token, QMessageProvider messageProvider) {
-	 * Vertx.vertx().executeBlocking(future -> { // Getting decoded token in
-	 * Hash Map from QwandaUtils final Map<String, Object> decodedToken =
-	 * KeycloakUtils.getJsonMap(token); // Getting Set of User Roles from
-	 * QwandaUtils final Set<String> userRoles =
-	 * KeycloakUtils.getRoleSet(decodedToken.get("realm_access").toString());
-	 * 
-	 * System.out.println("The Roles value are: " + userRoles.toString());
-	 * 
-	 * 
-	 * Getting Prj Realm name from KeyCloakUtils - Just cheating the keycloak
-	 * realm names as we can't add multiple realms in genny keyclaok as it is
-	 * open-source
-	 * 
-	 * final String projectRealm = KeycloakUtils.getPRJRealmFromDevEnv(); if
-	 * ((projectRealm != null) && (!projectRealm.isEmpty())) {
-	 * decodedToken.put("realm", projectRealm); } else { // Extracting realm
-	 * name from iss value final String realm =
-	 * (decodedToken.get("iss").toString()
-	 * .substring(decodedToken.get("iss").toString().lastIndexOf("/") + 1)); //
-	 * Adding realm name to the decoded token decodedToken.put("realm", realm);
-	 * } System.out.println("######  The realm name is:  #####  " +
-	 * decodedToken.get("realm")); // Printing Decoded Token values for (final
-	 * Map.Entry entry : decodedToken.entrySet()) {
-	 * System.out.println(entry.getKey() + ", " + entry.getValue()); }
-	 * 
-	 * 
-	 * //triggers message service depending on the type
-	 * messageProvider.sendMessage(eventMsg);
-	 * 
-	 * future.complete(); }, res -> { if (res.succeeded()) {
-	 * System.out.println("ProcessedEvent"); } });
-	 * 
-	 * }
-	 */
-
-	public static void processData(final QDataMessageIntf dataMsg, final EventBus bus, final String token) {
-		Vertx.vertx().executeBlocking(future -> {
-			// Getting decoded token in Hash Map from QwandaUtils
-			final Map<String, Object> decodedToken = KeycloakUtils.getJsonMap(token);
-			// Getting Set of User Roles from QwandaUtils
-			final Set<String> userRoles = KeycloakUtils.getRoleSet(decodedToken.get("realm_access").toString());
-
-			System.out.println("The Roles value are: " + userRoles.toString());
-
-			/*
-			 * Getting Prj Realm name from KeyCloakUtils - Just cheating the
-			 * keycloak realm names as we can't add multiple realms in genny
-			 * keyclaok as it is open-source
-			 */
-			final String projectRealm = KeycloakUtils.getPRJRealmFromDevEnv();
-			if ((projectRealm != null) && (!projectRealm.isEmpty())) {
-				decodedToken.put("realm", projectRealm);
-			} else {
-				// Extracting realm name from iss value
-				final String realm = (decodedToken.get("iss").toString()
-						.substring(decodedToken.get("iss").toString().lastIndexOf("/") + 1));
-				// Adding realm name to the decoded token
-				decodedToken.put("realm", realm);
-			}
-			System.out.println("######  The realm name is:  #####  " + decodedToken.get("realm"));
-			// Printing Decoded Token values
-			for (final Map.Entry entry : decodedToken.entrySet()) {
-				System.out.println(entry.getKey() + ", " + entry.getValue());
-			}
-
-			/*
-			 * DO STUFF HERE
-			 */
-			future.complete();
-		}, res -> {
-			if (res.succeeded()) {
-				System.out.println("ProcessedData");
-			}
-		});
-
+		
 	}
 
 }
