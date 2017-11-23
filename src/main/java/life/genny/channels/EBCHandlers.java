@@ -37,26 +37,27 @@ public class EBCHandlers {
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-	static Gson gson = new GsonBuilder()
-			.registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
-				@Override
-				public LocalDateTime deserialize(final JsonElement json, final Type type,
-						final JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-					return ZonedDateTime.parse(json.getAsJsonPrimitive().getAsString()).toLocalDateTime();
-				}
-
-				public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
-						final JsonSerializationContext context) {
-					return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); // "yyyy-mm-dd"
-				}
-			}).create();
-
-	final static String qwandaApiUrl = System.getenv("REACT_APP_QWANDA_API_URL");
-	final static String vertxUrl = System.getenv("REACT_APP_VERTX_URL");
-	final static String hostIp = System.getenv("HOSTIP");
-	final static String defaultSmsProvider = System.getenv("DEFAULT_SMS_PROVIDER_CODE");
-	final static String defaultMailProvider = System.getenv("DEFAULT_MAIL_PROVIDER_CODE");
-	final static String defaultVoiceProvider = System.getenv("DEFAULT_VOICE_PROVIDER_CODE");
+	static Gson gson = new Gson();
+	//= new GsonBuilder()
+//			.registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+//				@Override
+//				public LocalDateTime deserialize(final JsonElement json, final Type type,
+//						final JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+//					return ZonedDateTime.parse(json.getAsJsonPrimitive().getAsString()).toLocalDateTime();
+//				}
+//
+//				public JsonElement serialize(final LocalDateTime date, final Type typeOfSrc,
+//						final JsonSerializationContext context) {
+//					return new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)); // "yyyy-mm-dd"
+//				}
+//			}).create();
+//
+//	final static String qwandaApiUrl = System.getenv("REACT_APP_QWANDA_API_URL");
+//	final static String vertxUrl = System.getenv("REACT_APP_VERTX_URL");
+//	final static String hostIp = System.getenv("HOSTIP");
+//	final static String defaultSmsProvider = System.getenv("DEFAULT_SMS_PROVIDER_CODE");
+//	final static String defaultMailProvider = System.getenv("DEFAULT_MAIL_PROVIDER_CODE");
+//	final static String defaultVoiceProvider = System.getenv("DEFAULT_VOICE_PROVIDER_CODE");
 
 	final static String twilio_source = System.getenv("TWILIO_SOURCE_PHONE");
 	
