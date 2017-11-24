@@ -9,7 +9,7 @@
 		<log4j-core-version>2.5</log4j-core-version>
 		<vertx.version>3.4.2</vertx.version>
 		<junit-version>4.12</junit-version>
-
+		
 	</properties>
 	<repositories>
 		<repository>
@@ -29,12 +29,12 @@
 		<dependency>
 			<groupId>life.genny</groupId>
 			<artifactId>qwanda</artifactId>
-			<version>0.5.7</version>
+			<version>0.8</version>
 		</dependency>
 		<dependency>
 			<groupId>life.genny</groupId>
 			<artifactId>qwanda-utils</artifactId>
-			<version>0.6</version>
+			<version>0.8</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
@@ -97,22 +97,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.bitsofinfo</groupId>
-			<artifactId>hazelcast-docker-swarm-discovery-spi</artifactId>
-			<version>1.0-RC3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.kie</groupId>
-			<artifactId>kie-api</artifactId>
-			<version>7.0.0.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.drools</groupId>
-			<artifactId>drools-decisiontables</artifactId>
-			<version>7.0.0.Final</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.2</version>
@@ -132,50 +116,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.javamoney</groupId>
-			<artifactId>moneta</artifactId>
-			<version>1.1</version>
-		</dependency>
-
-
-		<dependency>
-			<groupId>org.drools</groupId>
-			<artifactId>drools-core</artifactId>
-			<version>7.0.0.Final</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.drools</groupId>
-			<artifactId>drools-compiler</artifactId>
-			<version>7.0.0.Final</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-flow</artifactId>
-			<version>7.0.0.Final</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-flow-builder</artifactId>
-			<version>7.0.0.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-bpmn2</artifactId>
-			<version>7.0.0.Final</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.xmlbeans</groupId>
 			<artifactId>xmlbeans</artifactId>
 			<version>2.6.0</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/io.vavr/vavr -->
-		<dependency>
-			<groupId>io.vavr</groupId>
-			<artifactId>vavr</artifactId>
-			<version>0.9.1</version>
 		</dependency>
 
 		<dependency>
@@ -191,14 +134,11 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.6</version>
 		</dependency>
-
-
 	</dependencies>
 
 	<build>
