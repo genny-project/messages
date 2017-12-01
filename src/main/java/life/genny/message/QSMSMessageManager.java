@@ -16,7 +16,7 @@ public class QSMSMessageManager implements QMessageProvider {
 	
 	@Override
 	public void sendMessage(QBaseMSGMessage message) {
-
+		System.out.println("its an sms");
 		//target is toPhoneNumber, Source is the fromPhoneNumber,
 		Twilio.init(System.getenv("TWILIO_ACCOUNT_SID"), System.getenv("TWILIO_AUTH_TOKEN"));
 		
