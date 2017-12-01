@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
@@ -28,7 +26,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import life.genny.constants.MessageTemplateConstants;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QMSGMessage;
@@ -178,7 +175,7 @@ public class QEmailMessageManager implements QMessageProvider {
 		
 		final String messageTemplate = message.getTemplate_code();
 		
-		String messageData = MergeUtil.merge(MessageTemplateConstants.MSG_CH40_MOVE, entityTemplateMap);
+		String messageData = MergeUtil.merge(messageTemplate, entityTemplateMap);
 		
 		QBaseMSGMessage baseMessage = new QBaseMSGMessage();
 		baseMessage.setMsgMessageData(messageData);
