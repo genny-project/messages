@@ -1,6 +1,7 @@
 package life.genny.channels;
 
 import java.lang.invoke.MethodHandles;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -10,6 +11,10 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.eventbus.EventBus;
 import life.genny.message.QMessageFactory;
+import life.genny.message.QMessageProvider;
+import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.message.QBaseMSGMessage;
+import life.genny.qwanda.message.QBaseMSGMessageType;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.util.MergeHelper;
 
@@ -37,7 +42,7 @@ public class EBCHandlers {
 		EBConsumers.getFromMessages().subscribe(arg -> {
 			logger.info("Received EVENT :"
 					+ (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
-
+			
 			final JsonObject payload = new JsonObject(arg.body().toString());
 			final String token = payload.getString("token");
 
@@ -45,53 +50,61 @@ public class EBCHandlers {
 			System.out.println(payload);
 			logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 			final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
-		
-			logger.info("message object ::"+message);
-			logger.info("token ::"+token);
 			
-			processMessage(message, token);
-			
+			//processMessage(message, token);
+			processTestMessage(message);
 
 		});
 
 	}
-
-	private static void processMessage(QMSGMessage message, String token) {
+	
+	
+	private static void processTestMessage(QMSGMessage message) {
 		
-		MergeHelper helper = new MergeHelper();
+		Map<String, String> messageContent = new HashMap<String, String>();
+		messageContent.put("GRP_QUOTES", "The project has been quoted");
+		messageContent.put("GRP_APPROVED", "The project owner has aproved the quote");
+		messageContent.put("GRP_IN_TRANSIT", "The Load is now in transit");
+		messageContent.put("GRP_COMPLETED", "The load has been delivered");
+		messageContent.put("GRP_PAID","The payment has been made");
 		
-		Map<String, String> keyEntityAttrMap = helper.getKeyEntityAttrMap(message);
+		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
 		
-		if(keyEntityAttrMap.containsKey("code")) {
-			//Working on it currently, should return be a map of linkValue & BaseEntity
-			helper.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
+		QBaseMSGMessage testMessage = new QBaseMSGMessage();
+		testMessage.setMsgMessageData("Dear Customer,"+messageContent.get(keyEntityAttrMap.get("targetBE")));
+		
+		if(message.getMsgMessageType().equals(QBaseMSGMessageType.SMS)) {
+			testMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
+			testMessage.setTarget(System.getenv("TWILIO_TARGET_PHONE"));
+		}else if(message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
+			testMessage.setTarget(System.getenv("EMAIL_TARGET"));
 		}
 		
 		
+		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
+		provider.sendMessage(testMessage);
 		
-		/*
+	}
+
+	private static void processMessage(QMSGMessage message, String token) {
+				
+		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
 		
-		Map<String, BaseEntity> entityTemplateMap = new MergeHelper().mergeHelper(message);
-		System.out.println("entityTemplateMap ::"+entityTemplateMap);
-		
-		if(!entityTemplateMap.isEmpty()){
-			String messageData = MergeUtil.merge(SAMPLE_SMS_TEMPLATE, entityTemplateMap);
+		if(keyEntityAttrMap.containsKey("code")) {
+			//Working on it currently, should return be a map of linkValue & BaseEntity
+			Map<String, BaseEntity> templateBaseEntMap = MergeHelper.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
 			
-			QBaseMSGMessage baseMessage = new QBaseMSGMessage();
-			baseMessage.setMsgMessageData(messageData);
+			if(templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {
+				triggerMessage(message, templateBaseEntMap, keyEntityAttrMap.get("recipient").toString());				
+			}
+		}
 		
-		}*/
-		
-		
-			
-			/*// triggers message depending on the message type
-			basemsglist.forEach(msgMessage -> {
-				logger.info("about to trigger message");
-				QMessageProvider provider = messageFactory.getMessageProvider(msgMessage.getMsgMessageType());
-				provider.sendMessage(msgMessage);
-				logger.info("message triggered");
-			});*/
-		
+	}
+	
+	public static void triggerMessage(QMSGMessage message, Map<String, BaseEntity> templateBaseEntMap, String recipient) {
+		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
+		QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntMap, recipient);
+		provider.sendMessage(msgMessage);
 	}
 
 }
