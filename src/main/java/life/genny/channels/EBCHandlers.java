@@ -63,7 +63,7 @@ public class EBCHandlers {
 		
 		Map<String, String> messageContent = new HashMap<String, String>();
 		messageContent.put("GRP_QUOTES", "The project has been quoted");
-		messageContent.put("GRP_APPROVED", "The project owner has aproved the quote");
+		messageContent.put("GRP_APPROVED", "The project owner has approved the quote");
 		messageContent.put("GRP_IN_TRANSIT", "The Load is now in transit");
 		messageContent.put("GRP_COMPLETED", "The load has been delivered");
 		messageContent.put("GRP_PAID","The payment has been made");
