@@ -24,7 +24,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 
-import life.genny.qwanda.converter.PropertiesJsonDeserializer;
+
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.QwandaUtils;
