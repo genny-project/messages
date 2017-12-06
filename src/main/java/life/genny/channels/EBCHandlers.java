@@ -91,7 +91,6 @@ public class EBCHandlers {
 		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
 		
 		if(keyEntityAttrMap.containsKey("code")) {
-			//Working on it currently, should return be a map of linkValue & BaseEntity
 			Map<String, BaseEntity> templateBaseEntMap = MergeHelper.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
 			
 			if(templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {
