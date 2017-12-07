@@ -33,7 +33,6 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.MergeUtil;
-import life.genny.util.MergeHelper;
 
 public class QEmailMessageManager implements QMessageProvider {
 	
@@ -125,26 +124,32 @@ public class QEmailMessageManager implements QMessageProvider {
 	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient) {
 		
 		final String messageTemplate = message.getTemplate_code();
-		QBaseMSGMessage baseMessage = new QBaseMSGMessage();
+		QBaseMSGMessage baseMessage = null;
 		
 		
 		String messageData;
-		//use this, still under dev
-		messageData = MergeUtil.merge(messageTemplate, entityTemplateMap);
+		try {
+			BaseEntity be = entityTemplateMap.get(recipient);
+			
+			if(be != null){
+				
+				//working on templates
+				baseMessage = new QBaseMSGMessage();
+				messageData = MergeUtil.merge(FileUtils.readFileToString(new File(""), Charset.defaultCharset()), entityTemplateMap);
+				baseMessage.setMsgMessageData(messageData);
+				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
+				baseMessage.setAttachments(message.getAttachments());
+				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValue(be, "PRI_EMAIL"));
+				
+				baseMessage.setTarget(System.getenv("EMAIL_USERNAME"));
+			} else{
+				System.out.println("BaseEntity for the mail recipient is null");
+			}
+			
 		
-		//messageData = MergeUtil.merge(FileUtils.readFileToString(new File(""), Charset.defaultCharset()), entityTemplateMap);
-		baseMessage.setMsgMessageData(messageData);
-		baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
-		baseMessage.setAttachments(message.getAttachments());
-		
-		BaseEntity be = entityTemplateMap.get(recipient);
-		//use this
-		//baseMessage.setTarget(MergeHelper.getBaseEntityAttrValue(be, "PRI_EMAIL"));
-		
-		System.out.println("sender email value ::"+MergeHelper.getBaseEntityAttrValue(be, "PRI_EMAIL"));
-		baseMessage.setTarget(System.getenv("EMAIL_USERNAME"));
-		
-		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 		
 		return baseMessage;
 	}

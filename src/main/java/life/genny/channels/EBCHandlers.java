@@ -1,7 +1,6 @@
 package life.genny.channels;
 
 import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -14,8 +13,8 @@ import life.genny.message.QMessageFactory;
 import life.genny.message.QMessageProvider;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
-import life.genny.qwanda.message.QBaseMSGMessageType;
 import life.genny.qwanda.message.QMSGMessage;
+import life.genny.qwandautils.MergeUtil;
 import life.genny.util.MergeHelper;
 
 public class EBCHandlers {
@@ -44,22 +43,19 @@ public class EBCHandlers {
 					+ (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
 			
 			final JsonObject payload = new JsonObject(arg.body().toString());
-			final String token = payload.getString("token");
-
 			
 			System.out.println(payload);
 			logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 			final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
 			
-			//processMessage(message, token);
-			processTestMessage(message);
+			processMessage(message, payload.getString("token"));
 
 		});
 
 	}
 	
 	
-	private static void processTestMessage(QMSGMessage message) {
+	/*private static void processTestMessage(QMSGMessage message) {
 		
 		Map<String, String> messageContent = new HashMap<String, String>();
 		messageContent.put("GRP_QUOTES", "The project has been quoted");
@@ -84,14 +80,14 @@ public class EBCHandlers {
 		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
 		provider.sendMessage(testMessage);
 		
-	}
+	}*/
 
 	private static void processMessage(QMSGMessage message, String token) {
 				
 		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
-		
+				
 		if(keyEntityAttrMap.containsKey("code")) {
-			Map<String, BaseEntity> templateBaseEntMap = MergeHelper.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
+			Map<String, BaseEntity> templateBaseEntMap = MergeUtil.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
 			
 			if(templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {
 				triggerMessage(message, templateBaseEntMap, keyEntityAttrMap.get("recipient").toString());				
@@ -103,7 +99,13 @@ public class EBCHandlers {
 	public static void triggerMessage(QMSGMessage message, Map<String, BaseEntity> templateBaseEntMap, String recipient) {
 		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
 		QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntMap, recipient);
-		provider.sendMessage(msgMessage);
+		
+		if(msgMessage != null) {
+			provider.sendMessage(msgMessage);
+		} else {
+			System.out.println("Message wont be sent since baseEntities returned is null");
+		}
+		
 	}
 
 }
