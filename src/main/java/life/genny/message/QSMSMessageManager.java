@@ -10,6 +10,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.MergeUtil;
+import life.genny.util.MergeHelper;
 
 public class QSMSMessageManager implements QMessageProvider {
 	
@@ -35,16 +36,25 @@ public class QSMSMessageManager implements QMessageProvider {
 		BaseEntity be = entityTemplateMap.get(recipient);
 		QBaseMSGMessage baseMessage = null;
 
-		if (be != null) {
-			baseMessage = new QBaseMSGMessage();
-			// working on the message template
-			String messageData = MergeUtil.merge(message.getTemplate_code(), entityTemplateMap);
-			
-			baseMessage.setMsgMessageData(messageData);
-			baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
-			baseMessage.setAttachments(message.getAttachments());
+		if (be != null) {	
 
-			baseMessage.setTarget(MergeUtil.getBaseEntityAttrValue(be, "PRI_MOBILE"));
+			// Fetching Message template from sheets
+			Map templateMap = MergeHelper.getTemplate(message.getTemplate_code());
+			
+			
+			if(templateMap != null) {
+				String smsMesssage = templateMap.get("sms").toString();
+				baseMessage = new QBaseMSGMessage();
+				
+				// Merging SMS template message with BaseEntity values
+				String messageData = MergeUtil.merge(smsMesssage.toString(), entityTemplateMap);
+
+				baseMessage.setMsgMessageData(messageData);
+				baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
+
+				// Fetching Phone number attribute from BaseEntity for recipient
+				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValue(be, "PRI_MOBILE"));
+			}
 		}
 
 		System.out.println("base message model for email ::"+baseMessage);

@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.core.Vertx;
 import io.vertx.rxjava.core.eventbus.EventBus;
 import life.genny.message.QMessageFactory;
 import life.genny.message.QMessageProvider;
@@ -47,8 +48,12 @@ public class EBCHandlers {
 			System.out.println(payload);
 			logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 			final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
+			Vertx.vertx().executeBlocking(arg1->{
+				processMessage(message, payload.getString("token"));
+			}, arg2->{
+				
+			});
 			
-			processMessage(message, payload.getString("token"));
 
 		});
 
