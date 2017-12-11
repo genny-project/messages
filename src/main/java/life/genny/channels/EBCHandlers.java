@@ -20,8 +20,10 @@ import life.genny.util.MergeHelper;
 
 public class EBCHandlers {
 	
-	public static final String SAMPLE_SMS_TEMPLATE = "Welcome {{RECIPIENT.PRI_FIRSTNAME}} {{RECIPIENT.PRI_LASTNAME}} !! Your contact number is {{RECIPIENT.PRI_MOBILE}} and email ID is {{RECIPIENT.PRI_EMAIL}}";
-
+	public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_RED = "\u001B[31m";
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
@@ -42,13 +44,13 @@ public class EBCHandlers {
 		EBConsumers.getFromMessages().subscribe(arg -> {
 			logger.info("Received EVENT :"
 					+ (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
-			
-			final JsonObject payload = new JsonObject(arg.body().toString());
-			
-			System.out.println(payload);
-			logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
-			final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
+						
 			Vertx.vertx().executeBlocking(arg1->{
+				final JsonObject payload = new JsonObject(arg.body().toString());
+				
+				System.out.println(payload);
+				logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
+				final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
 				processMessage(message, payload.getString("token"));
 			}, arg2->{
 				
@@ -59,33 +61,6 @@ public class EBCHandlers {
 
 	}
 	
-	
-	/*private static void processTestMessage(QMSGMessage message) {
-		
-		Map<String, String> messageContent = new HashMap<String, String>();
-		messageContent.put("GRP_QUOTES", "The project has been quoted");
-		messageContent.put("GRP_APPROVED", "The project owner has approved the quote");
-		messageContent.put("GRP_IN_TRANSIT", "The Load is now in transit");
-		messageContent.put("GRP_COMPLETED", "The load has been delivered");
-		messageContent.put("GRP_PAID","The payment has been made");
-		
-		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
-		
-		QBaseMSGMessage testMessage = new QBaseMSGMessage();
-		testMessage.setMsgMessageData("Dear Customer,"+messageContent.get(keyEntityAttrMap.get("targetBE")));
-		
-		if(message.getMsgMessageType().equals(QBaseMSGMessageType.SMS)) {
-			testMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
-			testMessage.setTarget(System.getenv("TWILIO_TARGET_PHONE"));
-		}else if(message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
-			testMessage.setTarget(System.getenv("EMAIL_TARGET"));
-		}
-		
-		
-		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
-		provider.sendMessage(testMessage);
-		
-	}*/
 
 	private static void processMessage(QMSGMessage message, String token) {
 				
@@ -95,6 +70,7 @@ public class EBCHandlers {
 			Map<String, BaseEntity> templateBaseEntMap = MergeUtil.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
 			
 			if(templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {
+				logger.info(ANSI_BLUE+"template base entity map ::"+templateBaseEntMap+ANSI_RESET);
 				triggerMessage(message, templateBaseEntMap, keyEntityAttrMap.get("recipient").toString());				
 			}
 		}
@@ -106,9 +82,10 @@ public class EBCHandlers {
 		QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntMap, recipient);
 		
 		if(msgMessage != null) {
+			logger.info(ANSI_BLUE+">>>>>>>>>>Message info is set<<<<<<<<<<<<"+ANSI_RESET);
 			provider.sendMessage(msgMessage);
 		} else {
-			System.out.println("Message wont be sent since baseEntities returned is null");
+			System.out.println(ANSI_RED+">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<"+ANSI_RESET);
 		}
 		
 	}
