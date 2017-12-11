@@ -16,7 +16,6 @@ public class MergeHelper {
 	
 	private static String messagesSheetId = System.getenv("MESSAGES_SHEETID");
 	private final static String secret = System.getenv("GOOGLE_CLIENT_SECRET");
-	private final static String hostingSheetId = System.getenv("GOOGLE_HOSTING_SHEET_ID");
 	static File credentialPath = new File(System.getProperty("user.home"), ".genny/sheets.googleapis.com-java-quickstart"); 
 
 	public static Map<String, String> getKeyEntityAttrMap(QMSGMessage message) {
@@ -46,7 +45,6 @@ public class MergeHelper {
 		GennySheets sheets = new GennySheets(secret, messagesSheetId, credentialPath);
 		
 		Map<String, Map> templateMap = getMessageTemplates(sheets);
-		System.out.println("template map ::"+templateMap);
 		
 		return templateMap.get(templateCode);
 	}

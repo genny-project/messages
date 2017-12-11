@@ -1,31 +1,16 @@
 package life.genny.message;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -33,8 +18,13 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.MergeUtil;
+import life.genny.util.GoogleDocHelper;
+import life.genny.util.MergeHelper;
 
 public class QEmailMessageManager implements QMessageProvider {
+	
+	public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_GREEN = "\u001B[32m";
 	
 	public static final String FILE_TYPE = "application/";
 	
@@ -58,11 +48,6 @@ public class QEmailMessageManager implements QMessageProvider {
 	        
 			String target = message.getTarget();
 			if (target != null && !target.isEmpty()) {
-
-				Multipart multipart = new MimeMultipart();
-
-				//To set message data in the mail
-				MimeBodyPart messageTextPart = new MimeBodyPart();
 
 				MimeMessage msg = new MimeMessage(session);
 				//msg.setFrom(new InternetAddress(System.getenv("EMAIL_USERNAME")));
@@ -98,57 +83,35 @@ public class QEmailMessageManager implements QMessageProvider {
 		return properties;
 	}
 	
-	private String getHtmlContent(String url) throws Exception, IOException {
-
-		HttpClient client = HttpClientBuilder.create().build();
-		HttpGet request = new HttpGet(url);
-		HttpResponse response = client.execute(request);
-
-		String html = "";
-		InputStream in = response.getEntity().getContent();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		StringBuilder str = new StringBuilder();
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			str.append(line);
-		}
-		in.close();
-		html = str.toString();
-		System.out.println("string html ::"+html);
-
-		return html;
-	}
 
 
 	@Override
 	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient) {
 		
-		final String messageTemplate = message.getTemplate_code();
 		QBaseMSGMessage baseMessage = null;
-		
-		
-		String messageData;
-		try {
+		Map templateMap = MergeHelper.getTemplate(message.getTemplate_code());
+
+		if (templateMap != null) {
+			String docId = templateMap.get("email").toString();
+			String htmlString = GoogleDocHelper.getGoogleDocString(docId);
+			logger.info(ANSI_GREEN + "email doc ID from google sheet ::" + docId + ANSI_RESET);
 			BaseEntity be = entityTemplateMap.get(recipient);
-			
-			if(be != null){
-				
-				//working on templates
+
+			if (be != null) {
+
+				// working on templates
 				baseMessage = new QBaseMSGMessage();
-				messageData = MergeUtil.merge(FileUtils.readFileToString(new File(""), Charset.defaultCharset()), entityTemplateMap);
-				baseMessage.setMsgMessageData(messageData);
+				baseMessage.setSubject(templateMap.get("subject").toString());
+				baseMessage.setMsgMessageData(MergeUtil.merge(htmlString, entityTemplateMap));
 				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
 				baseMessage.setAttachments(message.getAttachments());
 				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValue(be, "PRI_EMAIL"));
-				
+				logger.info(ANSI_GREEN + "Setting the targer email id ::"+baseMessage.getTarget() + ANSI_RESET);
+
 				baseMessage.setTarget(System.getenv("EMAIL_USERNAME"));
-			} else{
+			} else {
 				System.out.println("BaseEntity for the mail recipient is null");
 			}
-			
-		
-		} catch (IOException e) {
-			e.printStackTrace();
 		}		
 		
 		return baseMessage;
