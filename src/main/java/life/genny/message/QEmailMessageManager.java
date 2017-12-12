@@ -57,7 +57,7 @@ public class QEmailMessageManager implements QMessageProvider {
 				msg.setContent(message.getMsgMessageData(), "text/html; charset=utf-8");
 				
 				Transport.send(msg);
-				System.out.println("Done");
+				logger.info(ANSI_GREEN + "Email sent" + ANSI_RESET);
 
 			}
 
@@ -107,8 +107,6 @@ public class QEmailMessageManager implements QMessageProvider {
 				baseMessage.setAttachments(message.getAttachments());
 				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValue(be, "PRI_EMAIL"));
 				logger.info(ANSI_GREEN + "Setting the targer email id ::"+baseMessage.getTarget() + ANSI_RESET);
-
-				baseMessage.setTarget(System.getenv("EMAIL_USERNAME"));
 			} else {
 				System.out.println("BaseEntity for the mail recipient is null");
 			}
