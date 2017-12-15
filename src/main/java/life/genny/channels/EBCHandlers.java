@@ -63,6 +63,7 @@ public class EBCHandlers {
 	
 
 	private static void processMessage(QMSGMessage message, String token) {
+		
 				
 		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
 				
@@ -71,15 +72,15 @@ public class EBCHandlers {
 			
 			if(templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {
 				logger.info(ANSI_BLUE+"template base entity map ::"+templateBaseEntMap+ANSI_RESET);
-				triggerMessage(message, templateBaseEntMap, keyEntityAttrMap.get("recipient").toString());				
+				triggerMessage(message, templateBaseEntMap, keyEntityAttrMap.get("recipient").toString(), token);				
 			}
 		}
 		
 	}
 	
-	public static void triggerMessage(QMSGMessage message, Map<String, BaseEntity> templateBaseEntMap, String recipient) {
+	public static void triggerMessage(QMSGMessage message, Map<String, BaseEntity> templateBaseEntMap, String recipient, String token) {
 		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
-		QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntMap, recipient);
+		QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntMap, recipient, token);
 		
 		if(msgMessage != null) {
 			logger.info(ANSI_BLUE+">>>>>>>>>>Message info is set<<<<<<<<<<<<"+ANSI_RESET);

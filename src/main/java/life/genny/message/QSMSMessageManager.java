@@ -11,6 +11,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
+import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.util.MergeHelper;
@@ -41,7 +42,7 @@ public class QSMSMessageManager implements QMessageProvider {
 
 	@Override
 	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap,
-			String recipient) {
+			String recipient, String token) {
 
 		BaseEntity be = entityTemplateMap.get(recipient);
 		QBaseMSGMessage baseMessage = null;
@@ -49,11 +50,11 @@ public class QSMSMessageManager implements QMessageProvider {
 		if (be != null) {	
 
 			// Fetching Message template from sheets
-			Map templateMap = MergeHelper.getTemplate(message.getTemplate_code());
+			QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 			
 			
-			if(templateMap != null) {
-				String smsMesssage = templateMap.get("sms").toString();
+			if(template != null) {
+				String smsMesssage = template.getSms_template();
 				logger.info(ANSI_GREEN+"sms template from google sheet ::"+smsMesssage+ANSI_RESET);
 				baseMessage = new QBaseMSGMessage();
 				

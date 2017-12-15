@@ -9,5 +9,5 @@ import life.genny.qwanda.message.QMSGMessage;
 public interface QMessageProvider {
 	
 	public void sendMessage(QBaseMSGMessage message);
-	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient);
+	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient, String token);
 }

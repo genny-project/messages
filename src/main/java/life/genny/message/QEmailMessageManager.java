@@ -16,6 +16,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
+import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.util.GoogleDocHelper;
@@ -86,22 +87,21 @@ public class QEmailMessageManager implements QMessageProvider {
 
 
 	@Override
-	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient) {
+	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient, String token) {
 		
 		QBaseMSGMessage baseMessage = null;
-		Map templateMap = MergeHelper.getTemplate(message.getTemplate_code());
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 
-		if (templateMap != null) {
-			String docId = templateMap.get("email").toString();
+		if (template != null) {
+			String docId = template.getEmail_templateId();
 			String htmlString = GoogleDocHelper.getGoogleDocString(docId);
 			logger.info(ANSI_GREEN + "email doc ID from google sheet ::" + docId + ANSI_RESET);
 			BaseEntity be = entityTemplateMap.get(recipient);
 
 			if (be != null) {
 
-				// working on templates
 				baseMessage = new QBaseMSGMessage();
-				baseMessage.setSubject(templateMap.get("subject").toString());
+				baseMessage.setSubject(template.getSubject());
 				baseMessage.setMsgMessageData(MergeUtil.merge(htmlString, entityTemplateMap));
 				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
 				baseMessage.setAttachments(message.getAttachments());
