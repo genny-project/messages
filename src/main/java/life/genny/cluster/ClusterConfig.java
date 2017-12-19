@@ -61,7 +61,10 @@ public class ClusterConfig {
     } else {
       logger.info("Running DEV mode, no cluster");
       ClusterManager mgr = null;
-      mgr = new HazelcastClusterManager(); // standard docker
+      final Config hazelcastConfig = new Config();
+      hazelcastConfig.getGroupConfig().setName( hostIP).setPassword( "app1-pass" );
+
+      mgr = new HazelcastClusterManager(hazelcastConfig); // standard docker
       System.out.println("Starting Clustered Vertx");
       options.setClusterManager(mgr);
       options.setBlockedThreadCheckInterval(200000000);
