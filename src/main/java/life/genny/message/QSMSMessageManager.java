@@ -1,7 +1,11 @@
 package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
@@ -31,9 +35,16 @@ public class QSMSMessageManager implements QMessageProvider {
 		Twilio.init(System.getenv("TWILIO_ACCOUNT_SID"), System.getenv("TWILIO_AUTH_TOKEN"));
 		
 		if (message.getTarget() != null && !message.getTarget().isEmpty()) {
-			Message msg = Message.creator(new PhoneNumber(message.getTarget()), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
-			System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
-			logger.info(ANSI_GREEN+"SMS Sent"+ANSI_RESET);
+			
+			//target is a string array of multiple target phone numbers
+			String[] messageTargetArr = StringUtils.split(message.getTarget(), ",");
+			
+			for(String targetMobile : messageTargetArr) {
+				Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
+				System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
+				logger.info(ANSI_GREEN+"SMS Sent"+ANSI_RESET);
+			}
+			
 		}
 		
 		
@@ -64,8 +75,17 @@ public class QSMSMessageManager implements QMessageProvider {
 				baseMessage.setMsgMessageData(messageData);
 				baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
 
-				// Fetching Phone number attribute from BaseEntity for recipient
-				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValue(be, "PRI_MOBILE"));
+				// Fetching Phone number attribute from BaseEntity for recipients
+				List<String> targetlist = new ArrayList<>();
+				entityTemplateMap.entrySet().forEach(baseEntityMap -> {
+					String targetMobile = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "PRI_MOBILE");
+					if(targetMobile != null){
+						targetlist.add(targetMobile);
+					}				
+				});
+				
+				System.out.println("targetlist string ::"+targetlist.toString());
+				baseMessage.setTarget(targetlist.toString());
 				logger.info(ANSI_GREEN+"Target mobile number is set"+ANSI_RESET);
 			}
 		}

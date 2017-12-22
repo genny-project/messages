@@ -1,6 +1,8 @@
 package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -51,13 +53,15 @@ public class QEmailMessageManager implements QMessageProvider {
 			if (target != null && !target.isEmpty()) {
 
 				MimeMessage msg = new MimeMessage(session);
-				//msg.setFrom(new InternetAddress(System.getenv("EMAIL_USERNAME")));
 				msg.setFrom(new InternetAddress(message.getSource()));
-				msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(message.getTarget()));
+				
+				InternetAddress[] iAdressArray = InternetAddress.parse(message.getTarget());
+				msg.setRecipients(Message.RecipientType.TO, iAdressArray);
+				
 				msg.setSubject(message.getSubject());
 				msg.setContent(message.getMsgMessageData(), "text/html; charset=utf-8");
 				
-				Transport.send(msg);
+				Transport.send(msg, msg.getAllRecipients());
 				logger.info(ANSI_GREEN + "Email sent" + ANSI_RESET);
 
 			}
@@ -66,7 +70,6 @@ public class QEmailMessageManager implements QMessageProvider {
 			//throw new RuntimeException(e);
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -105,10 +108,23 @@ public class QEmailMessageManager implements QMessageProvider {
 				baseMessage.setMsgMessageData(MergeUtil.merge(htmlString, entityTemplateMap));
 				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
 				baseMessage.setAttachments(message.getAttachments());
-				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValue(be, "PRI_EMAIL"));
+				
+				// Fetching Email attribute from BaseEntity for recipients
+				List<String> targetlist = new ArrayList<>();
+				entityTemplateMap.entrySet().forEach(baseEntityMap -> {
+					String targetEmail = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "PRI_EMAIL");
+					if(targetEmail != null){
+						targetlist.add(targetEmail);
+					}				
+				});
+				
+				System.out.println("target email string ::"+targetlist.toString());
+				baseMessage.setTarget(targetlist.toString().replace("[", "").replace("]", "").replaceAll(" ", ""));
+
+				
 				logger.info(ANSI_GREEN + "Setting the targer email id ::"+baseMessage.getTarget() + ANSI_RESET);
 			} else {
-				System.out.println("BaseEntity for the mail recipient is null");
+				logger.error("BaseEntity for the mail recipient is null");
 			}
 		}		
 		
