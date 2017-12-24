@@ -32,7 +32,7 @@ public class EBCHandlers {
 				logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 				final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
 				
-				if(message.getCode() != null){
+				if(message.getTemplate_code() != null){
 					//for test_comm
 					MessageProcessHelper.processTestMessage(message, payload.getString("token"));
 					
