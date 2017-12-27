@@ -55,7 +55,9 @@ public class MessageProcessHelper {
 	}
 
 	private static BaseEntity getBaseEntityForCode(QMSGMessage message, String token) {
-		BaseEntity be = MergeUtil.getBaseEntityForAttr(message.getTemplate_code(), token);
+		
+		//Code is the Test-Message BaseEntity code
+		BaseEntity be = MergeUtil.getBaseEntityForAttr(message.getCode(), token);
 		return be;
 	}
 
@@ -80,6 +82,9 @@ public class MessageProcessHelper {
 			}
 
 		});
+		
+		templateBaseEntityMap.put(be.getName(), be);
+		
 		return templateBaseEntityMap;
 	}
 

@@ -115,7 +115,13 @@ public class QEmailMessageManager implements QMessageProvider {
 					String targetEmail = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "PRI_EMAIL");
 					if(targetEmail != null){
 						targetlist.add(targetEmail);
-					}				
+					} else {
+						//This condition is for the test mail service
+						String testEmail = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "TST_EMAIL");
+						if(testEmail != null) {
+							targetlist.add(testEmail);
+						}
+					}
 				});
 				
 				System.out.println("target email string ::"+targetlist.toString());

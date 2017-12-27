@@ -32,12 +32,12 @@ public class EBCHandlers {
 				logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 				final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
 				
-				if(message.getTemplate_code() != null){
-					//for test_comm
+				if(message.getCode() != null){
+					//for test_comm. Code is QUE_TEST_COMMS_SMS for test communication
 					MessageProcessHelper.processTestMessage(message, payload.getString("token"));
 					
 				} else {
-					//for BEG bucket shift
+					//for BEG bucket shift. Code is null for bucket-shift message service
 					MessageProcessHelper.processMessage(message, payload.getString("token"));
 				}
 				

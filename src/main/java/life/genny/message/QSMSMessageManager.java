@@ -81,7 +81,13 @@ public class QSMSMessageManager implements QMessageProvider {
 					String targetMobile = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "PRI_MOBILE");
 					if(targetMobile != null){
 						targetlist.add(targetMobile);
-					}				
+					}else {
+						//This condition is for the test sms service
+						String testEmail = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "TST_SMS");
+						if(testEmail != null) {
+							targetlist.add(testEmail);
+						}
+					}			
 				});
 				
 				System.out.println("targetlist string ::"+targetlist.toString());
