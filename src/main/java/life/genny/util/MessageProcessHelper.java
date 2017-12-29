@@ -12,6 +12,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.MergeUtil;
+import life.genny.qwandautils.QwandaUtils;
 
 public class MessageProcessHelper {
 
@@ -29,10 +30,10 @@ public class MessageProcessHelper {
 		BaseEntity be = getBaseEntityForCode(message, token);
 		
 		if(be != null) {
-			
+			System.out.println("got the deserialized baseentity");
 			//set message template with template (which was recieved as an answer in the Message-layout) from the TST_COMM template class
-			message.setTemplate_code(be.findEntityAttribute("TST_TEMPLATE_CODE").get().getValueString());
-			
+			//message.setTemplate_code(be.findEntityAttribute("TST_TEMPLATE_CODE").get().getValueString());
+			message.setTemplate_code(MergeUtil.getBaseEntityAttrValueAsString(be, "TST_TEMPLATE_CODE"));
 			
 			Map<String, BaseEntity> templateBaseEntityMap = getBaseEntityLinks(be, message, token);
 
@@ -48,6 +49,8 @@ public class MessageProcessHelper {
 				System.out.println(
 						ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
 			}
+		} else {
+			System.out.println("base entity is null");
 		}
 		
 		
@@ -68,16 +71,21 @@ public class MessageProcessHelper {
 		be.getBaseEntityAttributes().forEach(attribute -> {
 			switch (attribute.getAttributeCode()) {
 			case "TST_ALIAS1_ALIAS":
-				templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
-						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS1_CODE").get().getValueString(), token));
+				String value = MergeUtil.getBaseEntityAttrValueAsString(be, "TST_ALIAS1_CODE");
+				BaseEntity aliasEntity = MergeUtil.getBaseEntityForAttr(value, token);
+				templateBaseEntityMap.put(attribute.getValueString(), aliasEntity);
+				/*templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
+						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS1_CODE").get().getValueString(), token));*/
 				break;
 			case "TST_ALIAS2_ALIAS":
-				templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
-						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS2_CODE").get().getValueString(), token));
+				templateBaseEntityMap.put(attribute.getValueString(), MergeUtil.getBaseEntityForAttr(MergeUtil.getBaseEntityAttrValueAsString(be, "TST_ALIAS2_CODE"), token));
+				/*templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
+						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS2_CODE").get().getValueString(), token));*/
 				break;
 			case "TST_ALIAS3_ALIAS":
-				templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
-						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS3_CODE").get().getValueString(), token));
+				templateBaseEntityMap.put(attribute.getValueString(), MergeUtil.getBaseEntityForAttr(MergeUtil.getBaseEntityAttrValueAsString(be, "TST_ALIAS3_CODE"), token));
+				/*templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
+						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS3_CODE").get().getValueString(), token));*/
 				break;
 			}
 
@@ -93,7 +101,7 @@ public class MessageProcessHelper {
 		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
 
 		if (keyEntityAttrMap.containsKey("code")) {
-			Map<String, BaseEntity> templateBaseEntMap = MergeUtil
+			Map<String, BaseEntity> templateBaseEntMap = QwandaUtils
 					.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
 
 			if (templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {

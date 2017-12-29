@@ -112,12 +112,12 @@ public class QEmailMessageManager implements QMessageProvider {
 				// Fetching Email attribute from BaseEntity for recipients
 				List<String> targetlist = new ArrayList<>();
 				entityTemplateMap.entrySet().forEach(baseEntityMap -> {
-					String targetEmail = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "PRI_EMAIL");
+					String targetEmail = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "PRI_EMAIL");
 					if(targetEmail != null){
 						targetlist.add(targetEmail);
 					} else {
 						//This condition is for the test mail service
-						String testEmail = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "TST_EMAIL");
+						String testEmail = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "TST_EMAIL");
 						if(testEmail != null) {
 							targetlist.add(testEmail);
 						}

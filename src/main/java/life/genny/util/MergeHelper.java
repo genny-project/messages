@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMSGMessage;
-import life.genny.qwandautils.MergeUtil;
+import life.genny.qwandautils.QwandaUtils;
 
 public class MergeHelper {
 	
@@ -36,7 +36,7 @@ public class MergeHelper {
 	
 	public static QBaseMSGMessageTemplate getTemplate(String templateCode, String token) {
 		
-		QBaseMSGMessageTemplate template = MergeUtil.getTemplate(templateCode, token);
+		QBaseMSGMessageTemplate template = QwandaUtils.getTemplate(templateCode, token);
 		return template;
 	}
 

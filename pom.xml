@@ -117,12 +117,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.xmlbeans</groupId>
-			<artifactId>xmlbeans</artifactId>
-			<version>2.6.0</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.twilio.sdk</groupId>
 			<artifactId>twilio</artifactId>
 			<version>7.11.0</version>
@@ -157,8 +151,6 @@
 				<includes>
 					<include>**/*.properties</include>
 					<include>**/*.xml</include>
-					<include>**/*.png</include>
-					<include>**/*.jpg</include>
 				</includes>
 			</resource>
 		</resources>
@@ -445,9 +437,9 @@
 				</configuration>
 
 			</plugin>
-			<plugin>
-				<!-- The PMD plugin generates PMD and CPD reports using the PMD code 
-					analysis tool. -->
+			<!-- <plugin>
+				The PMD plugin generates PMD and CPD reports using the PMD code 
+					analysis tool.
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
 				<version>3.6</version>
@@ -462,7 +454,7 @@
 						<ruleset>rulesets/java/clone.xml</ruleset>
 						<ruleset>rulesets/java/codesize.xml</ruleset>
 						<ruleset>rulesets/java/comments.xml</ruleset>
-						<!-- <ruleset>rulesets/java/controversial.xml</ruleset> -->
+						<ruleset>rulesets/java/controversial.xml</ruleset>
 						<ruleset>rulesets/java/coupling.xml</ruleset>
 						<ruleset>rulesets/java/design.xml</ruleset>
 						<ruleset>rulesets/java/empty.xml</ruleset>
@@ -488,7 +480,7 @@
 						<ruleset>rulesets/java/unusedcode.xml</ruleset>
 					</rulesets>
 				</configuration>
-			</plugin>
+			</plugin> -->
 			<plugin>
 				<!-- FindBugs Plugin looks for bugs in Java programs. It is based on 
 					the concept of bug patterns. -->

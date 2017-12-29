@@ -78,12 +78,12 @@ public class QSMSMessageManager implements QMessageProvider {
 				// Fetching Phone number attribute from BaseEntity for recipients
 				List<String> targetlist = new ArrayList<>();
 				entityTemplateMap.entrySet().forEach(baseEntityMap -> {
-					String targetMobile = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "PRI_MOBILE");
+					String targetMobile = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "PRI_MOBILE");
 					if(targetMobile != null){
 						targetlist.add(targetMobile);
 					}else {
 						//This condition is for the test sms service
-						String testEmail = MergeUtil.getBaseEntityAttrValue(baseEntityMap.getValue(), "TST_SMS");
+						String testEmail = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "TST_SMS");
 						if(testEmail != null) {
 							targetlist.add(testEmail);
 						}
