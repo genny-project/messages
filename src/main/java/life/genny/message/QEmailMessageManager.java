@@ -2,9 +2,11 @@ package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -110,7 +112,7 @@ public class QEmailMessageManager implements QMessageProvider {
 				baseMessage.setAttachments(message.getAttachments());
 				
 				// Fetching Email attribute from BaseEntity for recipients
-				List<String> targetlist = new ArrayList<>();
+				Set<String> targetlist = new HashSet<>();
 				entityTemplateMap.entrySet().forEach(baseEntityMap -> {
 					String targetEmail = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "PRI_EMAIL");
 					if(targetEmail != null){

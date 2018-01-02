@@ -1,9 +1,9 @@
 package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -76,7 +76,7 @@ public class QSMSMessageManager implements QMessageProvider {
 				baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
 
 				// Fetching Phone number attribute from BaseEntity for recipients
-				List<String> targetlist = new ArrayList<>();
+				Set<String> targetlist = new HashSet<>();
 				entityTemplateMap.entrySet().forEach(baseEntityMap -> {
 					String targetMobile = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "PRI_MOBILE");
 					if(targetMobile != null){
