@@ -28,13 +28,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>life.genny</groupId>
-			<artifactId>qwanda</artifactId>
-			<version>0.8</version>
-		</dependency>
-		<dependency>
-			<groupId>life.genny</groupId>
 			<artifactId>qwanda-utils</artifactId>
-			<version>0.8</version>
+			<version>0.9.3</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
