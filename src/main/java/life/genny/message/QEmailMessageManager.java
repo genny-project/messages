@@ -1,9 +1,7 @@
 package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -32,6 +30,8 @@ public class QEmailMessageManager implements QMessageProvider {
     public static final String ANSI_GREEN = "\u001B[32m";
 	
 	public static final String FILE_TYPE = "application/";
+	
+	public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
@@ -91,25 +91,64 @@ public class QEmailMessageManager implements QMessageProvider {
 	
 
 
+	@SuppressWarnings("unused")
 	@Override
 	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient, String token) {
 		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		BaseEntity be = null;
 
 		if (template != null) {
 			String docId = template.getEmail_templateId();
 			String htmlString = GoogleDocHelper.getGoogleDocString(docId);
 			logger.info(ANSI_GREEN + "email doc ID from google sheet ::" + docId + ANSI_RESET);
-			BaseEntity be = entityTemplateMap.get(recipient);
+			
+			if(recipient != MESSAGE_BOTH_DRIVER_OWNER){
+				be = entityTemplateMap.get(recipient);
+			}
+			
 
 			if (be != null) {
+				
+				logger.info("Message to "+recipient);
 
 				baseMessage = new QBaseMSGMessage();
 				baseMessage.setSubject(template.getSubject());
 				baseMessage.setMsgMessageData(MergeUtil.merge(htmlString, entityTemplateMap));
 				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
 				baseMessage.setAttachments(message.getAttachments());
+				
+				Set<String> targetlist = new HashSet<>();
+				String targetEmail = MergeUtil.getBaseEntityAttrValueAsString(be, "PRI_EMAIL");
+				
+				if(targetlist != null) {
+					targetlist.add(targetEmail);
+				} else {
+					//This condition is for the test mail service
+					String testEmail = MergeUtil.getBaseEntityAttrValueAsString(be, "TST_EMAIL");
+					if(testEmail != null) {
+						targetlist.add(testEmail);
+					}
+				}
+				
+				
+				System.out.println("target email string ::"+targetlist.toString());
+				baseMessage.setTarget(targetlist.toString().replace("[", "").replace("]", "").replaceAll(" ", ""));
+
+				
+				logger.info(ANSI_GREEN + "Setting the targer email id ::"+baseMessage.getTarget() + ANSI_RESET);
+				
+			} else if (be == null && recipient.equals(MESSAGE_BOTH_DRIVER_OWNER)) {
+				
+				logger.info("Message to BOTH driver and owner");
+				
+				baseMessage = new QBaseMSGMessage();
+				baseMessage.setSubject(template.getSubject());
+				baseMessage.setMsgMessageData(MergeUtil.merge(htmlString, entityTemplateMap));
+				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
+				baseMessage.setAttachments(message.getAttachments());
+				
 				
 				// Fetching Email attribute from BaseEntity for recipients
 				Set<String> targetlist = new HashSet<>();
@@ -125,14 +164,15 @@ public class QEmailMessageManager implements QMessageProvider {
 						}
 					}
 				});
-				
+		
 				System.out.println("target email string ::"+targetlist.toString());
 				baseMessage.setTarget(targetlist.toString().replace("[", "").replace("]", "").replaceAll(" ", ""));
 
 				
 				logger.info(ANSI_GREEN + "Setting the targer email id ::"+baseMessage.getTarget() + ANSI_RESET);
+				
 			} else {
-				logger.error("BaseEntity for the mail recipient is null");
+				logger.error("BaseEntities for Mail context are not provided");
 			}
 		}		
 		

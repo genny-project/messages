@@ -24,6 +24,8 @@ public class QSMSMessageManager implements QMessageProvider {
 	
 	public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";
+    
+    public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
@@ -55,14 +57,18 @@ public class QSMSMessageManager implements QMessageProvider {
 	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap,
 			String recipient, String token) {
 
-		BaseEntity be = entityTemplateMap.get(recipient);
+		BaseEntity be = null;
+		if(recipient != MESSAGE_BOTH_DRIVER_OWNER){
+			be = entityTemplateMap.get(recipient);
+		}
 		QBaseMSGMessage baseMessage = null;
+		
+		// Fetching Message template from sheets
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 
-		if (be != null) {	
-
-			// Fetching Message template from sheets
-			QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		if (be == null && recipient.equals(MESSAGE_BOTH_DRIVER_OWNER)) {
 			
+			logger.info("Message to BOTH driver and owner");
 			
 			if(template != null) {
 				String smsMesssage = template.getSms_template();
@@ -94,6 +100,38 @@ public class QSMSMessageManager implements QMessageProvider {
 				baseMessage.setTarget(targetlist.toString());
 				logger.info(ANSI_GREEN+"Target mobile number is set"+ANSI_RESET);
 			}
+			
+		} else if (be != null) {
+			
+			logger.info("Message to "+recipient);
+			
+			String smsMesssage = template.getSms_template();
+			logger.info(ANSI_GREEN+"sms template from google sheet ::"+smsMesssage+ANSI_RESET);
+			baseMessage = new QBaseMSGMessage();
+			
+			// Merging SMS template message with BaseEntity values
+			String messageData = MergeUtil.merge(smsMesssage.toString(), entityTemplateMap);
+
+			baseMessage.setMsgMessageData(messageData);
+			baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
+
+			// Fetching Phone number attribute from BaseEntity for recipients
+			Set<String> targetlist = new HashSet<>();
+			String targetMobile = MergeUtil.getBaseEntityAttrValueAsString(be, "PRI_MOBILE");
+			if(targetMobile != null){
+				targetlist.add(targetMobile);
+			}else {
+				//This condition is for the test sms service
+				String testEmail = MergeUtil.getBaseEntityAttrValueAsString(be, "TST_SMS");
+				if(testEmail != null) {
+					targetlist.add(testEmail);
+				}
+			}
+			
+			System.out.println("targetlist string ::"+targetlist.toString());
+			baseMessage.setTarget(targetlist.toString());
+			logger.info(ANSI_GREEN+"Target mobile number is set"+ANSI_RESET);
+			
 		}
 
 		System.out.println("base message model for email ::"+baseMessage);
