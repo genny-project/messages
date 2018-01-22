@@ -21,9 +21,7 @@ public class GoogleDocHelper {
 	        HttpResponse response = export.executeMedia();
 	         
 	        htmlString = response.parseAsString();
-	        
-	        System.out.println("htmlString ::"+htmlString);
-			
+	        			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

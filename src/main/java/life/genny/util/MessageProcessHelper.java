@@ -11,6 +11,7 @@ import life.genny.message.QMessageProvider;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QMSGMessage;
+import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
 
@@ -136,6 +137,59 @@ public class MessageProcessHelper {
 					ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
 		}
 
+	}
+
+	public static void processGenericMessage(QMessageGennyMSG message, String tokenString) {
+		System.out.println("message model ::"+message.toString());
+		
+		
+		//Create context map with BaseEntities
+		Map<String, BaseEntity> baseEntityContextMap = createBaseEntityContextMap(message, tokenString);
+		
+		//Get Message Provider
+		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
+		
+		//Iterate through each recipient in recipientArray, Set Message and Trigger Message
+		String[] recipientArr = message.getRecipientArr();
+		if(recipientArr != null && recipientArr.length > 0) {
+			
+			for(String recipientCode : recipientArr) {
+				
+				Map<String, BaseEntity> newMap = new HashMap<>();
+				newMap = baseEntityContextMap;
+				
+				BaseEntity recipientBe = MergeUtil.getBaseEntityForAttr(recipientCode, tokenString);
+				newMap.put("RECIPIENT", recipientBe);
+				
+				//Setting Message values
+				QBaseMSGMessage msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
+				
+				//Triggering message
+				if (msgMessage != null) {
+					logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
+					provider.sendMessage(msgMessage);
+				} else {
+					logger.error(
+							ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
+				}
+				
+			}
+			
+		}
+		
+	}
+
+	private static Map<String, BaseEntity> createBaseEntityContextMap(QMessageGennyMSG message, String tokenString) {
+		
+		Map<String, BaseEntity> baseEntityContextMap = new HashMap<>();
+		
+		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
+		{
+		    System.out.println(entry.getKey() + "/" + entry.getValue());
+		    baseEntityContextMap.put(entry.getKey().toUpperCase(), MergeUtil.getBaseEntityForAttr(entry.getValue(), tokenString));
+		}
+		
+		return baseEntityContextMap;
 	}
 
 }

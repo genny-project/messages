@@ -20,6 +20,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMSGMessage;
+import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.util.GoogleDocHelper;
 import life.genny.util.MergeHelper;
@@ -175,6 +176,42 @@ public class QEmailMessageManager implements QMessageProvider {
 				logger.error("BaseEntities for Mail context are not provided");
 			}
 		}		
+		
+		return baseMessage;
+	}
+
+	@Override
+	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, BaseEntity> entityTemplateMap,
+			String token) {
+		
+		QBaseMSGMessage baseMessage = null;
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		BaseEntity recipientBe = entityTemplateMap.get("RECIPIENT");
+		
+		if(recipientBe != null) {
+			if (template != null) {
+				String docId = template.getEmail_templateId();
+				String htmlString = GoogleDocHelper.getGoogleDocString(docId);
+				logger.info(ANSI_GREEN + "email doc ID from google sheet ::" + docId + ANSI_RESET);
+				
+				baseMessage = new QBaseMSGMessage();
+				baseMessage.setSubject(template.getSubject());
+				baseMessage.setMsgMessageData(MergeUtil.merge(htmlString, entityTemplateMap));
+				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
+				
+				
+				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));
+				
+				
+				System.out.println("Message model ::"+baseMessage);
+				
+			} else {
+				logger.error("NO TEMPLATE FOUND");
+			}
+		} else {
+			logger.error("Recipient BaseEntity is NULL");
+		}
+		
 		
 		return baseMessage;
 	}
