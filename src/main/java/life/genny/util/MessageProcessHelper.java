@@ -140,8 +140,9 @@ public class MessageProcessHelper {
 	}
 
 	public static void processGenericMessage(QMessageGennyMSG message, String tokenString) {
-		System.out.println("message model ::"+message.toString());
 		
+		
+		System.out.println("message model ::"+message.toString());
 		
 		//Create context map with BaseEntities
 		Map<String, BaseEntity> baseEntityContextMap = createBaseEntityContextMap(message, tokenString);
@@ -151,6 +152,9 @@ public class MessageProcessHelper {
 		
 		//Iterate through each recipient in recipientArray, Set Message and Trigger Message
 		String[] recipientArr = message.getRecipientArr();
+		System.out.println("recipient array ::"+recipientArr);
+		QBaseMSGMessage msgMessage = null;
+		
 		if(recipientArr != null && recipientArr.length > 0) {
 			
 			for(String recipientCode : recipientArr) {
@@ -162,11 +166,13 @@ public class MessageProcessHelper {
 				newMap.put("RECIPIENT", recipientBe);
 				
 				//Setting Message values
-				QBaseMSGMessage msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
+				msgMessage = new QBaseMSGMessage();
+				msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
 				
 				//Triggering message
 				if (msgMessage != null) {
 					logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
+					logger.info("-------->> message data context details ::"+ msgMessage +"<<------------");
 					provider.sendMessage(msgMessage);
 				} else {
 					logger.error(
@@ -175,6 +181,8 @@ public class MessageProcessHelper {
 				
 			}
 			
+		} else {
+			logger.error(ANSI_RED+"  RECIPIENT NULL OR EMPTY  "+ANSI_RESET);
 		}
 		
 	}
