@@ -154,12 +154,13 @@ public class MessageProcessHelper {
 		String[] recipientArr = message.getRecipientArr();
 		System.out.println("recipient array ::"+recipientArr);
 		QBaseMSGMessage msgMessage = null;
+		Map<String, BaseEntity> newMap = null;
 		
 		if(recipientArr != null && recipientArr.length > 0) {
 			
 			for(String recipientCode : recipientArr) {
 				
-				Map<String, BaseEntity> newMap = new HashMap<>();
+				newMap = new HashMap<>();
 				newMap = baseEntityContextMap;
 				
 				BaseEntity recipientBe = MergeUtil.getBaseEntityForAttr(recipientCode, tokenString);
