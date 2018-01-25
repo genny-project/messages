@@ -145,10 +145,8 @@ public class MessageProcessHelper {
 		System.out.println("message model ::"+message.toString());
 		
 		//Create context map with BaseEntities
-		Map<String, BaseEntity> baseEntityContextMap = createBaseEntityContextMap(message, tokenString);
-		
-		//Get Message Provider
-		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
+		Map<String, BaseEntity> baseEntityContextMap = new HashMap<>();
+		baseEntityContextMap = createBaseEntityContextMap(message, tokenString);
 		
 		//Iterate through each recipient in recipientArray, Set Message and Trigger Message
 		String[] recipientArr = message.getRecipientArr();
@@ -168,6 +166,10 @@ public class MessageProcessHelper {
 				
 				//Setting Message values
 				msgMessage = new QBaseMSGMessage();
+				
+				//Get Message Provider
+				QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
+				
 				msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
 				
 				//Triggering message
