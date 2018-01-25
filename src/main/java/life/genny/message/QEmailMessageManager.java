@@ -201,6 +201,7 @@ public class QEmailMessageManager implements QMessageProvider {
 				
 				
 				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));
+				logger.info("------->EMAIL DETAILS ::"+baseMessage+"<---------");
 								
 			} else {
 				logger.error("NO TEMPLATE FOUND");

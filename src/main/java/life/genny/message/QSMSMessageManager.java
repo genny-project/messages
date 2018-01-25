@@ -161,6 +161,7 @@ public class QSMSMessageManager implements QMessageProvider {
 				baseMessage.setMsgMessageData(messageData);
 				baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
 				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_MOBILE"));
+				logger.info("------->SMS DETAILS ::"+baseMessage+"<---------");
 								
 			} else {
 				logger.error("NO TEMPLATE FOUND");
