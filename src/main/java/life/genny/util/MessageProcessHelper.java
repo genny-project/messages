@@ -150,11 +150,13 @@ public class MessageProcessHelper {
 		
 		//Iterate through each recipient in recipientArray, Set Message and Trigger Message
 		String[] recipientArr = message.getRecipientArr();
-		System.out.println("recipient array ::"+recipientArr);
+		System.out.println("recipient array ::"+recipientArr.toString());
 		QBaseMSGMessage msgMessage = null;
 		Map<String, BaseEntity> newMap = null;
 		
 		if(recipientArr != null && recipientArr.length > 0) {
+			
+			logger.error("recipient error length ::"+recipientArr.length);
 			
 			for(String recipientCode : recipientArr) {
 				
@@ -163,6 +165,7 @@ public class MessageProcessHelper {
 				
 				BaseEntity recipientBe = MergeUtil.getBaseEntityForAttr(recipientCode, tokenString);
 				newMap.put("RECIPIENT", recipientBe);
+				logger.info("new map ::"+newMap);
 				
 				//Setting Message values
 				msgMessage = new QBaseMSGMessage();
@@ -175,14 +178,13 @@ public class MessageProcessHelper {
 				//Triggering message
 				if (msgMessage != null) {
 					logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-					logger.info("-------->> message data context details ::"+ msgMessage +"<<------------");
 					provider.sendMessage(msgMessage);
 				} else {
 					logger.error(
 							ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
 				}
 				
-			}
+			} 
 			
 		} else {
 			logger.error(ANSI_RED+"  RECIPIENT NULL OR EMPTY  "+ANSI_RESET);

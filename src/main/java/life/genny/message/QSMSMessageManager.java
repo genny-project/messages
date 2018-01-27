@@ -45,7 +45,7 @@ public class QSMSMessageManager implements QMessageProvider {
 			for(String targetMobile : messageTargetArr) {
 				Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
 				System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
-				logger.info(ANSI_GREEN+"SMS Sent"+ANSI_RESET);
+				logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
 			}
 			
 		}

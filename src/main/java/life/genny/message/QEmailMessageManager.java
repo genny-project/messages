@@ -58,14 +58,14 @@ public class QEmailMessageManager implements QMessageProvider {
 				MimeMessage msg = new MimeMessage(session);
 				msg.setFrom(new InternetAddress(message.getSource()));
 				
-				InternetAddress[] iAdressArray = InternetAddress.parse(message.getTarget());
-				msg.setRecipients(Message.RecipientType.TO, iAdressArray);
-				
+				//InternetAddress[] iAdressArray = InternetAddress.parse(message.getTarget());
+				//msg.setRecipients(Message.RecipientType.TO, );
+				msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(message.getTarget(), false));
 				msg.setSubject(message.getSubject());
 				msg.setContent(message.getMsgMessageData(), "text/html; charset=utf-8");
 				
 				Transport.send(msg, msg.getAllRecipients());
-				logger.info(ANSI_GREEN + "Email sent" + ANSI_RESET);
+				logger.info(ANSI_GREEN + "Email to " + message.getTarget() +" is sent" + ANSI_RESET);
 
 			}
 
@@ -200,9 +200,7 @@ public class QEmailMessageManager implements QMessageProvider {
 				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
 				
 				
-				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));
-				logger.info("------->EMAIL DETAILS ::"+baseMessage+"<---------");
-								
+				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));								
 			} else {
 				logger.error("NO TEMPLATE FOUND");
 			}
