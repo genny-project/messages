@@ -156,7 +156,7 @@ public class MessageProcessHelper {
 		
 		if(recipientArr != null && recipientArr.length > 0) {
 			
-			logger.error("recipient error length ::"+recipientArr.length);
+			logger.info("recipient array length ::"+recipientArr.length);
 			
 			for(String recipientCode : recipientArr) {
 				
