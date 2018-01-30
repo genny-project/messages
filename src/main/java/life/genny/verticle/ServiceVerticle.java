@@ -15,7 +15,7 @@ public class ServiceVerticle extends AbstractVerticle {
 		Cluster.joinCluster(vertx).compose(res -> {
 
 			final Future<Void> fut = Future.future();
-			
+	
 			startFuture.complete();
 		}, startFuture);
 	}
