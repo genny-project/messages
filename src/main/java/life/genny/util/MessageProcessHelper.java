@@ -14,6 +14,7 @@ import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
+import io.vertx.rxjava.core.eventbus.EventBus;
 
 public class MessageProcessHelper {
 
@@ -26,7 +27,7 @@ public class MessageProcessHelper {
 
 	static QMessageFactory messageFactory = new QMessageFactory();
 
-	public static void processTestMessage(QMSGMessage message, String token) {
+	public static void processTestMessage(QMSGMessage message, String token, EventBus eventBus) {
 
 		BaseEntity be = getBaseEntityForCode(message, token);
 		
@@ -45,7 +46,7 @@ public class MessageProcessHelper {
 
 			if (msgMessage != null) {
 				logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-				provider.sendMessage(msgMessage);
+				provider.sendMessage(msgMessage, eventBus);
 			} else {
 				System.out.println(
 						ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
@@ -97,7 +98,7 @@ public class MessageProcessHelper {
 		return templateBaseEntityMap;
 	}
 
-	public static void processMessage(QMSGMessage message, String token) {
+	public static void processMessage(QMSGMessage message, String token, EventBus eventBus) {
 
 		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
 
@@ -107,7 +108,7 @@ public class MessageProcessHelper {
 
 			if (templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {
 				logger.info(ANSI_BLUE + "template base entity map ::" + templateBaseEntMap + ANSI_RESET);
-				triggerMessage(message, templateBaseEntMap, keyEntityAttrMap.get("recipient").toString(), token);
+				triggerMessage(message, templateBaseEntMap, keyEntityAttrMap.get("recipient").toString(), token, eventBus);
 			}
 		}
 
@@ -125,13 +126,13 @@ public class MessageProcessHelper {
 	 *            </p>
 	 */
 	private static void triggerMessage(QMSGMessage message, Map<String, BaseEntity> templateBaseEntMap,
-			String recipient, String token) {
+			String recipient, String token, EventBus eventBus) {
 		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
 		QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntMap, recipient, token);
 
 		if (msgMessage != null) {
 			logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-			provider.sendMessage(msgMessage);
+			provider.sendMessage(msgMessage, eventBus);
 		} else {
 			System.out.println(
 					ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
@@ -139,7 +140,7 @@ public class MessageProcessHelper {
 
 	}
 
-	public static void processGenericMessage(QMessageGennyMSG message, String tokenString) {
+	public static void processGenericMessage(QMessageGennyMSG message, String tokenString, EventBus eventbus) {
 		
 		
 		System.out.println("message model ::"+message.toString());
@@ -178,7 +179,7 @@ public class MessageProcessHelper {
 				//Triggering message
 				if (msgMessage != null) {
 					logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-					provider.sendMessage(msgMessage);
+					provider.sendMessage(msgMessage, eventbus);
 				} else {
 					logger.error(
 							ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);

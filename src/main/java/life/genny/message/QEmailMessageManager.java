@@ -16,6 +16,7 @@ import javax.mail.internet.MimeMessage;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.core.eventbus.EventBus;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
@@ -38,7 +39,7 @@ public class QEmailMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message) {
+	public void sendMessage(QBaseMSGMessage message, EventBus bus) {
 
 		Properties emailProperties = setProperties();
 

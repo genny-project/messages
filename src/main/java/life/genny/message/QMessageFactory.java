@@ -15,6 +15,9 @@ public class QMessageFactory {
 	    case EMAIL:
 	    	provider = new QEmailMessageManager();
 	    	break;
+	    case TOAST:
+	    	provider = new QToastMessageManager();
+	    	break;
 	    default:
 	    	provider = new QEmailMessageManager();    
 	    }

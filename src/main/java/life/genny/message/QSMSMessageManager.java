@@ -13,6 +13,7 @@ import com.twilio.type.PhoneNumber;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.core.eventbus.EventBus;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
@@ -32,7 +33,7 @@ public class QSMSMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	@Override
-	public void sendMessage(QBaseMSGMessage message) {
+	public void sendMessage(QBaseMSGMessage message, EventBus eventBus) {
 		logger.info(ANSI_GREEN+">>>>>>>>>>>About to trigger SMS<<<<<<<<<<<<<<"+ANSI_RESET);
 		//target is toPhoneNumber, Source is the fromPhoneNumber,
 		Twilio.init(System.getenv("TWILIO_ACCOUNT_SID"), System.getenv("TWILIO_AUTH_TOKEN"));

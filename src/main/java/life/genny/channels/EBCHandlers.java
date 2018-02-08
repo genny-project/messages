@@ -35,16 +35,16 @@ public class EBCHandlers {
 					final QMSGMessage message = gson.fromJson(payload.toString(), QMSGMessage.class);
 					if(message.getCode() != null){
 						//for test_comm. Code is QUE_TEST_COMMS_SMS for test communication
-						MessageProcessHelper.processTestMessage(message, payload.getString("token"));
+						MessageProcessHelper.processTestMessage(message, payload.getString("token"), eventBus);
 						
 					} else {
 						//for BEG bucket shift. Code is null for bucket-shift message service
-						MessageProcessHelper.processMessage(message, payload.getString("token"));
+						MessageProcessHelper.processMessage(message, payload.getString("token"), eventBus);
 					}
 				} else {
 					System.out.println("GENERIC MESSAGES");
 					final QMessageGennyMSG message = gson.fromJson(payload.toString(), QMessageGennyMSG.class);
-					MessageProcessHelper.processGenericMessage(message, payload.getString("token"));
+					MessageProcessHelper.processGenericMessage(message, payload.getString("token"), eventBus);
 					
 				}			
 				
