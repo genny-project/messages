@@ -18,6 +18,8 @@ public class ClusterConfig {
 
   private static String hostIP =
       System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "127.0.0.1";
+  private static String systemUser =
+    	      System.getenv("USER") != null ? System.getenv("USER") : "genny";
 
   private static String privateIP = System.getenv("MYIP");
   private final static int portHazelcastCluster = 5709;
@@ -28,6 +30,7 @@ public class ClusterConfig {
    */
   public static Config configHazelcastCluster() {
     final Config hazelcastConfig = new Config();
+    hazelcastConfig.getGroupConfig().setName( systemUser).setPassword(systemUser);
     hazelcastConfig.getNetworkConfig().setPort(portHazelcastCluster);
     hazelcastConfig.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
     hazelcastConfig.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
