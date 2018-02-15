@@ -13,7 +13,7 @@ public class QMessageFactory {
 	    	provider = new QSMSMessageManager();
 	    	break;
 	    case EMAIL:
-	    	provider = new QEmailMessageManager();
+	    	provider = new QVertxMailManager();
 	    	break;
 	    case TOAST:
 	    	provider = new QToastMessageManager();
