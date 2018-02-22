@@ -7,11 +7,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.eventbus.EventBus;
-import life.genny.channels.EBProducers;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.qwanda.message.QCmdMessage;
 import life.genny.qwanda.message.QDataToastMessage;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
@@ -33,7 +31,8 @@ public class QToastMessageManager implements QMessageProvider{
 		
 		System.out.println("About to send toast message");
 		
-		QDataToastMessage toastMsg = new QDataToastMessage("info", message.getMsgMessageData());
+		/* message.getPriority() returns "error" for templateCode containing "FAIL", returns "info" for other templates */ 
+		QDataToastMessage toastMsg = new QDataToastMessage(message.getPriority(), message.getMsgMessageData());
 		toastMsg.setToken(message.getToken());
 		
 		String[] recipientArr = {message.getTarget()};
@@ -44,29 +43,6 @@ public class QToastMessageManager implements QMessageProvider{
 		JsonObject toastJsonObj = new JsonObject(toastJson);
 		
 		eventBus.publish("cmds", toastJsonObj);
-		/*QCmdMessage cmdView = new QCmdMessage("CMD_NOTIFICATION", "toast");
-		JsonObject jsonObj = JsonObject.mapFrom(cmdView);
-		jsonObj.put("style", "info");
-		jsonObj.put("token", message.getToken());
-		jsonObj.put("text", message.getMsgMessageData());
-		
-		String[] recipientArr = {message.getTarget()};
-		
-		jsonObj.put("recipientCodeArray", recipientArr);
-		
-		eventBus.publish("data", jsonObj);*/
-		
-		
-		
-		/*public void publishData(final BaseEntity be, final String aliasCode, final String[] recipientsCode) {
-			
-			QDataBaseEntityMessage msg = new QDataBaseEntityMessage(be, aliasCode);
-			msg.setToken(getToken());
-			if (recipientsCode != null) {
-				msg.setRecipientCodeArray(recipientsCode);
-			}
-			publish("cmds",  RulesUtils.toJsonObject(msg));
-		}*/
 			
 	}
 
@@ -97,6 +73,13 @@ public class QToastMessageManager implements QMessageProvider{
 				baseMessage.setMsgMessageData(messageData);
 				baseMessage.setToken(token);
 				baseMessage.setTarget(recipientBe.getCode());
+				
+				if(message.getTemplate_code().contains("FAIL")) {
+					baseMessage.setPriority("error");
+				} else {
+					baseMessage.setPriority("info");
+				}
+				
 				logger.info("------->TOAST DETAILS ::"+baseMessage+"<---------");
 								
 			} else {
