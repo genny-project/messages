@@ -29,7 +29,7 @@ public class MessageProcessHelper {
 
 	public static void processTestMessage(QMSGMessage message, String token, EventBus eventBus) {
 
-		BaseEntity be = getBaseEntityForCode(message, token);
+		BaseEntity be = getBaseEntityForCode(message, token); 
 		
 		if(be != null) {
 			System.out.println("got the deserialized baseentity");
@@ -46,7 +46,7 @@ public class MessageProcessHelper {
 
 			if (msgMessage != null) {
 				logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-				provider.sendMessage(msgMessage, eventBus);
+				provider.sendMessage(msgMessage, eventBus, templateBaseEntityMap);
 			} else {
 				System.out.println(
 						ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
@@ -132,7 +132,7 @@ public class MessageProcessHelper {
 
 		if (msgMessage != null) {
 			logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-			provider.sendMessage(msgMessage, eventBus);
+			provider.sendMessage(msgMessage, eventBus, templateBaseEntMap);
 		} else {
 			System.out.println(
 					ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
@@ -179,7 +179,7 @@ public class MessageProcessHelper {
 				//Triggering message
 				if (msgMessage != null) {
 					logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-					provider.sendMessage(msgMessage, eventbus);
+					provider.sendMessage(msgMessage, eventbus, newMap);
 				} else {
 					logger.error(
 							ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);

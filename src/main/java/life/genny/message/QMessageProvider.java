@@ -10,7 +10,7 @@ import life.genny.qwanda.message.QMessageGennyMSG;
 
 public interface QMessageProvider {
 	
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus);
+	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, BaseEntity> contextMap);
 	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient, String token);
 	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, BaseEntity> entityTemplateMap, String token);
 
