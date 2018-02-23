@@ -42,7 +42,7 @@ public class QToastMessageManager implements QMessageProvider{
 		String toastJson = JsonUtils.toJson(toastMsg);
 		JsonObject toastJsonObj = new JsonObject(toastJson);
 		
-		eventBus.publish("cmds", toastJsonObj);
+		eventBus.publish("data", toastJsonObj);
 			
 	}
 
