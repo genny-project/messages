@@ -1,7 +1,12 @@
 package life.genny.message;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -19,6 +24,7 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
+import life.genny.qwandautils.QwandaUtils;
 import life.genny.util.GoogleDocHelper;
 import life.genny.util.MergeHelper;
 
@@ -37,12 +43,12 @@ public class QVertxMailManager implements QMessageProvider{
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus) {
+	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, BaseEntity> contextMap) {
 		
 		vertx = Vertx.vertx();
 
 		MailMessage mailmessage = mailMessage(vertx, message);
-		MailClient mailClient = createClient(vertx);
+		MailClient mailClient = createClient(vertx, contextMap);
 
 		mailClient.sendMail(mailmessage, result -> {
 			if (result.succeeded()) {
@@ -53,13 +59,15 @@ public class QVertxMailManager implements QMessageProvider{
 		});
 	}	
 
-	  public MailClient createClient(Vertx vertx) {
+	  public MailClient createClient(Vertx vertx, Map<String, BaseEntity> contextMap) {
 	    MailConfig config = new MailConfig();
-	    config.setHostname(System.getenv("MAIL_SMTP_HOST"));
-	    config.setPort(Integer.parseInt(System.getenv("MAIL_SMTP_PORT")));
+	    BaseEntity projectBe = contextMap.get("PROJECT");
+	    
+	    config.setHostname(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_HOST"));
+	    config.setPort(Integer.parseInt(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_PORT")));
 	    config.setStarttls(StartTLSOptions.REQUIRED);
-	    config.setUsername(System.getenv("EMAIL_USERNAME"));
-	    config.setPassword(System.getenv("EMAIL_PASSWORD"));
+	    config.setUsername(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+	    config.setPassword(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_PASSWORD"));
 	    MailClient mailClient = MailClient.createNonShared(vertx, config);
 	    
 	    return mailClient;
@@ -70,7 +78,6 @@ public class QVertxMailManager implements QMessageProvider{
 	    message.setFrom(messageTemplate.getSource());
 	    message.setTo(messageTemplate.getTarget());
 	    message.setSubject(messageTemplate.getSubject());
-	    //message.setCc("Another User <another@example.net>");
 	    message.setHtml(messageTemplate.getMsgMessageData());
 	    
 	    return message;
@@ -109,17 +116,43 @@ public class QVertxMailManager implements QMessageProvider{
 		
 		if(recipientBe != null) {
 			if (template != null) {
-				String docId = template.getEmail_templateId();
-				String htmlString = GoogleDocHelper.getGoogleDocString(docId);
-				logger.info(ANSI_GREEN + "email doc ID from google sheet ::" + docId + ANSI_RESET);
-				
+					
 				baseMessage = new QBaseMSGMessage();
-				baseMessage.setSubject(template.getSubject());
-				baseMessage.setMsgMessageData(MergeUtil.merge(htmlString, entityTemplateMap));
-				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
-				
-				
-				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));								
+				String emailLink = template.getEmail_templateId();
+			
+				String urlString = null;
+				String innerContentString = null;
+				Document doc = null;
+				try {
+					
+					BaseEntity projectBe = entityTemplateMap.get("PROJECT");
+					
+					if(projectBe != null) {
+						
+						/* Getting base email template from project google doc */
+						urlString = QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
+						
+						/* Getting content email template from notifications-doc and merging with contextMap */
+						innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
+						
+						/* Inserting the content html into the main email html */
+						doc = Jsoup.parse(urlString);
+						Element element = doc.getElementById("content");
+						element.html(innerContentString);
+						
+						baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+						baseMessage.setSubject(template.getSubject());
+						baseMessage.setMsgMessageData(doc.toString());
+						baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));	
+						
+					} else {
+						logger.error("NO PROJECT BASEENTITY FOUND");
+					}
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+											
 			} else {
 				logger.error("NO TEMPLATE FOUND");
 			}

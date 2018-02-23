@@ -1,5 +1,6 @@
 package life.genny.message;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,6 +15,10 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.eventbus.EventBus;
@@ -23,6 +28,7 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
+import life.genny.qwandautils.QwandaUtils;
 import life.genny.util.GoogleDocHelper;
 import life.genny.util.MergeHelper;
 
@@ -39,7 +45,7 @@ public class QEmailMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus bus) {
+	public void sendMessage(QBaseMSGMessage message, EventBus bus, Map<String, BaseEntity> contextMap) {
 
 		Properties emailProperties = setProperties();
 
@@ -91,7 +97,6 @@ public class QEmailMessageManager implements QMessageProvider {
 		return properties;
 	}
 	
-
 
 	@SuppressWarnings("unused")
 	@Override
@@ -191,17 +196,43 @@ public class QEmailMessageManager implements QMessageProvider {
 		
 		if(recipientBe != null) {
 			if (template != null) {
-				String docId = template.getEmail_templateId();
-				String htmlString = GoogleDocHelper.getGoogleDocString(docId);
-				logger.info(ANSI_GREEN + "email doc ID from google sheet ::" + docId + ANSI_RESET);
-				
+					
 				baseMessage = new QBaseMSGMessage();
-				baseMessage.setSubject(template.getSubject());
-				baseMessage.setMsgMessageData(MergeUtil.merge(htmlString, entityTemplateMap));
-				baseMessage.setSource(System.getenv("EMAIL_USERNAME"));
-				
-				
-				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));								
+				String emailLink = template.getEmail_templateId();
+			
+				String urlString = null;
+				String innerContentString = null;
+				Document doc = null;
+				try {
+					
+					BaseEntity projectBe = entityTemplateMap.get("PROJECT");
+					
+					if(projectBe != null) {
+						
+						/* Getting base email template from project google doc */
+						urlString = QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
+						
+						/* Getting content email template from notifications-doc and merging with contextMap */
+						innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
+						
+						/* Inserting the content html into the main email html */
+						doc = Jsoup.parse(urlString);
+						Element element = doc.getElementById("content");
+						element.html(innerContentString);
+						
+						baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+						baseMessage.setSubject(template.getSubject());
+						baseMessage.setMsgMessageData(doc.toString());
+						baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));	
+						
+					} else {
+						logger.error("NO PROJECT BASEENTITY FOUND");
+					}
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+											
 			} else {
 				logger.error("NO TEMPLATE FOUND");
 			}

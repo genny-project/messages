@@ -14,7 +14,7 @@ public class GoogleDocHelper {
 		// Build a new authorized API client service.
         Drive service;
         String htmlString = null;
-		try {
+        try {
 			service = GoogleDocs.getDriveService();
 				
 			Export export = service.files().export(docId, "text/html");
@@ -27,6 +27,30 @@ public class GoogleDocHelper {
 		}
 
        return htmlString;
+	
+	}
+	
+	
+	public static String getGoogleDocPlainString(String docId) {
+		// Build a new authorized API client service.
+        Drive service;
+        String htmlString = null;
+		try {
+			service = GoogleDocs.getDriveService();
+				
+			Export export = service.files().export(docId, "text/plain");
+	        HttpResponse response = export.executeMedia();
+	         
+	        htmlString = response.parseAsString();
+	        			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+       return htmlString;
+       
+       
+       
 		
 	}
 

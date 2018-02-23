@@ -27,7 +27,7 @@ public class QToastMessageManager implements QMessageProvider{
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus) {
+	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, BaseEntity> contextMap) {
 		
 		System.out.println("About to send toast message");
 		

@@ -33,23 +33,34 @@ public class QSMSMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus) {
+	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, BaseEntity> contextMap) {
 		logger.info(ANSI_GREEN+">>>>>>>>>>>About to trigger SMS<<<<<<<<<<<<<<"+ANSI_RESET);
-		//target is toPhoneNumber, Source is the fromPhoneNumber,
-		Twilio.init(System.getenv("TWILIO_ACCOUNT_SID"), System.getenv("TWILIO_AUTH_TOKEN"));
 		
-		if (message.getTarget() != null && !message.getTarget().isEmpty()) {
+		BaseEntity projectBe = contextMap.get("PROJECT");
+		
+		if(projectBe != null) {
+			//target is toPhoneNumber, Source is the fromPhoneNumber
+			Twilio.init(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_TWILIO_ACCOUNT_SID"), MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_TWILIO_AUTH_TOKEN"));
+			message.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_TWILIO_SOURCE_PHONE"));
 			
-			//target is a string array of multiple target phone numbers
-			String[] messageTargetArr = StringUtils.split(message.getTarget(), ",");
-			
-			for(String targetMobile : messageTargetArr) {
-				Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
-				System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
-				logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
+			if (message.getTarget() != null && !message.getTarget().isEmpty()) {
+				
+				//target is a string array of multiple target phone numbers
+				String[] messageTargetArr = StringUtils.split(message.getTarget(), ",");
+				
+				for(String targetMobile : messageTargetArr) {
+					Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
+					System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
+					logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
+				}
+				
+			} else {
+				logger.error("SMS not sent since target phone number is empty or NULL");
 			}
-			
+		} else {
+			logger.error("SMS not sent since Project Baseentity is NULL");
 		}
+		
 		
 		
 	}
@@ -59,7 +70,7 @@ public class QSMSMessageManager implements QMessageProvider {
 	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap,
 			String recipient, String token) {
 
-		BaseEntity be = null;
+		/*BaseEntity be = null;
 		if(recipient != MESSAGE_BOTH_DRIVER_OWNER){
 			be = entityTemplateMap.get(recipient);
 		}
@@ -137,7 +148,8 @@ public class QSMSMessageManager implements QMessageProvider {
 		}
 
 		System.out.println("base message model for email ::"+baseMessage);
-		return baseMessage;
+		return baseMessage;*/
+		return null;
 	}
 
 
@@ -160,7 +172,6 @@ public class QSMSMessageManager implements QMessageProvider {
 				baseMessage = new QBaseMSGMessage();
 				baseMessage.setSubject(template.getSubject());
 				baseMessage.setMsgMessageData(messageData);
-				baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
 				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_MOBILE"));
 				logger.info("------->SMS DETAILS ::"+baseMessage+"<---------");
 								
@@ -170,7 +181,6 @@ public class QSMSMessageManager implements QMessageProvider {
 		} else {
 			logger.error("Recipient BaseEntity is NULL");
 		}
-		
 		
 		return baseMessage;
 	}
