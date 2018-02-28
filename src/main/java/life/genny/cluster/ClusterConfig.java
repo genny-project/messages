@@ -56,7 +56,7 @@ public class ClusterConfig {
 
     final VertxOptions options = new VertxOptions();
 
-    if (System.getenv("GENNY_DEV") == null) {
+    if (System.getenv("DEV_MODE") == null) {
       //final ClusterManager mgr = new HazelcastClusterManager(configHazelcastCluster());
       final ClusterManager mgr = new HazelcastClusterManager();
       options.setClusterManager(mgr);
@@ -65,7 +65,7 @@ public class ClusterConfig {
       logger.info("Running DEV mode, no cluster");
       ClusterManager mgr = null;
       final Config hazelcastConfig = new Config();
-      hazelcastConfig.getGroupConfig().setName( hostIP).setPassword( "app1-pass" );
+      hazelcastConfig.getGroupConfig().setName( hostIP).setPassword( systemUser );
 
       mgr = new HazelcastClusterManager(hazelcastConfig); // standard docker
       System.out.println("Starting Clustered Vertx");
