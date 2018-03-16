@@ -1,12 +1,14 @@
 package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.Map;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.eventbus.EventBus;
+import life.genny.channel.Producer;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
@@ -42,8 +44,8 @@ public class QToastMessageManager implements QMessageProvider{
 		String toastJson = JsonUtils.toJson(toastMsg);
 		JsonObject toastJsonObj = new JsonObject(toastJson);
 		
-		eventBus.publish("data", toastJsonObj);
-			
+		/*eventBus.publish("data", toastJsonObj);*/
+		System.out.println(Producer.getToData().write(toastJsonObj));
 	}
 
 	@Override

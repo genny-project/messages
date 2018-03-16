@@ -27,11 +27,6 @@
 
 	</repositories>
 	<dependencies>
-		<dependency>
-			<groupId>life.genny</groupId>
-			<artifactId>qwanda-utils</artifactId>
-			<version>${qwanda-utils.version}</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
@@ -58,11 +53,6 @@
 			<version>${log4j-core-version}</version>
 		</dependency>
 	
-		<dependency>
-			<groupId>com.spotify</groupId>
-			<artifactId>docker-client</artifactId>
-			<version>8.8.2</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
