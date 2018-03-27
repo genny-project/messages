@@ -14,6 +14,7 @@ import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
+import life.genny.verticle.utils.VertxUtils;
 import io.vertx.rxjava.core.eventbus.EventBus;
 
 public class MessageProcessHelper {
@@ -164,8 +165,10 @@ public class MessageProcessHelper {
 				newMap = new HashMap<>();
 				newMap = baseEntityContextMap;
 				
-				BaseEntity recipientBe = MergeUtil.getBaseEntityForAttr(recipientCode, tokenString);
-				newMap.put("RECIPIENT", recipientBe);
+				BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(recipientCode, tokenString);
+				
+				//BaseEntity recipientBe = MergeUtil.getBaseEntityForAttr(recipientCode, tokenString);
+				newMap.put("RECIPIENT", recipientBeFromDDT);
 				logger.info("new map ::"+newMap);
 				
 				//Setting Message values
@@ -200,7 +203,8 @@ public class MessageProcessHelper {
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
 		{
 		    System.out.println(entry.getKey() + "/" + entry.getValue());
-		    baseEntityContextMap.put(entry.getKey().toUpperCase(), MergeUtil.getBaseEntityForAttr(entry.getValue(), tokenString));
+		    //baseEntityContextMap.put(entry.getKey().toUpperCase(), MergeUtil.getBaseEntityForAttr(entry.getValue(), tokenString));
+		    baseEntityContextMap.put(entry.getKey().toUpperCase(), VertxUtils.readFromDDT(entry.getValue(), tokenString));
 		}
 		
 		return baseEntityContextMap;
