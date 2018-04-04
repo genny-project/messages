@@ -1,7 +1,6 @@
 package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
 import java.util.Map;
 
 import io.vertx.core.json.JsonObject;
@@ -45,7 +44,8 @@ public class QToastMessageManager implements QMessageProvider{
 		JsonObject toastJsonObj = new JsonObject(toastJson);
 		
 		/*eventBus.publish("data", toastJsonObj);*/
-		System.out.println(Producer.getToData().write(toastJsonObj));
+		//System.out.println(Producer.getToData().write(toastJsonObj));
+		Producer.getToData().write(toastJsonObj);
 	}
 
 	@Override
