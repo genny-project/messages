@@ -46,7 +46,7 @@ public class QToastMessageManager implements QMessageProvider{
 		/*eventBus.publish("data", toastJsonObj);*/
 		//System.out.println(Producer.getToData().write(toastJsonObj));
 		//Producer.getToData().write(toastJsonObj);
-		Producer.getToWebData().write(toastJsonObj);
+		Producer.getToWebData().send(toastJsonObj);
 	}
 
 	@Override
