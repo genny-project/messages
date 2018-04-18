@@ -43,7 +43,7 @@ public class QVertxMailManager implements QMessageProvider{
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, BaseEntity> contextMap) {
+	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, Object> contextMap) {
 		
 		vertx = Vertx.vertx();
 
@@ -59,9 +59,9 @@ public class QVertxMailManager implements QMessageProvider{
 		});
 	}	
 
-	  public MailClient createClient(Vertx vertx, Map<String, BaseEntity> contextMap) {
+	  public MailClient createClient(Vertx vertx, Map<String, Object> contextMap) {
 	    MailConfig config = new MailConfig();
-	    BaseEntity projectBe = contextMap.get("PROJECT");
+	    BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
 	    
 	    config.setHostname(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_HOST"));
 	    config.setPort(Integer.parseInt(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_PORT")));
@@ -102,17 +102,18 @@ public class QVertxMailManager implements QMessageProvider{
 	  }
 
 	@Override
-	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap,
+	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, Object> entityTemplateMap,
 			String recipient, String token) {
 		return null;
 	}
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, BaseEntity> entityTemplateMap,
-			String token) {
+	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap,
+			String token) {													
+		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
-		BaseEntity recipientBe = entityTemplateMap.get("RECIPIENT");
+		BaseEntity recipientBe = (BaseEntity)entityTemplateMap.get("RECIPIENT");
 		
 		if(recipientBe != null) {
 			if (template != null) {
@@ -125,7 +126,7 @@ public class QVertxMailManager implements QMessageProvider{
 				Document doc = null;
 				try {
 					
-					BaseEntity projectBe = entityTemplateMap.get("PROJECT");
+					BaseEntity projectBe = (BaseEntity)entityTemplateMap.get("PROJECT");
 					
 					if(projectBe != null) {
 						

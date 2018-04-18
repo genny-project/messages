@@ -33,10 +33,10 @@ public class QSMSMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, BaseEntity> contextMap) {
+	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, Object> contextMap) {
 		logger.info(ANSI_GREEN+">>>>>>>>>>>About to trigger SMS<<<<<<<<<<<<<<"+ANSI_RESET);
 		
-		BaseEntity projectBe = contextMap.get("PROJECT");
+		BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
 		
 		if(projectBe != null) {
 			//target is toPhoneNumber, Source is the fromPhoneNumber
@@ -67,7 +67,7 @@ public class QSMSMessageManager implements QMessageProvider {
 
 
 	@Override
-	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap,
+	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, Object> entityTemplateMap,
 			String recipient, String token) {
 
 		/*BaseEntity be = null;
@@ -154,11 +154,11 @@ public class QSMSMessageManager implements QMessageProvider {
 
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, BaseEntity> entityTemplateMap,
+	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap,
 			String token) {
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
-		BaseEntity recipientBe = entityTemplateMap.get("RECIPIENT");
+		BaseEntity recipientBe = (BaseEntity)(entityTemplateMap.get("RECIPIENT"));
 		
 		if(recipientBe != null) {
 			if (template != null) {
