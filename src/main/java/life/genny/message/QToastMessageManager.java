@@ -28,7 +28,7 @@ public class QToastMessageManager implements QMessageProvider{
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, BaseEntity> contextMap) {
+	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, Object> contextMap) {
 		
 		System.out.println("About to send toast message");
 		
@@ -50,18 +50,18 @@ public class QToastMessageManager implements QMessageProvider{
 	}
 
 	@Override
-	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap,
+	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, Object> entityTemplateMap,
 			String recipient, String token) {
 		return null;
 	}
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, BaseEntity> entityTemplateMap,
+	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap,
 			String token) {
 		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
-		BaseEntity recipientBe = entityTemplateMap.get("RECIPIENT");
+		BaseEntity recipientBe = (BaseEntity)(entityTemplateMap.get("RECIPIENT"));
 		
 		if(recipientBe != null) {
 			if (template != null) {

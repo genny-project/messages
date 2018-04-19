@@ -38,7 +38,7 @@ public class MessageProcessHelper {
 			//message.setTemplate_code(be.findEntityAttribute("TST_TEMPLATE_CODE").get().getValueString());
 			message.setTemplate_code(MergeUtil.getBaseEntityAttrValueAsString(be, "TST_TEMPLATE_CODE"));
 			
-			Map<String, BaseEntity> templateBaseEntityMap = getBaseEntityLinks(be, message, token);
+			Map<String, Object> templateBaseEntityMap = getBaseEntityLinks(be, message, token);
 
 			System.out.println("template baseEntity map ::" + templateBaseEntityMap);
 
@@ -67,9 +67,9 @@ public class MessageProcessHelper {
 		return be;
 	}
 
-	private static Map<String, BaseEntity> getBaseEntityLinks(BaseEntity be, QMSGMessage message, String token) {
+	private static Map<String, Object> getBaseEntityLinks(BaseEntity be, QMSGMessage message, String token) {
 		
-		Map<String, BaseEntity> templateBaseEntityMap = new HashMap<>();
+		Map<String, Object> templateBaseEntityMap = new HashMap<>();
 
 		be.getBaseEntityAttributes().forEach(attribute -> {
 			switch (attribute.getAttributeCode()) {
@@ -104,8 +104,10 @@ public class MessageProcessHelper {
 		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
 
 		if (keyEntityAttrMap.containsKey("code")) {
-			Map<String, BaseEntity> templateBaseEntMap = QwandaUtils
+			
+			Map<String, BaseEntity> map = QwandaUtils
 					.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
+			Map<String, Object> templateBaseEntMap = new HashMap<String, Object>(map);
 
 			if (templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {
 				logger.info(ANSI_BLUE + "template base entity map ::" + templateBaseEntMap + ANSI_RESET);
@@ -126,8 +128,9 @@ public class MessageProcessHelper {
 	 *            for message will be set and message will be triggered
 	 *            </p>
 	 */
-	private static void triggerMessage(QMSGMessage message, Map<String, BaseEntity> templateBaseEntMap,
+	private static void triggerMessage(QMSGMessage message, Map<String, Object> templateBaseEntMap,
 			String recipient, String token, EventBus eventBus) {
+		
 		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
 		QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntMap, recipient, token);
 
@@ -147,14 +150,14 @@ public class MessageProcessHelper {
 		System.out.println("message model ::"+message.toString());
 		
 		//Create context map with BaseEntities
-		Map<String, BaseEntity> baseEntityContextMap = new HashMap<>();
+		Map<String, Object> baseEntityContextMap = new HashMap<>();
 		baseEntityContextMap = createBaseEntityContextMap(message, tokenString);
 		
 		//Iterate through each recipient in recipientArray, Set Message and Trigger Message
 		String[] recipientArr = message.getRecipientArr();
 		System.out.println("recipient array ::"+recipientArr.toString());
 		QBaseMSGMessage msgMessage = null;
-		Map<String, BaseEntity> newMap = null;
+		Map<String, Object> newMap = null;
 		
 		if(recipientArr != null && recipientArr.length > 0) {
 			
@@ -196,15 +199,23 @@ public class MessageProcessHelper {
 		
 	}
 
-	private static Map<String, BaseEntity> createBaseEntityContextMap(QMessageGennyMSG message, String tokenString) {
+	private static Map<String, Object> createBaseEntityContextMap(QMessageGennyMSG message, String tokenString) {
 		
-		Map<String, BaseEntity> baseEntityContextMap = new HashMap<>();
+		Map<String, Object> baseEntityContextMap = new HashMap<>();
 		
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
 		{
 		    System.out.println(entry.getKey() + "/" + entry.getValue());
 		    //baseEntityContextMap.put(entry.getKey().toUpperCase(), MergeUtil.getBaseEntityForAttr(entry.getValue(), tokenString));
-		    baseEntityContextMap.put(entry.getKey().toUpperCase(), VertxUtils.readFromDDT(entry.getValue(), tokenString));
+		    
+		    String value = entry.getValue();
+		    BaseEntity be = VertxUtils.readFromDDT(value, tokenString);
+		    if(be != null) {
+			    baseEntityContextMap.put(entry.getKey().toUpperCase(), be);
+		    }
+		    else {
+			    baseEntityContextMap.put(entry.getKey().toUpperCase(), value);
+		    }
 		}
 		
 		return baseEntityContextMap;

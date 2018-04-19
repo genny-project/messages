@@ -45,7 +45,7 @@ public class QEmailMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus bus, Map<String, BaseEntity> contextMap) {
+	public void sendMessage(QBaseMSGMessage message, EventBus bus, Map<String, Object> contextMap) {
 
 		Properties emailProperties = setProperties();
 
@@ -100,7 +100,7 @@ public class QEmailMessageManager implements QMessageProvider {
 
 	@SuppressWarnings("unused")
 	@Override
-	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, BaseEntity> entityTemplateMap, String recipient, String token) {
+	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, Object> entityTemplateMap, String recipient, String token) {
 		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
@@ -112,7 +112,7 @@ public class QEmailMessageManager implements QMessageProvider {
 			logger.info(ANSI_GREEN + "email doc ID from google sheet ::" + docId + ANSI_RESET);
 			
 			if(recipient != MESSAGE_BOTH_DRIVER_OWNER){
-				be = entityTemplateMap.get(recipient);
+				be = (BaseEntity)entityTemplateMap.get(recipient);
 			}
 			
 
@@ -160,14 +160,19 @@ public class QEmailMessageManager implements QMessageProvider {
 				// Fetching Email attribute from BaseEntity for recipients
 				Set<String> targetlist = new HashSet<>();
 				entityTemplateMap.entrySet().forEach(baseEntityMap -> {
-					String targetEmail = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "PRI_EMAIL");
-					if(targetEmail != null){
-						targetlist.add(targetEmail);
-					} else {
-						//This condition is for the test mail service
-						String testEmail = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "TST_EMAIL");
-						if(testEmail != null) {
-							targetlist.add(testEmail);
+					
+					Object value = baseEntityMap.getValue();
+					if(value.getClass().equals(BaseEntity.class)) {
+						
+						String targetEmail = MergeUtil.getBaseEntityAttrValueAsString((BaseEntity)value, "PRI_EMAIL");
+						if(targetEmail != null){
+							targetlist.add(targetEmail);
+						} else {
+							//This condition is for the test mail service
+							String testEmail = MergeUtil.getBaseEntityAttrValueAsString((BaseEntity)value, "TST_EMAIL");
+							if(testEmail != null) {
+								targetlist.add(testEmail);
+							}
 						}
 					}
 				});
@@ -187,12 +192,12 @@ public class QEmailMessageManager implements QMessageProvider {
 	}
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, BaseEntity> entityTemplateMap,
+	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap,
 			String token) {
 		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
-		BaseEntity recipientBe = entityTemplateMap.get("RECIPIENT");
+		BaseEntity recipientBe = (BaseEntity)entityTemplateMap.get("RECIPIENT");
 		
 		if(recipientBe != null) {
 			if (template != null) {
@@ -205,7 +210,7 @@ public class QEmailMessageManager implements QMessageProvider {
 				Document doc = null;
 				try {
 					
-					BaseEntity projectBe = entityTemplateMap.get("PROJECT");
+					BaseEntity projectBe = (BaseEntity)entityTemplateMap.get("PROJECT");
 					
 					if(projectBe != null) {
 						
