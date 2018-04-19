@@ -6,10 +6,11 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>messages</name>
 	<properties>
-		<qwanda-utils.version>1.0.21</qwanda-utils.version>
+		<qwanda-utils.version>1.0.22</qwanda-utils.version>
+		<genny-verticle.version>1.0.22</genny-verticle.version>
+
 		<log4j-core-version>2.5</log4j-core-version>
 		<junit-version>4.12</junit-version>
-		<genny-verticle.version>1.0.21</genny-verticle.version>
 	</properties>
 	<repositories>
 		<repository>
