@@ -68,6 +68,12 @@ public class QVertxMailManager implements QMessageProvider{
 	    config.setStarttls(StartTLSOptions.REQUIRED);
 	    config.setUsername(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
 	    config.setPassword(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_PASSWORD"));
+	    
+	    logger.info("host name ::"+MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_HOST"));
+	    logger.info("port ::"+Integer.parseInt(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_PORT")));
+	    logger.info("username ::"+MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+	    logger.info("password ::"+MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_PASSWORD"));
+	    
 	    MailClient mailClient = MailClient.createNonShared(vertx, config);
 	    
 	    return mailClient;
@@ -83,15 +89,17 @@ public class QVertxMailManager implements QMessageProvider{
 	    return message;
 	  }
 
-	  public void attachment(Vertx vertx, MailMessage message) {
+	  public MailMessage attachment(Vertx vertx, MailMessage message) {
 	    MailAttachment attachment = new MailAttachment();
 	    attachment.setContentType("text/plain");
 	    attachment.setData(Buffer.buffer("attachment file"));
 
 	    message.setAttachment(attachment);
+	    
+	    return message;
 	  }
 
-	  public void inlineAttachment(Vertx vertx, MailMessage message) {
+	  public MailMessage inlineAttachment(Vertx vertx, MailMessage message) {
 	    MailAttachment attachment = new MailAttachment();
 	    attachment.setContentType("image/jpeg");
 	    attachment.setData(Buffer.buffer("image data"));
@@ -99,6 +107,8 @@ public class QVertxMailManager implements QMessageProvider{
 	    attachment.setContentId("<image1@example.com>");
 
 	    message.setInlineAttachment(attachment);
+	    
+	    return message;
 	  }
 
 	@Override
@@ -142,9 +152,16 @@ public class QVertxMailManager implements QMessageProvider{
 						element.html(innerContentString);
 						
 						baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+						
+						logger.info("source email username ::"+MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+						
 						baseMessage.setSubject(template.getSubject());
 						baseMessage.setMsgMessageData(doc.toString());
-						baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));	
+						baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));
+						
+						
+						/* Set generic attachments in mail message */
+						setGenericAttachmentsInMailMessage();
 						
 					} else {
 						logger.error("NO PROJECT BASEENTITY FOUND");
@@ -163,6 +180,11 @@ public class QVertxMailManager implements QMessageProvider{
 		
 		
 		return baseMessage;
+	}
+
+	private void setGenericAttachmentsInMailMessage() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
