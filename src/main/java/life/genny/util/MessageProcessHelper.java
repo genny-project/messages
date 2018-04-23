@@ -14,7 +14,7 @@ import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
-import life.genny.verticle.utils.VertxUtils;
+import life.genny.utils.VertxUtils;
 import io.vertx.rxjava.core.eventbus.EventBus;
 
 public class MessageProcessHelper {
