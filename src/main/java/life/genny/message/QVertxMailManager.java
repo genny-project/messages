@@ -40,7 +40,9 @@ public class QVertxMailManager implements QMessageProvider{
 	public static final String FILE_TYPE = "application/";
 	
 	public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
-	private static String hostIP = System.getenv("HOSTIP") != null ? System.getenv("HOSTIP") : "127.0.0.1";
+	
+	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331/raw"
+			: System.getenv("PDF_GEN_SERVICE_API_URL");
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
@@ -123,14 +125,14 @@ public class QVertxMailManager implements QMessageProvider{
 		
 		if(content != null) {
 			
-			if(message.getContentType().equalsIgnoreCase("application/pdf")) {
+			/* IF CONTENT TYPE IS PDF and URL is a HTML template :: Then Hit Camelot service to fetch pdf filepath. Camelot service converts html strings into PDF format using puppetteer */
+			if(message.getContentType().equalsIgnoreCase("application/pdf")  && message.getLink().contains(".html")) {
 				
-				/* IF CONTENT TYPE IS PDF :: Hit Camelot service to fetch pdf filepath. Camelot service converts html strings into PDF format using puppetteer */
 				String path = MergeHelper.getHtmlStringToPdfInByte(content);
 
 				if(path != null) {
 					/* convert contentString into byte[] */
-					contentBytes = MergeHelper.getUrlContentInBytes("http://localhost:7331" + path);
+					contentBytes = MergeHelper.getUrlContentInBytes(PDF_GEN_SERVICE_API_URL + path);
 				}
 			} else {
 				contentBytes = MergeHelper.getUrlContentInBytes(message.getLink());
@@ -232,12 +234,6 @@ public class QVertxMailManager implements QMessageProvider{
 	private List<MailAttachment> setGenericAttachmentsInMailMessage(List<QBaseMSGAttachment> attachmentList, Map<String, Object> contextMap) {
 		
 		List<MailAttachment> mailAttachments = new ArrayList<>();
-		
-		/*List<QBaseMSGAttachment> attachmentListList = new ArrayList<>();
-		QBaseMSGAttachment attachment1 = new QBaseMSGAttachment(AttachmentType.INLINE, "image/png", "https://i.imgur.com/VuLkMxX.png", false, "image");
-		QBaseMSGAttachment attachment2 = new QBaseMSGAttachment(AttachmentType.NON_INLINE, "application/pdf", "https://raw.githubusercontent.com/genny-project/layouts/master/email/templates/invoice-pdf-owner.html", true, "invoice");
-		attachmentListList.add(attachment1);
-		attachmentListList.add(attachment2);*/
 		
 		for(QBaseMSGAttachment attachment : attachmentList) {
 			MailAttachment mailAttachment = getAttachment(attachment , contextMap);
