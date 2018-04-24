@@ -1,9 +1,7 @@
 package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -40,23 +38,33 @@ public class QSMSMessageManager implements QMessageProvider {
 		
 		if(projectBe != null) {
 			//target is toPhoneNumber, Source is the fromPhoneNumber
-			Twilio.init(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_TWILIO_ACCOUNT_SID"), MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_TWILIO_AUTH_TOKEN"));
-			message.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_TWILIO_SOURCE_PHONE"));
+			String accountSID = projectBe.getValue("ENV_TWILIO_ACCOUNT_SID", null);
+			String sourcePhone = projectBe.getValue("ENV_TWILIO_SOURCE_PHONE", null);
+			String twilioAuthToken = projectBe.getValue("ENV_TWILIO_AUTH_TOKEN", null);
+
 			
-			if (message.getTarget() != null && !message.getTarget().isEmpty()) {
-				
-				//target is a string array of multiple target phone numbers
-				String[] messageTargetArr = StringUtils.split(message.getTarget(), ",");
-				
-				for(String targetMobile : messageTargetArr) {
-					Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
-					System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
-					logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
+			if(accountSID != null && sourcePhone != null && twilioAuthToken != null) {
+				Twilio.init(accountSID, twilioAuthToken);
+				message.setSource(sourcePhone);
+								
+				if (message.getTarget() != null && !message.getTarget().isEmpty()) {
+					
+					//target is a string array of multiple target phone numbers
+					String[] messageTargetArr = StringUtils.split(message.getTarget(), ",");
+					
+					for(String targetMobile : messageTargetArr) {
+						Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
+						System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
+						logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
+					}
+					
+				} else {
+					logger.error("SMS not sent since target phone number is empty or NULL");
 				}
-				
 			} else {
-				logger.error("SMS not sent since target phone number is empty or NULL");
+				logger.error("Twilio credentials not loaded into cache");
 			}
+			
 		} else {
 			logger.error("SMS not sent since Project Baseentity is NULL");
 		}
@@ -172,7 +180,11 @@ public class QSMSMessageManager implements QMessageProvider {
 				baseMessage = new QBaseMSGMessage();
 				baseMessage.setSubject(template.getSubject());
 				baseMessage.setMsgMessageData(messageData);
-				baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_MOBILE"));
+				
+				String targetPhone = recipientBe.getValue("PRI_MOBILE", null);
+				System.out.println("target phone ::"+targetPhone);
+				
+				baseMessage.setTarget(targetPhone);
 				logger.info("------->SMS DETAILS ::"+baseMessage+"<---------");
 								
 			} else {
