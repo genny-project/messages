@@ -6,16 +6,13 @@ import java.util.Map;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.core.eventbus.EventBus;
 import life.genny.message.QMessageFactory;
 import life.genny.message.QMessageProvider;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
-import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
-import life.genny.qwandautils.MergeUtil;
-import life.genny.qwandautils.QwandaUtils;
-import life.genny.verticle.utils.VertxUtils;
-import io.vertx.rxjava.core.eventbus.EventBus;
+import life.genny.utils.VertxUtils;
 
 public class MessageProcessHelper {
 
@@ -28,122 +25,16 @@ public class MessageProcessHelper {
 
 	static QMessageFactory messageFactory = new QMessageFactory();
 
-	public static void processTestMessage(QMSGMessage message, String token, EventBus eventBus) {
-
-		BaseEntity be = getBaseEntityForCode(message, token); 
-		
-		if(be != null) {
-			System.out.println("got the deserialized baseentity");
-			//set message template with template (which was recieved as an answer in the Message-layout) from the TST_COMM template class
-			//message.setTemplate_code(be.findEntityAttribute("TST_TEMPLATE_CODE").get().getValueString());
-			message.setTemplate_code(MergeUtil.getBaseEntityAttrValueAsString(be, "TST_TEMPLATE_CODE"));
-			
-			Map<String, Object> templateBaseEntityMap = getBaseEntityLinks(be, message, token);
-
-			System.out.println("template baseEntity map ::" + templateBaseEntityMap);
-
-			QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
-			QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntityMap, "OWNER", token);
-
-			if (msgMessage != null) {
-				logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-				provider.sendMessage(msgMessage, eventBus, templateBaseEntityMap);
-			} else {
-				System.out.println(
-						ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
-			}
-		} else {
-			System.out.println("base entity is null");
-		}
-		
-		
-
-	}
-
-	private static BaseEntity getBaseEntityForCode(QMSGMessage message, String token) {
-		
-		//Code is the Test-Message BaseEntity code
-		BaseEntity be = MergeUtil.getBaseEntityForAttr(message.getCode(), token);
-		return be;
-	}
-
-	private static Map<String, Object> getBaseEntityLinks(BaseEntity be, QMSGMessage message, String token) {
-		
-		Map<String, Object> templateBaseEntityMap = new HashMap<>();
-
-		be.getBaseEntityAttributes().forEach(attribute -> {
-			switch (attribute.getAttributeCode()) {
-			case "TST_ALIAS1_ALIAS":
-				String value = MergeUtil.getBaseEntityAttrValueAsString(be, "TST_ALIAS1_CODE");
-				BaseEntity aliasEntity = MergeUtil.getBaseEntityForAttr(value, token);
-				templateBaseEntityMap.put(attribute.getValueString(), aliasEntity);
-				/*templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
-						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS1_CODE").get().getValueString(), token));*/
-				break;
-			case "TST_ALIAS2_ALIAS":
-				templateBaseEntityMap.put(attribute.getValueString(), MergeUtil.getBaseEntityForAttr(MergeUtil.getBaseEntityAttrValueAsString(be, "TST_ALIAS2_CODE"), token));
-				/*templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
-						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS2_CODE").get().getValueString(), token));*/
-				break;
-			case "TST_ALIAS3_ALIAS":
-				templateBaseEntityMap.put(attribute.getValueString(), MergeUtil.getBaseEntityForAttr(MergeUtil.getBaseEntityAttrValueAsString(be, "TST_ALIAS3_CODE"), token));
-				/*templateBaseEntityMap.put(attribute.getValueString(), MergeUtil
-						.getBaseEntityForAttr(be.findEntityAttribute("TST_ALIAS3_CODE").get().getValueString(), token));*/
-				break;
-			}
-
-		});
-		
-		templateBaseEntityMap.put(be.getName(), be);
-		
-		return templateBaseEntityMap;
-	}
-
-	public static void processMessage(QMSGMessage message, String token, EventBus eventBus) {
-
-		Map<String, String> keyEntityAttrMap = MergeHelper.getKeyEntityAttrMap(message);
-
-		if (keyEntityAttrMap.containsKey("code")) {
-			
-			Map<String, BaseEntity> map = QwandaUtils
-					.getBaseEntWithChildrenForAttributeCode(keyEntityAttrMap.get("code"), token);
-			Map<String, Object> templateBaseEntMap = new HashMap<String, Object>(map);
-
-			if (templateBaseEntMap != null && !templateBaseEntMap.isEmpty()) {
-				logger.info(ANSI_BLUE + "template base entity map ::" + templateBaseEntMap + ANSI_RESET);
-				triggerMessage(message, templateBaseEntMap, keyEntityAttrMap.get("recipient").toString(), token, eventBus);
-			}
-		}
-
-	}
-
 	/**
 	 * 
 	 * @param message
-	 * @param templateBaseEntMap
-	 * @param recipient
-	 * @param token
+	 * @param tokenString
+	 * @param eventbus
 	 *            <p>
-	 *            Based on the message provider (SMS/Email/Voice), information
-	 *            for message will be set and message will be triggered
+	 *            Based on the message provider (SMS/Email/Voice), information for
+	 *            message will be set and message will be triggered
 	 *            </p>
 	 */
-	private static void triggerMessage(QMSGMessage message, Map<String, Object> templateBaseEntMap,
-			String recipient, String token, EventBus eventBus) {
-		
-		QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
-		QBaseMSGMessage msgMessage = provider.setMessageValue(message, templateBaseEntMap, recipient, token);
-
-		if (msgMessage != null) {
-			logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-			provider.sendMessage(msgMessage, eventBus, templateBaseEntMap);
-		} else {
-			System.out.println(
-					ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
-		}
-
-	}
-
 	public static void processGenericMessage(QMessageGennyMSG message, String tokenString, EventBus eventbus) {
 		
 		
@@ -184,6 +75,14 @@ public class MessageProcessHelper {
 				
 				//Triggering message
 				if (msgMessage != null) {
+					
+					if(message.getAttachmentList() != null) {
+						System.out.println("mail has attachments");
+						msgMessage.setAttachmentList(message.getAttachmentList());
+					} else {
+						System.out.println("No attachments for the message");
+					}
+					
 					logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
 					provider.sendMessage(msgMessage, eventbus, newMap);
 				} else {

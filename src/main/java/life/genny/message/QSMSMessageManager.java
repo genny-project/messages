@@ -1,9 +1,7 @@
 package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,7 +15,6 @@ import io.vertx.rxjava.core.eventbus.EventBus;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.util.MergeHelper;
@@ -63,93 +60,6 @@ public class QSMSMessageManager implements QMessageProvider {
 		
 		
 		
-	}
-
-
-	@Override
-	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, Object> entityTemplateMap,
-			String recipient, String token) {
-
-		/*BaseEntity be = null;
-		if(recipient != MESSAGE_BOTH_DRIVER_OWNER){
-			be = entityTemplateMap.get(recipient);
-		}
-		QBaseMSGMessage baseMessage = null;
-		
-		// Fetching Message template from sheets
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
-
-		if (be == null && recipient.equals(MESSAGE_BOTH_DRIVER_OWNER)) {
-			
-			logger.info("Message to BOTH driver and owner");
-			
-			if(template != null) {
-				String smsMesssage = template.getSms_template();
-				logger.info(ANSI_GREEN+"sms template from google sheet ::"+smsMesssage+ANSI_RESET);
-				baseMessage = new QBaseMSGMessage();
-				
-				// Merging SMS template message with BaseEntity values
-				String messageData = MergeUtil.merge(smsMesssage.toString(), entityTemplateMap);
-
-				baseMessage.setMsgMessageData(messageData);
-				baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
-
-				// Fetching Phone number attribute from BaseEntity for recipients
-				Set<String> targetlist = new HashSet<>();
-				entityTemplateMap.entrySet().forEach(baseEntityMap -> {
-					String targetMobile = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "PRI_MOBILE");
-					if(targetMobile != null){
-						targetlist.add(targetMobile);
-					}else {
-						//This condition is for the test sms service
-						String testEmail = MergeUtil.getBaseEntityAttrValueAsString(baseEntityMap.getValue(), "TST_SMS");
-						if(testEmail != null) {
-							targetlist.add(testEmail);
-						}
-					}			
-				});
-				
-				System.out.println("targetlist string ::"+targetlist.toString());
-				baseMessage.setTarget(targetlist.toString());
-				logger.info(ANSI_GREEN+"Target mobile number is set"+ANSI_RESET);
-			}
-			
-		} else if (be != null) {
-			
-			logger.info("Message to "+recipient);
-			
-			String smsMesssage = template.getSms_template();
-			logger.info(ANSI_GREEN+"sms template from google sheet ::"+smsMesssage+ANSI_RESET);
-			baseMessage = new QBaseMSGMessage();
-			
-			// Merging SMS template message with BaseEntity values
-			String messageData = MergeUtil.merge(smsMesssage.toString(), entityTemplateMap);
-
-			baseMessage.setMsgMessageData(messageData);
-			baseMessage.setSource(System.getenv("TWILIO_SOURCE_PHONE"));
-
-			// Fetching Phone number attribute from BaseEntity for recipients
-			Set<String> targetlist = new HashSet<>();
-			String targetMobile = MergeUtil.getBaseEntityAttrValueAsString(be, "PRI_MOBILE");
-			if(targetMobile != null){
-				targetlist.add(targetMobile);
-			}else {
-				//This condition is for the test sms service
-				String testEmail = MergeUtil.getBaseEntityAttrValueAsString(be, "TST_SMS");
-				if(testEmail != null) {
-					targetlist.add(testEmail);
-				}
-			}
-			
-			System.out.println("targetlist string ::"+targetlist.toString());
-			baseMessage.setTarget(targetlist.toString());
-			logger.info(ANSI_GREEN+"Target mobile number is set"+ANSI_RESET);
-			
-		}
-
-		System.out.println("base message model for email ::"+baseMessage);
-		return baseMessage;*/
-		return null;
 	}
 
 

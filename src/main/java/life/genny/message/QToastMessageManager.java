@@ -12,7 +12,6 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QDataToastMessage;
-import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.MergeUtil;
@@ -49,11 +48,6 @@ public class QToastMessageManager implements QMessageProvider{
 		Producer.getToWebData().write(toastJsonObj);
 	}
 
-	@Override
-	public QBaseMSGMessage setMessageValue(QMSGMessage message, Map<String, Object> entityTemplateMap,
-			String recipient, String token) {
-		return null;
-	}
 
 	@Override
 	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap,
