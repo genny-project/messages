@@ -199,8 +199,19 @@ public class QVertxMailManager implements QMessageProvider{
 						Element element = doc.getElementById("content");
 						element.html(innerContentString);
 						
-						baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
-						logger.info("source email username ::"+MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+						/* Setting source email here */
+						/* Amazon mail accounts have an extra config of sourceEmail..amazon mail service do not have sameID username and email. Google account has the same ID for username and sourceEmail */
+						String emailSourceEmail = MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_SOURCE_EMAIL");
+						
+						if(emailSourceEmail != null) {
+							System.out.println("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
+							baseMessage.setSource(emailSourceEmail);
+						} else {
+							System.out.println("this email account does not sourceEmail, so setting username as source");
+							baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+							logger.info("source email username ::"+MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+						}
+						
 						
 						baseMessage.setSubject(template.getSubject());
 						baseMessage.setMsgMessageData(doc.toString());
