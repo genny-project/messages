@@ -49,26 +49,39 @@ public class QVertxMailManager implements QMessageProvider{
 
 	@Override
 	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, Object> contextMap) {
-		
+
 		vertx = Vertx.vertx();
 
-		MailMessage mailmessage = mailMessage(vertx, message);
-		
-		//If message has attachments, process them seperately
-		if(message.getAttachmentList() != null && message.getAttachmentList().size() > 0) {
-			List<MailAttachment> attachmentList = setGenericAttachmentsInMailMessage(message.getAttachmentList(), contextMap);
-			mailmessage.setAttachment(attachmentList);
-		}
-		
-		MailClient mailClient = createClient(vertx, contextMap);
+		// TODO Manual hack. Need to add functionality for communication unsubscription
+		List<String> unsubscribeList = new ArrayList<>();
+		unsubscribeList.add("almurray4@yahoo.com.au");
 
-		mailClient.sendMail(mailmessage, result -> {
-			if (result.succeeded()) {
-				System.out.println("email sent to ::"+mailmessage.getTo());
-			} else {
-				result.cause().printStackTrace();
+		/* Checks if email is in unsubscribeList. If email is not in unsubscription list, then they will recieve emails */
+		if ( message.getTarget() != null && !unsubscribeList.contains(message.getTarget().toLowerCase())) {
+			
+			MailMessage mailmessage = mailMessage(vertx, message);
+
+			// If message has attachments, process them seperately
+			if (message.getAttachmentList() != null && message.getAttachmentList().size() > 0) {
+				List<MailAttachment> attachmentList = setGenericAttachmentsInMailMessage(message.getAttachmentList(),
+						contextMap);
+				mailmessage.setAttachment(attachmentList);
 			}
-		});
+
+			/* create vertx instance of MailClient */
+			MailClient mailClient = createClient(vertx, contextMap);
+			
+			/* Trigger email */
+			mailClient.sendMail(mailmessage, result -> {
+				if (result.succeeded()) {
+					System.out.println("email sent to ::" + mailmessage.getTo());
+				} else {
+					result.cause().printStackTrace();
+				}
+			});
+		}
+		// END-OF manual hack
+		
 	}	
 
 	  public MailClient createClient(Vertx vertx, Map<String, Object> contextMap) {
