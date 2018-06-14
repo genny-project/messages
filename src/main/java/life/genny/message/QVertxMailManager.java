@@ -189,9 +189,7 @@ public class QVertxMailManager implements QMessageProvider{
 		if(recipientBe != null) {
 			if (template != null) {
 					
-				baseMessage = new QBaseMSGMessage();
 				String emailLink = template.getEmail_templateId();
-			
 				String urlString = null;
 				String innerContentString = null;
 				Document doc = null;
@@ -212,30 +210,18 @@ public class QVertxMailManager implements QMessageProvider{
 						Element element = doc.getElementById("content");
 						element.html(innerContentString);
 						
-						/* Setting source email here */
 						/* Amazon mail accounts have an extra config of sourceEmail..amazon mail service do not have sameID username and email. Google account has the same ID for username and sourceEmail */
-						String emailSourceEmail = MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_SOURCE_EMAIL");
+						String emailSourceEmail = projectBe.getValue("ENV_MAIL_SMTP_SOURCE_EMAIL", null);
 						
+						/* setting up all source, target, priority, subject, content, attachment list in the constructor */
 						if(emailSourceEmail != null) {
 							System.out.println("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
-							baseMessage.setSource(emailSourceEmail);
+							baseMessage = new QBaseMSGMessage(emailSourceEmail, recipientBe.getValue("PRI_EMAIL", null), null, template.getSubject(), doc.toString(), message.getAttachmentList());
 						} else {
 							System.out.println("this email account does not sourceEmail, so setting username as source");
-							baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
-							logger.info("source email username ::"+MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+							baseMessage = new QBaseMSGMessage(projectBe.getValue("ENV_EMAIL_USERNAME", null), recipientBe.getValue("PRI_EMAIL", null), null, template.getSubject(), doc.toString(), message.getAttachmentList());
 						}
-						
-						
-						baseMessage.setSubject(template.getSubject());
-						baseMessage.setMsgMessageData(doc.toString());
-						
-						/* target email is taken from the "PRI_EMAIL" attribute of recipient BaseEntity */
-						baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));
-						
-						/* mail attachment list stuff */
-						baseMessage.setAttachmentList(message.getAttachmentList());
-						
-						
+								
 					} else {
 						logger.error("NO PROJECT BASEENTITY FOUND");
 					}
@@ -250,7 +236,6 @@ public class QVertxMailManager implements QMessageProvider{
 		} else {
 			logger.error("Recipient BaseEntity is NULL");
 		}
-		
 		
 		return baseMessage;
 	}
