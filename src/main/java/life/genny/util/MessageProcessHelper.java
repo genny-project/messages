@@ -11,6 +11,7 @@ import life.genny.message.QMessageFactory;
 import life.genny.message.QMessageProvider;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
+import life.genny.qwanda.message.QBaseMSGMessageType;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.utils.VertxUtils;
 
@@ -36,66 +37,76 @@ public class MessageProcessHelper {
 	 *            </p>
 	 */
 	public static void processGenericMessage(QMessageGennyMSG message, String tokenString, EventBus eventbus) {
-		
-		
-		System.out.println("message model ::"+message.toString());
-		
-		//Create context map with BaseEntities
+
+		System.out.println("message model ::" + message.toString());
+
+		// Create context map with BaseEntities
 		Map<String, Object> baseEntityContextMap = new HashMap<>();
 		baseEntityContextMap = createBaseEntityContextMap(message, tokenString);
-		
-		//Iterate through each recipient in recipientArray, Set Message and Trigger Message
+
 		String[] recipientArr = message.getRecipientArr();
-		System.out.println("recipient array ::"+recipientArr.toString());
+		System.out.println("recipient array ::" + recipientArr.toString());
 		QBaseMSGMessage msgMessage = null;
 		Map<String, Object> newMap = null;
-		
-		if(recipientArr != null && recipientArr.length > 0) {
-			
-			logger.info("recipient array length ::"+recipientArr.length);
-			
-			for(String recipientCode : recipientArr) {
-				
+
+		/* iterating and triggering email to each recipient individually */
+		if (recipientArr != null && recipientArr.length > 0) {
+
+			logger.info("recipient array length ::" + recipientArr.length);
+
+			for (String recipientCode : recipientArr) {
+
+				// Setting Message values
+				msgMessage = new QBaseMSGMessage();
+				BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(recipientCode, tokenString);
 				newMap = new HashMap<>();
 				newMap = baseEntityContextMap;
-				
-				BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(recipientCode, tokenString);
-				
-				//BaseEntity recipientBe = MergeUtil.getBaseEntityForAttr(recipientCode, tokenString);
 				newMap.put("RECIPIENT", recipientBeFromDDT);
-				logger.info("new map ::"+newMap);
-				
-				//Setting Message values
-				msgMessage = new QBaseMSGMessage();
-				
-				//Get Message Provider
+				logger.info("new map ::" + newMap);
+
+				// Get Message Provider
 				QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
-				
 				msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
-				
-				//Triggering message
+
 				if (msgMessage != null) {
 					
-					if(message.getAttachmentList() != null) {
+					// setting attachments
+					if (message.getAttachmentList() != null) {
 						System.out.println("mail has attachments");
 						msgMessage.setAttachmentList(message.getAttachmentList());
-					} else {
-						System.out.println("No attachments for the message");
 					}
 					
-					logger.info(ANSI_BLUE + ">>>>>>>>>>Message info is set<<<<<<<<<<<<" + ANSI_RESET);
-					provider.sendMessage(msgMessage, eventbus, newMap);
+					BaseEntity unsubscriptionBe = VertxUtils.readFromDDT("COM_EMAIL_UNSUBSCRIPTION", tokenString);
+					System.out.println("unsubscribe be :: "+unsubscriptionBe);
+					String templateCode = message.getTemplate_code() + "_UNSUBSCRIBE";
+					System.out.println("template code in message processor :: "+message.getTemplate_code());
+					System.out.println("template code ::"+templateCode);
+					
+					/* check if unsubscription list for the template code has the userCode */
+					Boolean isUserUnsubscribed = VertxUtils.checkIfAttributeValueContainsString(unsubscriptionBe, templateCode, recipientBeFromDDT.getCode());
+					
+					/* if user is unsubscribed, then dont send emails. But toast and sms are still applicable */
+					if(isUserUnsubscribed && !message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
+						System.out.println("unsubscribed");
+						provider.sendMessage(msgMessage, eventbus, newMap);
+					}
+					
+					/* if subscribed, allow messages */
+					if(!isUserUnsubscribed) {
+						System.out.println("subscribed");
+						provider.sendMessage(msgMessage, eventbus, newMap);
+					} 
+					
 				} else {
-					logger.error(
-							ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
+					logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
 				}
-				
-			} 
-			
+
+			}
+
 		} else {
-			logger.error(ANSI_RED+"  RECIPIENT NULL OR EMPTY  "+ANSI_RESET);
+			logger.error(ANSI_RED + "  RECIPIENT NULL OR EMPTY  " + ANSI_RESET);
 		}
-		
+
 	}
 
 	private static Map<String, Object> createBaseEntityContextMap(QMessageGennyMSG message, String tokenString) {
