@@ -19,7 +19,7 @@ import life.genny.qwandautils.QwandaUtils;
 
 public class MergeHelper {
 	
-	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331/raw"
+	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
 
 	public static Map<String, String> getKeyEntityAttrMap(QMSGMessage message) {
@@ -80,7 +80,7 @@ public class MergeHelper {
 		String path = null;
 		try {
 
-			/* Camelot htmlToPdfConverter service */
+			/* Camelot htmlToPdfConverter service */ 
 			resp = QwandaUtils.apiPostEntity(PDF_GEN_SERVICE_API_URL + "/raw", gson.toJson(postObj), null);
 		} catch (IOException e) {
 			e.printStackTrace();
