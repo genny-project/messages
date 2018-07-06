@@ -51,12 +51,7 @@ public class QVertxMailManager implements QMessageProvider{
 
 		vertx = Vertx.vertx();
 
-		// TODO Manual hack. Need to add functionality for communication unsubscription
-		List<String> unsubscribeList = new ArrayList<>(); 
-		unsubscribeList.add("almurray4@yahoo.com.au");
-
-		/* Checks if email is in unsscribeList. If email is not in unsubscription list, then they will recieve emails */
-		if ( message.getTarget() != null && !unsubscribeList.contains(message.getTarget().toLowerCase())) {
+		if ( message.getTarget() != null ) {
 			
 			/* get the project Baseentity, null check is already done in processHelper */
 			BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
@@ -89,11 +84,11 @@ public class QVertxMailManager implements QMessageProvider{
 	  public MailClient createClient(Vertx vertx, BaseEntity projectBe) {
 	    MailConfig config = new MailConfig();
 	    
-	    config.setHostname(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_HOST"));
-	    config.setPort(Integer.parseInt(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_PORT")));
+	    config.setHostname(projectBe.getValue("ENV_MAIL_SMTP_HOST", null));
+	    config.setPort(Integer.parseInt(projectBe.getValue("ENV_MAIL_SMTP_PORT", null)));
 	    config.setStarttls(StartTLSOptions.REQUIRED);
-	    config.setUsername(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
-	    config.setPassword(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_PASSWORD"));
+	    config.setUsername(projectBe.getValue("ENV_EMAIL_USERNAME", null));
+	    config.setPassword(projectBe.getValue("ENV_EMAIL_PASSWORD", null));
 	
 	    MailClient mailClient = MailClient.createNonShared(vertx, config);
 	    
