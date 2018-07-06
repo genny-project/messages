@@ -28,21 +28,20 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
+import life.genny.qwandautils.StringFormattingUtils;
 import life.genny.util.MergeHelper;
 
 public class QVertxMailManager implements QMessageProvider{
 	
 	private Vertx vertx;
 	
-	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_RESET = "\u001B[0m"; 
     public static final String ANSI_GREEN = "\u001B[32m";
-	
-	public static final String FILE_TYPE = "application/";
-	
-	public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
-	
+			
 	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331/raw"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
+	
+	public static final Boolean devMode = System.getenv("GENNYDEV") == null ? false : true;
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
@@ -52,14 +51,12 @@ public class QVertxMailManager implements QMessageProvider{
 
 		vertx = Vertx.vertx();
 
-		// TODO Manual hack. Need to add functionality for communication unsubscription
-		List<String> unsubscribeList = new ArrayList<>();
-		unsubscribeList.add("almurray4@yahoo.com.au");
-
-		/* Checks if email is in unsubscribeList. If email is not in unsubscription list, then they will recieve emails */
-		if ( message.getTarget() != null && !unsubscribeList.contains(message.getTarget().toLowerCase())) {
+		if ( message.getTarget() != null ) {
 			
-			MailMessage mailmessage = mailMessage(vertx, message);
+			/* get the project Baseentity, null check is already done in processHelper */
+			BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
+			
+			MailMessage mailmessage = mailMessage(vertx, message, projectBe);
 
 			// If message has attachments, process them seperately
 			if (message.getAttachmentList() != null && message.getAttachmentList().size() > 0) {
@@ -69,7 +66,7 @@ public class QVertxMailManager implements QMessageProvider{
 			}
 
 			/* create vertx instance of MailClient */
-			MailClient mailClient = createClient(vertx, contextMap);
+			MailClient mailClient = createClient(vertx, projectBe);
 			
 			/* Trigger email */
 			mailClient.sendMail(mailmessage, result -> {
@@ -84,28 +81,37 @@ public class QVertxMailManager implements QMessageProvider{
 		
 	}	
 
-	  public MailClient createClient(Vertx vertx, Map<String, Object> contextMap) {
+	  public MailClient createClient(Vertx vertx, BaseEntity projectBe) {
 	    MailConfig config = new MailConfig();
-	    BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
 	    
-	    config.setHostname(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_HOST"));
-	    config.setPort(Integer.parseInt(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_MAIL_SMTP_PORT")));
+	    config.setHostname(projectBe.getValue("ENV_MAIL_SMTP_HOST", null));
+	    config.setPort(Integer.parseInt(projectBe.getValue("ENV_MAIL_SMTP_PORT", null)));
 	    config.setStarttls(StartTLSOptions.REQUIRED);
-	    config.setUsername(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
-	    config.setPassword(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_PASSWORD"));
+	    config.setUsername(projectBe.getValue("ENV_EMAIL_USERNAME", null));
+	    config.setPassword(projectBe.getValue("ENV_EMAIL_PASSWORD", null));
 	
 	    MailClient mailClient = MailClient.createNonShared(vertx, config);
 	    
 	    return mailClient;
 	  }
 
-	  public MailMessage mailMessage(Vertx vertx, QBaseMSGMessage messageTemplate) {
+	  public MailMessage mailMessage(Vertx vertx, QBaseMSGMessage messageTemplate, BaseEntity projectBe) {
 	    MailMessage message = new MailMessage();
 	    message.setFrom(messageTemplate.getSource());
 	    message.setTo(messageTemplate.getTarget());
 	    message.setSubject(messageTemplate.getSubject());
 	    message.setHtml(messageTemplate.getMsgMessageData());
 	    
+	    String bccString = projectBe.getValue("PRI_EMAIL_BCC_LIST", null);
+	    /* add bcc list only if environment is not dev */
+		if (!devMode && bccString != null) {
+			List<String> listOfBccRecipients = StringFormattingUtils.splitCharacterSeperatedStringToList(bccString, ",");
+			if (listOfBccRecipients != null) {
+				message.setBcc(listOfBccRecipients);
+				System.out.println("listOfBccRecipients :"+listOfBccRecipients.toString());
+			}
+		}
+    	    
 	    return message;
 	  }
 
@@ -216,7 +222,7 @@ public class QVertxMailManager implements QMessageProvider{
 						/* setting up all source, target, priority, subject, content, attachment list in the constructor */
 						if(emailSourceEmail != null) {
 							System.out.println("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
-							baseMessage = new QBaseMSGMessage(emailSourceEmail, recipientBe.getValue("PRI_EMAIL", null), null, template.getSubject(), doc.toString(), message.getAttachmentList());
+							baseMessage = new QBaseMSGMessage(emailSourceEmail, recipientBe.getValue("PRI_EMAIL", null), null, MergeUtil.merge(template.getSubject(), entityTemplateMap), doc.toString(), message.getAttachmentList());
 						} else {
 							System.out.println("this email account does not sourceEmail, so setting username as source");
 							baseMessage = new QBaseMSGMessage(projectBe.getValue("ENV_EMAIL_USERNAME", null), recipientBe.getValue("PRI_EMAIL", null), null, template.getSubject(), doc.toString(), message.getAttachmentList());
