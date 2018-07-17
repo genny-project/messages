@@ -16,6 +16,7 @@ public class ServiceVerticle extends AbstractVerticle {
 	    Cluster.joinCluster().compose(res -> {
 	      final Future<Void> fut = Future.future();
 	        Routers.routers(vertx);
+	        Routers.activate(vertx);
 	        EBCHandlers.registerHandlers(CurrentVtxCtx.getCurrentCtx().getClusterVtx().eventBus());
 	        fut.complete();
 	      }, startFuture);
