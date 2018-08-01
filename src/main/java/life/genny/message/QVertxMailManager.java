@@ -98,7 +98,22 @@ public class QVertxMailManager implements QMessageProvider{
 	  public MailMessage mailMessage(Vertx vertx, QBaseMSGMessage messageTemplate, BaseEntity projectBe) {
 	    MailMessage message = new MailMessage();
 	    message.setFrom(messageTemplate.getSource());
-	    message.setTo(messageTemplate.getTarget());
+	    
+	    if(!devMode) {
+	    		/* if in production mode, send email to original recipients */
+	    		message.setTo(messageTemplate.getTarget());
+	    } else {
+	    		/* In dev/staging mode, send only to devs */
+	    		List<String> devs = new ArrayList<String>();
+	    		devs.add("loris@gada.io");
+	    		devs.add("adam@gada.io");
+	    		devs.add("gayatri@gada.io");
+	    		devs.add("sudan@gada.io");
+	    		devs.add("anish@gada.io");
+	    		
+	    		message.setTo(devs);
+	    }
+	    
 	    message.setSubject(messageTemplate.getSubject());
 	    message.setHtml(messageTemplate.getMsgMessageData());
 	    
