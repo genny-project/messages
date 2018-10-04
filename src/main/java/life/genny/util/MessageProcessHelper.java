@@ -4,6 +4,8 @@ import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sun.xml.bind.v2.TODO;
+
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.eventbus.EventBus;
@@ -38,72 +40,27 @@ public class MessageProcessHelper {
 	 */
 	public static void processGenericMessage(QMessageGennyMSG message, String tokenString, EventBus eventbus) {
 
-		System.out.println("message model ::" + message.toString());
+		logger.info("message model ::" + message.toString());
 
 		// Create context map with BaseEntities
 		Map<String, Object> baseEntityContextMap = new HashMap<>();
 		baseEntityContextMap = createBaseEntityContextMap(message, tokenString);
 
 		String[] recipientArr = message.getRecipientArr();
-		System.out.println("recipient array ::" + recipientArr.toString());
-		QBaseMSGMessage msgMessage = null;
-		Map<String, Object> newMap = null;
+		String[] to = message.getTo();
 
 		/* iterating and triggering email to each recipient individually */
 		if (recipientArr != null && recipientArr.length > 0) {
 
 			logger.info("recipient array length ::" + recipientArr.length);
+			messageProcessorForBaseEntityRecipientArray(message, tokenString, eventbus, baseEntityContextMap);
 
-			for (String recipientCode : recipientArr) {
-
-				// Setting Message values
-				msgMessage = new QBaseMSGMessage();
-				BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(recipientCode, tokenString);
-				newMap = new HashMap<>();
-				newMap = baseEntityContextMap;
-				newMap.put("RECIPIENT", recipientBeFromDDT);
-				logger.info("new map ::" + newMap);
-
-				// Get Message Provider
-				QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
-				msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
-
-				if (msgMessage != null) {
-					
-					// setting attachments
-					if (message.getAttachmentList() != null) {
-						System.out.println("mail has attachments");
-						msgMessage.setAttachmentList(message.getAttachmentList());
-					}
-					
-					BaseEntity unsubscriptionBe = VertxUtils.readFromDDT("COM_EMAIL_UNSUBSCRIPTION", tokenString);
-					System.out.println("unsubscribe be :: "+unsubscriptionBe);
-					String templateCode = message.getTemplate_code() + "_UNSUBSCRIBE";
-					System.out.println("template code in message processor :: "+message.getTemplate_code());
-					System.out.println("template code ::"+templateCode);
-					
-					/* check if unsubscription list for the template code has the userCode */
-					Boolean isUserUnsubscribed = VertxUtils.checkIfAttributeValueContainsString(unsubscriptionBe, templateCode, recipientBeFromDDT.getCode());
-					
-					/* if user is unsubscribed, then dont send emails. But toast and sms are still applicable */
-					if(isUserUnsubscribed && !message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
-						System.out.println("unsubscribed");
-						provider.sendMessage(msgMessage, eventbus, newMap);
-					}
-					
-					/* if subscribed, allow messages */
-					if(!isUserUnsubscribed) {
-						System.out.println("subscribed");
-						provider.sendMessage(msgMessage, eventbus, newMap);
-					} 
-					
-				} else {
-					logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
-				}
-
-			}
-
-		} else {
+		} else if(to != null && to.length > 0) {
+			
+			logger.info("to array length ::" + to.length);
+			messageProcessorForDirectRecipientArray(message, tokenString, eventbus, baseEntityContextMap);
+		}
+		else {
 			logger.error(ANSI_RED + "  RECIPIENT NULL OR EMPTY  " + ANSI_RESET);
 		}
 
@@ -115,8 +72,7 @@ public class MessageProcessHelper {
 		
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
 		{
-		    System.out.println(entry.getKey() + "/" + entry.getValue());
-		    //baseEntityContextMap.put(entry.getKey().toUpperCase(), MergeUtil.getBaseEntityForAttr(entry.getValue(), tokenString));
+			logger.info(entry.getKey() + "/" + entry.getValue());
 		    
 		    String value = entry.getValue();
 		    BaseEntity be = VertxUtils.readFromDDT(value, tokenString);
@@ -129,6 +85,98 @@ public class MessageProcessHelper {
 		}
 		
 		return baseEntityContextMap;
+	}
+	
+	/* When recipientArray is an array of BaseEntityCodeArray, we use this method to send message */
+	private static void messageProcessorForBaseEntityRecipientArray(QMessageGennyMSG message, String tokenString,
+			EventBus eventbus, Map<String, Object> baseEntityContextMap) {
+
+		for (String recipientCode : message.getRecipientArr()) {
+
+			// Setting Message values
+			QBaseMSGMessage msgMessage = new QBaseMSGMessage();
+			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(recipientCode, tokenString);
+			Map<String, Object> newMap = new HashMap<>();
+			newMap = baseEntityContextMap;
+			newMap.put("RECIPIENT", recipientBeFromDDT);
+			logger.info("new map ::" + newMap);
+
+			/* Get Message Provider */
+			QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
+
+			/* set values for sending message */
+			msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
+
+			if (msgMessage != null) {
+
+				// setting attachments
+				if (message.getAttachmentList() != null) {
+					logger.info("mail has attachments");
+					msgMessage.setAttachmentList(message.getAttachmentList());
+				}
+
+				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT("COM_EMAIL_UNSUBSCRIPTION", tokenString);
+				logger.info("unsubscribe be :: " + unsubscriptionBe);
+				String templateCode = message.getTemplate_code() + "_UNSUBSCRIBE";
+
+				/* check if unsubscription list for the template code has the userCode */
+				Boolean isUserUnsubscribed = VertxUtils.checkIfAttributeValueContainsString(unsubscriptionBe,
+						templateCode, recipientBeFromDDT.getCode());
+
+				/*
+				 * if user is unsubscribed, then dont send emails. But toast and sms are still
+				 * applicable
+				 */
+				if (isUserUnsubscribed && !message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
+					logger.info("unsubscribed");
+					provider.sendMessage(msgMessage, eventbus, newMap);
+				}
+
+				/* if subscribed, allow messages */
+				if (!isUserUnsubscribed) {
+					logger.info("subscribed");
+					provider.sendMessage(msgMessage, eventbus, newMap);
+				}
+
+			} else {
+				logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<"
+						+ ANSI_RESET);
+			}
+
+		}
+	}
+	
+	/* When recipientArray is an array of emailIds OR array of phone-numbers, we use this method to send message */
+	private static void messageProcessorForDirectRecipientArray(QMessageGennyMSG message, String tokenString,
+			EventBus eventbus, Map<String, Object> baseEntityContextMap) {
+		
+		// Setting Message values		
+		/* directToValue -> actual emailId or phoneNumber */
+		for(String directToValue : message.getTo()) {
+			
+			// Get Message Provider
+			QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
+			
+			/* set values for sending message */
+			QBaseMSGMessage msgMessage = provider.setGenericMessageValueForDirectRecipient(message, baseEntityContextMap, tokenString, directToValue);
+			
+			if (msgMessage != null) {
+				
+				/* setting attachments */
+				if (message.getAttachmentList() != null) {
+					logger.info("mail has attachments");
+					msgMessage.setAttachmentList(message.getAttachmentList());
+				}
+				
+				//TODO Need to implement unsubscription for direct email list
+				
+				provider.sendMessage(msgMessage, eventbus, baseEntityContextMap);
+						
+				
+			} else {
+				logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<" + ANSI_RESET);
+			}
+		}
 	}
 
 }
