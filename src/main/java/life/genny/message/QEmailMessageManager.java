@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -46,6 +45,7 @@ public class QEmailMessageManager implements QMessageProvider {
 		Properties emailProperties = setProperties();
 
 		Session session = Session.getInstance(emailProperties, new javax.mail.Authenticator() {
+			@Override
 			protected PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication(System.getenv("EMAIL_USERNAME"), System.getenv("EMAIL_PASSWORD"));
 			}
@@ -61,8 +61,6 @@ public class QEmailMessageManager implements QMessageProvider {
 				MimeMessage msg = new MimeMessage(session);
 				msg.setFrom(new InternetAddress(message.getSource()));
 				
-				//InternetAddress[] iAdressArray = InternetAddress.parse(message.getTarget());
-				//msg.setRecipients(Message.RecipientType.TO, );
 				msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(message.getTarget(), false));
 				msg.setSubject(message.getSubject());
 				msg.setContent(message.getMsgMessageData(), "text/html; charset=utf-8");
@@ -72,12 +70,9 @@ public class QEmailMessageManager implements QMessageProvider {
 
 			}
 
-		} catch (MessagingException e) {
-			//throw new RuntimeException(e);
-			e.printStackTrace();
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			logger.error("ERROR", e);
+		} 
 
 	}
 
@@ -139,7 +134,7 @@ public class QEmailMessageManager implements QMessageProvider {
 					}
 					
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("ERROR", e);
 				}
 											
 			} else {
@@ -152,6 +147,60 @@ public class QEmailMessageManager implements QMessageProvider {
 		
 		return baseMessage;
 	}
+
+	@Override
+	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(QMessageGennyMSG message,
+			Map<String, Object> entityTemplateMap, String token, String to) {
+		
+		QBaseMSGMessage baseMessage = null;
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+	
+		if (template != null) {
+				
+			baseMessage = new QBaseMSGMessage();
+			String emailLink = template.getEmail_templateId();
+		
+			String urlString = null;
+			String innerContentString = null;
+			Document doc = null;
+			
+			try {
+				
+				BaseEntity projectBe = (BaseEntity)entityTemplateMap.get("PROJECT");
+				
+				if(projectBe != null) {
+					
+					/* Getting base email template from project google doc */
+					urlString = QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
+					
+					/* Getting content email template from notifications-doc and merging with contextMap */
+					innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
+					
+					/* Inserting the content html into the main email html */
+					doc = Jsoup.parse(urlString);
+					Element element = doc.getElementById("content");
+					element.html(innerContentString);
+					
+					baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
+					baseMessage.setSubject(template.getSubject());
+					baseMessage.setMsgMessageData(doc.toString());
+					baseMessage.setTarget(to);	
+					
+				} else {
+					logger.error("NO PROJECT BASEENTITY FOUND");
+				}
+				
+				} catch (IOException e) {
+					logger.error("ERROR", e);
+			}
+										
+		} else {
+			logger.error("NO TEMPLATE FOUND");
+		}	
+		
+		return baseMessage;
+	}
+
 	
 
 }

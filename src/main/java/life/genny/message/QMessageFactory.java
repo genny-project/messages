@@ -1,13 +1,20 @@
 package life.genny.message;
 
+import java.lang.invoke.MethodHandles;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import life.genny.qwanda.message.QBaseMSGMessageType;
 
 public class QMessageFactory {
 	
+	private static final Logger logger = LoggerFactory
+			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	
 	public QMessageProvider getMessageProvider(QBaseMSGMessageType messageType)
 	  {
 		QMessageProvider provider;
-		System.out.println("message type::"+messageType.toString());
+		logger.info("message type::"+messageType.toString());
 	    switch(messageType) {
 	    case SMS:
 	    	provider = new QSMSMessageManager();

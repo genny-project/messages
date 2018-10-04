@@ -53,7 +53,7 @@ public class QSMSMessageManager implements QMessageProvider {
 					
 					for(String targetMobile : messageTargetArr) {
 						Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
-						System.out.println("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
+						logger.info("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
 						logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
 					}
 					
@@ -67,8 +67,7 @@ public class QSMSMessageManager implements QMessageProvider {
 		} else {
 			logger.error("SMS not sent since Project Baseentity is NULL");
 		}
-		
-		
+			
 		
 	}
 
@@ -87,14 +86,14 @@ public class QSMSMessageManager implements QMessageProvider {
 				logger.info(ANSI_GREEN+"sms template from google sheet ::"+smsMesssage+ANSI_RESET);
 				
 				// Merging SMS template message with BaseEntity values
-				String messageData = MergeUtil.merge(smsMesssage.toString(), entityTemplateMap);
+				String messageData = MergeUtil.merge(smsMesssage, entityTemplateMap);
 				
 				baseMessage = new QBaseMSGMessage();
 				baseMessage.setSubject(template.getSubject());
 				baseMessage.setMsgMessageData(messageData);
 				
 				String targetPhone = recipientBe.getValue("PRI_MOBILE", null);
-				System.out.println("target phone ::"+targetPhone);
+				logger.info("target phone ::"+targetPhone);
 				
 				baseMessage.setTarget(targetPhone);
 				logger.info("------->SMS DETAILS ::"+baseMessage+"<---------");
@@ -105,6 +104,36 @@ public class QSMSMessageManager implements QMessageProvider {
 		} else {
 			logger.error("Recipient BaseEntity is NULL");
 		}
+		
+		return baseMessage;
+	}
+
+
+	@Override
+	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(QMessageGennyMSG message,
+			Map<String, Object> entityTemplateMap, String token, String to) {
+		
+		QBaseMSGMessage baseMessage = null;
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		
+		if (template != null) {
+			
+			String smsMesssage = template.getSms_template();
+			logger.info(ANSI_GREEN+"sms template from google sheet ::"+smsMesssage+ANSI_RESET);
+			
+			// Merging SMS template message with BaseEntity values
+			String messageData = MergeUtil.merge(smsMesssage, entityTemplateMap);
+			
+			baseMessage = new QBaseMSGMessage();
+			baseMessage.setSubject(template.getSubject());
+			baseMessage.setMsgMessageData(messageData);
+			baseMessage.setTarget(to);
+			logger.info("------->SMS DETAILS ::"+baseMessage+"<---------");
+							
+		} else {
+			logger.error("NO TEMPLATE FOUND");
+		}
+		
 		
 		return baseMessage;
 	}

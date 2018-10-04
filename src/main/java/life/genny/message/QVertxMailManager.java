@@ -38,7 +38,7 @@ public class QVertxMailManager implements QMessageProvider{
 	public static final String ANSI_RESET = "\u001B[0m"; 
     public static final String ANSI_GREEN = "\u001B[32m";
 			
-	final public static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331/raw"
+    public final static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331/raw"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");
 	
 	public static final Boolean devMode = System.getenv("GENNYDEV") == null ? false : true;
@@ -56,7 +56,7 @@ public class QVertxMailManager implements QMessageProvider{
 			/* get the project Baseentity, null check is already done in processHelper */
 			BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
 			
-			MailMessage mailmessage = mailMessage(vertx, message, projectBe);
+			MailMessage mailmessage = mailMessage(message, projectBe);
 
 			// If message has attachments, process them seperately
 			if (message.getAttachmentList() != null && message.getAttachmentList().size() > 0) {
@@ -71,7 +71,7 @@ public class QVertxMailManager implements QMessageProvider{
 			/* Trigger email */
 			mailClient.sendMail(mailmessage, result -> {
 				if (result.succeeded()) {
-					System.out.println("email sent to ::" + mailmessage.getTo());
+					logger.info("email sent to ::" + mailmessage.getTo());
 				} else {
 					result.cause().printStackTrace();
 				}
@@ -90,12 +90,11 @@ public class QVertxMailManager implements QMessageProvider{
 	    config.setUsername(projectBe.getValue("ENV_EMAIL_USERNAME", null));
 	    config.setPassword(projectBe.getValue("ENV_EMAIL_PASSWORD", null));
 	
-	    MailClient mailClient = MailClient.createNonShared(vertx, config);
+	    return MailClient.createNonShared(vertx, config);
 	    
-	    return mailClient;
 	  }
 
-	  public MailMessage mailMessage(Vertx vertx, QBaseMSGMessage messageTemplate, BaseEntity projectBe) {
+	  public MailMessage mailMessage( QBaseMSGMessage messageTemplate, BaseEntity projectBe) {
 	    MailMessage message = new MailMessage();
 	    message.setFrom(messageTemplate.getSource());
 	    
@@ -104,7 +103,7 @@ public class QVertxMailManager implements QMessageProvider{
 	    		message.setTo(messageTemplate.getTarget());
 	    } else {
 	    		/* In dev/staging mode, send only to devs */
-	    		List<String> devs = new ArrayList<String>();
+	    		List<String> devs = new ArrayList<>();
 	    		devs.add("loris@gada.io");
 	    		devs.add("adam@gada.io");
 	    		devs.add("gayatri@gada.io");
@@ -123,7 +122,7 @@ public class QVertxMailManager implements QMessageProvider{
 			List<String> listOfBccRecipients = StringFormattingUtils.splitCharacterSeperatedStringToList(bccString, ",");
 			if (listOfBccRecipients != null) {
 				message.setBcc(listOfBccRecipients);
-				System.out.println("listOfBccRecipients :"+listOfBccRecipients.toString());
+				logger.info("listOfBccRecipients :"+listOfBccRecipients.toString());
 			}
 		}
     	    
@@ -188,13 +187,10 @@ public class QVertxMailManager implements QMessageProvider{
 			} else {
 				logger.error("Error happened during byte conversion of attachment content");
 			}
-			
-			
+				
 		} else {
 			logger.error("Attachment content is null");
-		}
-	    	
-	    
+		}  
 	    return attachment;
 	  }
 
@@ -236,10 +232,10 @@ public class QVertxMailManager implements QMessageProvider{
 						
 						/* setting up all source, target, priority, subject, content, attachment list in the constructor */
 						if(emailSourceEmail != null) {
-							System.out.println("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
+							logger.info("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
 							baseMessage = new QBaseMSGMessage(emailSourceEmail, recipientBe.getValue("PRI_EMAIL", null), null, MergeUtil.merge(template.getSubject(), entityTemplateMap), doc.toString(), message.getAttachmentList());
 						} else {
-							System.out.println("this email account does not sourceEmail, so setting username as source");
+							logger.info("this email account does not sourceEmail, so setting username as source");
 							baseMessage = new QBaseMSGMessage(projectBe.getValue("ENV_EMAIL_USERNAME", null), recipientBe.getValue("PRI_EMAIL", null), null, template.getSubject(), doc.toString(), message.getAttachmentList());
 						}
 								
@@ -274,6 +270,62 @@ public class QVertxMailManager implements QMessageProvider{
 		}	
 		
 		return mailAttachments;
+	}
+
+	@Override
+	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(QMessageGennyMSG message,
+			Map<String, Object> entityTemplateMap, String token, String to) {
+		QBaseMSGMessage baseMessage = null;
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		
+		if (template != null) {
+				
+			String emailLink = template.getEmail_templateId();
+			String urlString = null;
+			String innerContentString = null;
+			Document doc = null;
+			try {
+				
+				BaseEntity projectBe = (BaseEntity)entityTemplateMap.get("PROJECT");
+				
+				if(projectBe != null) {
+					
+					/* Getting base email template (which contains the header and footer) from "NTF_BASE_TEMPLATE" attribute of project BaseEntity */
+					urlString = QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
+					
+					/* Getting content email template from notifications-doc and merging with contextMap */
+					innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
+					
+					/* Inserting the content html into the main email html. The mail html template has an element with Id - content */
+					doc = Jsoup.parse(urlString);
+					Element element = doc.getElementById("content");
+					element.html(innerContentString);
+					
+					/* Amazon mail accounts have an extra config of sourceEmail..amazon mail service do not have sameID username and email. Google account has the same ID for username and sourceEmail */
+					String emailSourceEmail = projectBe.getValue("ENV_MAIL_SMTP_SOURCE_EMAIL", null);
+					
+					/* setting up all source, target, priority, subject, content, attachment list in the constructor */
+					if(emailSourceEmail != null) {
+						logger.info("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
+						baseMessage = new QBaseMSGMessage(emailSourceEmail, to, null, MergeUtil.merge(template.getSubject(), entityTemplateMap), doc.toString(), message.getAttachmentList());
+					} else {
+						logger.info("this email account does not sourceEmail, so setting username as source");
+						baseMessage = new QBaseMSGMessage(projectBe.getValue("ENV_EMAIL_USERNAME", null), to, null, template.getSubject(), doc.toString(), message.getAttachmentList());
+					}
+							
+				} else {
+					logger.error("NO PROJECT BASEENTITY FOUND");
+				}
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+										
+		} else {
+			logger.error("NO TEMPLATE FOUND");
+		}
+		
+		return baseMessage;
 	}
 
 }
