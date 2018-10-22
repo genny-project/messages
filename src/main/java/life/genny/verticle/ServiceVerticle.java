@@ -7,6 +7,11 @@ import life.genny.channels.EBCHandlers;
 import life.genny.cluster.Cluster;
 
 import life.genny.cluster.CurrentVtxCtx;
+import life.genny.eventbus.EventBusInterface;
+import life.genny.eventbus.EventBusVertx;
+import life.genny.eventbus.VertxCache;
+import life.genny.qwandautils.GennyCacheInterface;
+import life.genny.utils.VertxUtils;
 
 
 public class ServiceVerticle extends AbstractVerticle {
@@ -15,6 +20,10 @@ public class ServiceVerticle extends AbstractVerticle {
 	    final Future<Void> startFuture = Future.future();
 	    Cluster.joinCluster().compose(res -> {
 	      final Future<Void> fut = Future.future();
+	        EventBusInterface eventBus = new EventBusVertx();
+	        GennyCacheInterface vertxCache = new VertxCache();
+	        VertxUtils.init(eventBus,vertxCache);
+
 	        Routers.routers(vertx);
 	        Routers.activate(vertx);
 	        EBCHandlers.registerHandlers(CurrentVtxCtx.getCurrentCtx().getClusterVtx().eventBus());
