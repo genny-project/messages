@@ -5,7 +5,6 @@ import io.vertx.rxjava.core.Future;
 import life.genny.channel.Routers;
 import life.genny.channels.EBCHandlers;
 import life.genny.cluster.Cluster;
-
 import life.genny.cluster.CurrentVtxCtx;
 import life.genny.eventbus.EventBusInterface;
 import life.genny.eventbus.EventBusVertx;
