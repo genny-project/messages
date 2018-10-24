@@ -107,13 +107,17 @@ public class QVertxMailManager implements QMessageProvider{
 	    		devs.add("loris@gada.io");
 	    		devs.add("adam@gada.io");
 	    		devs.add("gayatri@gada.io");
-	    		devs.add("sudan@gada.io");
 	    		devs.add("anish@gada.io");
-	    		
+	    			    		
 	    		message.setTo(devs);
 	    }
 	    
-	    message.setSubject(messageTemplate.getSubject());
+	    if(!devMode) {
+	    		message.setSubject(messageTemplate.getSubject());
+	    } else {
+	    		message.setSubject("TEST:"+messageTemplate.getSubject());
+	    }
+	    
 	    message.setHtml(messageTemplate.getMsgMessageData());
 	    
 	    String bccString = projectBe.getValue("PRI_EMAIL_BCC_LIST", null);
