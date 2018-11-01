@@ -45,6 +45,8 @@ public class QVertxMailManager implements QMessageProvider{
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	
+	final public static Boolean IS_STAGING = System.getenv("GENNYSTAGING") == null ? false : true;
 
 	@Override
 	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, Object> contextMap) {
@@ -98,31 +100,46 @@ public class QVertxMailManager implements QMessageProvider{
 	    MailMessage message = new MailMessage();
 	    message.setFrom(messageTemplate.getSource());
 	    
-	    if(!devMode) {
-	    		/* if in production mode, send email to original recipients */
-	    		message.setTo(messageTemplate.getTarget());
-	    } else {
-	    		/* In dev/staging mode, send only to devs */
+	    if(devMode || IS_STAGING) {
+	    	
+		    	/* In dev/staging mode, send only to devs */
 	    		List<String> devs = new ArrayList<>();
 	    		devs.add("loris@gada.io");
 	    		devs.add("adam@gada.io");
 	    		devs.add("gayatri@gada.io");
 	    		devs.add("anish@gada.io");
-	    			    		
+	    	
+	    		projectBe.getBaseEntityAttributes().forEach(attribute -> {
+	    			System.out.println("attribute code ::"+attribute.getAttributeCode() + ", value" +attribute.getValue());
+	    		});
+	    		
+	    		String testEmailIds = projectBe.getValue("PRI_TEST_EMAIL_IDS", null);
+	    		logger.info("testEmailIds ::"+testEmailIds);
+		    /* add bcc list only if environment is not dev */
+			if (testEmailIds != null) {
+				List<String> listOfTestRecipients = StringFormattingUtils.splitCharacterSeperatedStringToList(testEmailIds, ",");
+				if (listOfTestRecipients != null) {
+					devs.addAll(listOfTestRecipients);
+					logger.info("listOfTestRecipients :"+listOfTestRecipients.toString());
+				}
+			}	    		
 	    		message.setTo(devs);
+	    } else {
+		    	/* if in production mode, send email to original recipients */
+	    		message.setTo(messageTemplate.getTarget());
 	    }
 	    
-	    if(!devMode) {
-	    		message.setSubject(messageTemplate.getSubject());
-	    } else {
+	    if(devMode || IS_STAGING) {
 	    		message.setSubject("TEST:"+messageTemplate.getSubject());
+	    } else {
+	    		message.setSubject(messageTemplate.getSubject());
 	    }
 	    
 	    message.setHtml(messageTemplate.getMsgMessageData());
 	    
 	    String bccString = projectBe.getValue("PRI_EMAIL_BCC_LIST", null);
 	    /* add bcc list only if environment is not dev */
-		if (!devMode && bccString != null) {
+		if (!(devMode || IS_STAGING) && bccString != null) {
 			List<String> listOfBccRecipients = StringFormattingUtils.splitCharacterSeperatedStringToList(bccString, ",");
 			if (listOfBccRecipients != null) {
 				message.setBcc(listOfBccRecipients);
