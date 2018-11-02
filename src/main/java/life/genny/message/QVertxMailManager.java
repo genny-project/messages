@@ -108,10 +108,6 @@ public class QVertxMailManager implements QMessageProvider{
 	    		devs.add("adam@gada.io");
 	    		devs.add("gayatri@gada.io");
 	    		devs.add("anish@gada.io");
-	    	
-	    		projectBe.getBaseEntityAttributes().forEach(attribute -> {
-	    			System.out.println("attribute code ::"+attribute.getAttributeCode() + ", value" +attribute.getValue());
-	    		});
 	    		
 	    		String testEmailIds = projectBe.getValue("PRI_TEST_EMAIL_IDS", null);
 	    		logger.info("testEmailIds ::"+testEmailIds);
