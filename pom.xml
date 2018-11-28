@@ -6,7 +6,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>messages</name>
 	<properties>
-		<genny-verticle.version>1.0.59</genny-verticle.version>
+		<genny-verticle.version>1.0.65</genny-verticle.version>
 
 		<log4j-core-version>2.5</log4j-core-version>
 		<junit-version>4.12</junit-version>
@@ -37,7 +37,7 @@
 
 		<dependency>
 			<groupId>life.genny</groupId>
-			<artifactId>genny-verticle</artifactId>
+			<artifactId>genny-verticle-rules</artifactId>
 			<version>${genny-verticle.version}</version>
 		</dependency>
 
