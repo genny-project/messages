@@ -31,11 +31,12 @@ public class ServiceVerticle extends AbstractVerticle {
 	      SecureResources.setKeycloakJsonMap().compose(p -> {
 	    	Routers.routers(vertx);
 	        Routers.activate(vertx);
-	        System.out.println("Messages now ready");
+	       
 	        fut.complete();
 	      }, fut);
 	      EBCHandlers.registerHandlers(CurrentVtxCtx.getCurrentCtx().getClusterVtx().eventBus());
 	      startFuture.complete();
+	      System.out.println("Messages now ready");
 	    }, startFuture);
 	    
 	  }
