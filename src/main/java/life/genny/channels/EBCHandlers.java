@@ -30,7 +30,7 @@ public class EBCHandlers {
 				System.out.println(payload);
 				logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 				
-					System.out.println("GENERIC MESSAGES");
+				logger.info("GENERIC MESSAGES");
 					final QMessageGennyMSG message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
 					MessageProcessHelper.processGenericMessage(message, payload.getString("token"), eventBus);
 					
