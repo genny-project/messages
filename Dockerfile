@@ -4,7 +4,7 @@ RUN echo http://mirror.yandex.ru/mirrors/alpine/v3.7/main > /etc/apk/repositorie
 
 RUN apk update && apk add jq && apk add bash && apk add curl
 
-ADD target/messages-0.0.1-SNAPSHOT-fat.jar /service.jar
+ADD target/messages-2.0.0-fat.jar /service.jar
 #ADD cluster.xml /cluster.xml
 
 RUN mkdir /realm
