@@ -2,9 +2,9 @@ FROM  openjdk:8u151-jre-alpine3.7
 RUN echo http://mirror.yandex.ru/mirrors/alpine/v3.7/main > /etc/apk/repositories; \
     echo http://mirror.yandex.ru/mirrors/alpine/v3.7/community >> /etc/apk/repositories
 
-RUN apk update && apk add jq && apk add bash
+RUN apk update && apk add jq && apk add bash && apk add curl
 
-ADD target/messages-0.0.1-SNAPSHOT-fat.jar /service.jar
+ADD target/messages-2.0.0-fat.jar /service.jar
 #ADD cluster.xml /cluster.xml
 
 RUN mkdir /realm
@@ -20,9 +20,10 @@ EXPOSE 5709
 #EXPOSE 15701
 #EXPOSE 15702
 EXPOSE 15709
+EXPOSE 8089
 #CMD ["java"]
 
-HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD curl -f / http://localhost:8080/version || exit 1
+HEALTHCHECK --interval=10s --timeout=3s --retries=15 CMD curl -f / http://localhost:8089/version || exit 1
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
