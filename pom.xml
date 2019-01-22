@@ -349,7 +349,7 @@
 								</transformer>
 							</transformers>
 							<artifactSet />
-							<outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile>
+							<outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
 							<filters>
 								<filter>
 									<artifact>*:*</artifact>
