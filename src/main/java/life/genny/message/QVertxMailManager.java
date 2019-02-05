@@ -234,7 +234,7 @@ public class QVertxMailManager implements QMessageProvider{
 					if(projectBe != null) {
 						
 						/* Getting base email template (which contains the header and footer) from "NTF_BASE_TEMPLATE" attribute of project BaseEntity */
-						urlString = QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
+						urlString = projectBe.findEntityAttribute("NTF_BASE_TEMPLATE").isPresent()?projectBe.findEntityAttribute("NTF_BASE_TEMPLATE").get().getAsString():null; //QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
 						
 						/* Getting content email template from notifications-doc and merging with contextMap */
 						innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
