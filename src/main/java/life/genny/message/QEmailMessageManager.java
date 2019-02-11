@@ -47,6 +47,7 @@ public class QEmailMessageManager implements QMessageProvider {
 		Session session = Session.getInstance(emailProperties, new javax.mail.Authenticator() {
 			@Override
 			protected PasswordAuthentication getPasswordAuthentication() {
+				
 				return new PasswordAuthentication(System.getenv("EMAIL_USERNAME"), System.getenv("EMAIL_PASSWORD"));
 			}
 		});
