@@ -73,6 +73,8 @@ public class MessageProcessHelper {
 	private static Map<String, Object> createBaseEntityContextMap(QMessageGennyMSG message, String tokenString) {
 		
 		Map<String, Object> baseEntityContextMap = new HashMap<>();
+		JSONObject decodedToken = KeycloakUtils.getDecodedToken(tokenString);
+		String realm = decodedToken.getString("aud");
 		
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
 		{
@@ -83,7 +85,7 @@ public class MessageProcessHelper {
 		    if ((value != null) && (value.length()>4))
 		    {
 		    	if (value.matches("[A-Z]{3}\\_.*")) { // MUST BE A BE CODE
-		    		be = VertxUtils.readFromDDT(value, tokenString);
+		    		be = VertxUtils.readFromDDT(realm,value, tokenString);
 		    	}
 		    }
 		    
@@ -105,13 +107,15 @@ public class MessageProcessHelper {
 		// Extract the project from the tokenString
 		
 		JSONObject decodedTokenJson = KeycloakUtils.getDecodedToken(tokenString);
+		String realm = decodedTokenJson.getString("aud");
+
 		Log.info("decodedToken="+decodedTokenJson);
 
 		for (String recipientCode : message.getRecipientArr()) {
 
 			// Setting Message values
 			QBaseMSGMessage msgMessage = new QBaseMSGMessage();
-			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(recipientCode, tokenString);
+			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(realm,recipientCode, tokenString);
 			if (recipientBeFromDDT == null) {
 				
 				logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned for "+recipientCode+" is null<<<<<<<<<"
@@ -136,7 +140,7 @@ public class MessageProcessHelper {
 					msgMessage.setAttachmentList(message.getAttachmentList());
 				}
 
-				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT("COM_EMAIL_UNSUBSCRIPTION", tokenString);
+				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT(realm,"COM_EMAIL_UNSUBSCRIPTION", tokenString);
 				logger.info("unsubscribe be :: " + unsubscriptionBe);
 				String templateCode = message.getTemplate_code() + "_UNSUBSCRIBE";
 
