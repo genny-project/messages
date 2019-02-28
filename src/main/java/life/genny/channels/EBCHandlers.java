@@ -13,6 +13,9 @@ import life.genny.qwandautils.JsonUtils;
 import life.genny.util.MessageProcessHelper;
 
 public class EBCHandlers {
+	  protected static final Logger log = org.apache.logging.log4j.LogManager
+		      .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 	
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
@@ -27,7 +30,7 @@ public class EBCHandlers {
 			Vertx.vertx().executeBlocking(arg1->{
 				final JsonObject payload = new JsonObject(arg.body().toString());
 				
-				System.out.println(payload);
+				log.info(payload);
 				logger.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
 				
 				logger.info("GENERIC MESSAGES");

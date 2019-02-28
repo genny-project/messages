@@ -1,5 +1,9 @@
 package life.genny.channels;
 
+import java.lang.invoke.MethodHandles;
+
+import org.apache.logging.log4j.Logger;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
@@ -9,6 +13,9 @@ import io.vertx.rxjava.core.shareddata.SharedData;
 import io.vertx.rxjava.ext.web.RoutingContext;
 
 public class ClusterMap {
+	  protected static final Logger log = org.apache.logging.log4j.LogManager
+		      .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+
 
   private static Vertx vertxContext;
 
@@ -38,7 +45,7 @@ public class ClusterMap {
       } else {
         // a JsonObject wraps a map and it exposes type-aware getters
         String param1 = wifiPayload.getString("key");
-        System.out.println("CACHE KEY:" + param1);
+        log.info("CACHE KEY:" + param1);
         String param2 = wifiPayload.getString("json");
         SharedData sd = getVertxContext().sharedData();
         if (System.getenv("GENNY_DEV") == null) {
