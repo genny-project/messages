@@ -4,6 +4,9 @@ import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONObject;
+import org.mortbay.log.Log;
+
 import com.sun.xml.bind.v2.TODO;
 
 import io.vertx.core.logging.Logger;
@@ -15,6 +18,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageType;
 import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.qwandautils.KeycloakUtils;
 import life.genny.utils.VertxUtils;
 
 public class MessageProcessHelper {
@@ -69,13 +73,22 @@ public class MessageProcessHelper {
 	private static Map<String, Object> createBaseEntityContextMap(QMessageGennyMSG message, String tokenString) {
 		
 		Map<String, Object> baseEntityContextMap = new HashMap<>();
+		JSONObject decodedToken = KeycloakUtils.getDecodedToken(tokenString);
+		String realm = decodedToken.getString("aud");
 		
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
 		{
 			logger.info(entry.getKey() + "/" + entry.getValue());
 		    
 		    String value = entry.getValue();
-		    BaseEntity be = VertxUtils.readFromDDT(value, tokenString);
+		    BaseEntity be = null;
+		    if ((value != null) && (value.length()>4))
+		    {
+		    	if (value.matches("[A-Z]{3}\\_.*")) { // MUST BE A BE CODE
+		    		be = VertxUtils.readFromDDT(realm,value, tokenString);
+		    	}
+		    }
+		    
 		    if(be != null) {
 			    baseEntityContextMap.put(entry.getKey().toUpperCase(), be);
 		    }
@@ -90,12 +103,24 @@ public class MessageProcessHelper {
 	/* When recipientArray is an array of BaseEntityCodeArray, we use this method to send message */
 	private static void messageProcessorForBaseEntityRecipientArray(QMessageGennyMSG message, String tokenString,
 			EventBus eventbus, Map<String, Object> baseEntityContextMap) {
+		
+		// Extract the project from the tokenString
+		
+		JSONObject decodedTokenJson = KeycloakUtils.getDecodedToken(tokenString);
+		String realm = decodedTokenJson.getString("aud");
+
+		Log.info("decodedToken="+decodedTokenJson);
 
 		for (String recipientCode : message.getRecipientArr()) {
 
 			// Setting Message values
 			QBaseMSGMessage msgMessage = new QBaseMSGMessage();
-			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(recipientCode, tokenString);
+			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(realm,recipientCode, tokenString);
+			if (recipientBeFromDDT == null) {
+				
+				logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned for "+recipientCode+" is null<<<<<<<<<"
+						+ ANSI_RESET);
+			}
 			Map<String, Object> newMap = new HashMap<>();
 			newMap = baseEntityContextMap;
 			newMap.put("RECIPIENT", recipientBeFromDDT);
@@ -115,7 +140,7 @@ public class MessageProcessHelper {
 					msgMessage.setAttachmentList(message.getAttachmentList());
 				}
 
-				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT("COM_EMAIL_UNSUBSCRIPTION", tokenString);
+				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT(realm,"COM_EMAIL_UNSUBSCRIPTION", tokenString);
 				logger.info("unsubscribe be :: " + unsubscriptionBe);
 				String templateCode = message.getTemplate_code() + "_UNSUBSCRIBE";
 
