@@ -16,3 +16,4 @@ src/main/resources/messages-git.properties
 !/.mvn/wrapper/maven-wrapper.jar
 .classpath
 /bin/
+.factorypath
