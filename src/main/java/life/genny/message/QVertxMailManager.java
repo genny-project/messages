@@ -59,6 +59,7 @@ public class QVertxMailManager implements QMessageProvider{
 			BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
 			
 			MailMessage mailmessage = mailMessage(message, projectBe);
+			
 
 			// If message has attachments, process them seperately
 			if (message.getAttachmentList() != null && message.getAttachmentList().size() > 0) {
@@ -104,10 +105,10 @@ public class QVertxMailManager implements QMessageProvider{
 	    	
 		    	/* In dev/staging mode, send only to devs */
 	    		List<String> devs = new ArrayList<>();
-	    		devs.add("loris@gada.io");
 	    		devs.add("adam@gada.io");
 	    		devs.add("gayatri@gada.io");
 	    		devs.add("anish@gada.io");
+	    		devs.add("safal0079@gmail.com");
 	    		
 	    		String testEmailIds = projectBe.getValue("PRI_TEST_EMAIL_IDS", null);
 	    		logger.info("testEmailIds ::"+testEmailIds);
@@ -219,17 +220,21 @@ public class QVertxMailManager implements QMessageProvider{
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 		BaseEntity recipientBe = (BaseEntity)entityTemplateMap.get("RECIPIENT");
+		logger.info("Recepients::" + recipientBe);
 		
 		if(recipientBe != null) {
 			if (template != null) {
 					
 				String emailLink = template.getEmail_templateId();
+				logger.info("emailLink ::" + emailLink);
 				String urlString = null;
 				String innerContentString = null;
+				String mainContentString = null;
 				Document doc = null;
 				try {
 					
 					BaseEntity projectBe = (BaseEntity)entityTemplateMap.get("PROJECT");
+					logger.info("projectBe ::" + projectBe);
 					
 					if(projectBe != null) {
 						
@@ -239,13 +244,20 @@ public class QVertxMailManager implements QMessageProvider{
 						/* Getting content email template from notifications-doc and merging with contextMap */
 						innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
 						
+						/* Getting content email template from notifications-doc and merging with contextMap */
+						mainContentString = QwandaUtils.apiGet(urlString, null);
+						
 						/* Inserting the content html into the main email html. The mail html template has an element with Id - content */
-						doc = Jsoup.parse(urlString);
+						doc = Jsoup.parse(mainContentString);
+					
 						Element element = doc.getElementById("content");
+						
 						element.html(innerContentString);
+						logger.info("doc after merge :: " + doc);
 						
 						/* Amazon mail accounts have an extra config of sourceEmail..amazon mail service do not have sameID username and email. Google account has the same ID for username and sourceEmail */
 						String emailSourceEmail = projectBe.getValue("ENV_MAIL_SMTP_SOURCE_EMAIL", null);
+						logger.info("elememailSourceEmailent" + emailSourceEmail);
 						
 						/* setting up all source, target, priority, subject, content, attachment list in the constructor */
 						if(emailSourceEmail != null) {

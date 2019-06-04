@@ -124,6 +124,7 @@ public class MessageProcessHelper {
 			Map<String, Object> newMap = new HashMap<>();
 			newMap = baseEntityContextMap;
 			newMap.put("RECIPIENT", recipientBeFromDDT);
+			
 			logger.info("new map ::" + newMap);
 
 			/* Get Message Provider */
@@ -131,6 +132,7 @@ public class MessageProcessHelper {
 
 			/* set values for sending message */
 			msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
+			logger.info("New Generic Message ::: "+ msgMessage);
 
 			if (msgMessage != null) {
 
