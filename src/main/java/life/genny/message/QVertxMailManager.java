@@ -253,11 +253,10 @@ public class QVertxMailManager implements QMessageProvider{
 						Element element = doc.getElementById("content");
 						
 						element.html(innerContentString);
-						logger.info("doc after merge :: " + doc);
 						
 						/* Amazon mail accounts have an extra config of sourceEmail..amazon mail service do not have sameID username and email. Google account has the same ID for username and sourceEmail */
 						String emailSourceEmail = projectBe.getValue("ENV_MAIL_SMTP_SOURCE_EMAIL", null);
-						logger.info("elememailSourceEmailent" + emailSourceEmail);
+						logger.info("emailSourceEmail ::" + emailSourceEmail);
 						
 						/* setting up all source, target, priority, subject, content, attachment list in the constructor */
 						if(emailSourceEmail != null) {
