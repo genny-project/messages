@@ -106,9 +106,9 @@ public class QVertxMailManager implements QMessageProvider{
 		    	/* In dev/staging mode, send only to devs */
 	    		List<String> devs = new ArrayList<>();
 	    		devs.add("adam@gada.io");
-	    		devs.add("gayatri@gada.io");
+	    		devs.add("byron@gada.io");
 	    		devs.add("anish@gada.io");
-	    		devs.add("safal0079@gmail.com");
+	    		devs.add("safal@gada.io");
 	    		
 	    		String testEmailIds = projectBe.getValue("PRI_TEST_EMAIL_IDS", null);
 	    		logger.info("testEmailIds ::"+testEmailIds);
