@@ -237,13 +237,15 @@ public class QVertxMailManager implements QMessageProvider{
 						urlString = projectBe.findEntityAttribute("NTF_BASE_TEMPLATE").isPresent()?projectBe.findEntityAttribute("NTF_BASE_TEMPLATE").get().getAsString():null; //QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
 						
 						/* Getting content email template from notifications-doc and merging with contextMap */
-						innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
+						String emailMsg = QwandaUtils.apiGet(emailLink, null);
+						innerContentString = MergeUtil.merge(emailMsg, entityTemplateMap);
 						
 						/* Inserting the content html into the main email html. The mail html template has an element with Id - content */
 						doc = Jsoup.parse(urlString);
 						Element element = doc.getElementById("content");
-						element.html(innerContentString);
-						
+						if (element != null) {
+							element.html(innerContentString);
+						}
 						/* Amazon mail accounts have an extra config of sourceEmail..amazon mail service do not have sameID username and email. Google account has the same ID for username and sourceEmail */
 						String emailSourceEmail = projectBe.getValue("ENV_MAIL_SMTP_SOURCE_EMAIL", null);
 						

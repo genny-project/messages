@@ -14,6 +14,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.eventbus.EventBus;
 import life.genny.message.QMessageFactory;
 import life.genny.message.QMessageProvider;
+import life.genny.models.GennyToken;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageType;
@@ -106,16 +107,14 @@ public class MessageProcessHelper {
 		
 		// Extract the project from the tokenString
 		
-		JSONObject decodedTokenJson = KeycloakUtils.getDecodedToken(tokenString);
-		String realm = decodedTokenJson.getString("aud");
-
-		Log.info("decodedToken="+decodedTokenJson);
+		GennyToken gennyToken = new GennyToken(tokenString);
+		
 
 		for (String recipientCode : message.getRecipientArr()) {
 
 			// Setting Message values
 			QBaseMSGMessage msgMessage = new QBaseMSGMessage();
-			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(realm,recipientCode, tokenString);
+			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(gennyToken.getRealm(),recipientCode, tokenString);
 			if (recipientBeFromDDT == null) {
 				
 				logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned for "+recipientCode+" is null<<<<<<<<<"
@@ -140,7 +139,7 @@ public class MessageProcessHelper {
 					msgMessage.setAttachmentList(message.getAttachmentList());
 				}
 
-				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT(realm,"COM_EMAIL_UNSUBSCRIPTION", tokenString);
+				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT(gennyToken.getRealm(),"COM_EMAIL_UNSUBSCRIPTION", tokenString);
 				logger.info("unsubscribe be :: " + unsubscriptionBe);
 				String templateCode = message.getTemplate_code() + "_UNSUBSCRIBE";
 
