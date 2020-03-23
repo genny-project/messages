@@ -122,7 +122,11 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.8.3</version>
 		</dependency>
-
+		<dependency>
+		  <groupId>com.github.banana-j</groupId>
+		  <artifactId>bananaj</artifactId>
+		  <version>0.6.2</version>
+		</dependency>
 
 	</dependencies>
 
