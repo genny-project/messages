@@ -26,13 +26,18 @@ public class ServiceVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() {
-		log.info("Setting up routes");
+		log.info("Setting up routes new version");
 		final Future<Void> startFuture = Future.future();
 		Cluster.joinCluster().compose(res -> {
+		    log.info("Starting eventbus:::::::::::::::::::::::::::::");
 			EventBusInterface eventBus = new EventBusVertx();
+		    log.info("Starting VertxCache:::::::::::::::::::::::::::");
 			GennyCacheInterface vertxCache = new VertxCache();
+		    log.info("Starting init:::::::::::::::::::::::::::::::::");
 			VertxUtils.init(eventBus, vertxCache);
+		    log.info("Starting routers::::::::::::::::::::::::::::::");
 			Routers.routers(vertx);
+		    log.info("Starting activate:::::::::::::::::::::::::::::");
 			Routers.activate(vertx);
 			log.info("Messages now ready");
 
