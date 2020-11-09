@@ -1,18 +1,14 @@
 package life.genny.channels;
 
 import java.lang.invoke.MethodHandles;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.Logger;
-
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
-import io.vertx.rxjava.core.Vertx;
-import io.vertx.rxjava.core.http.HttpServerRequest;
-import io.vertx.rxjava.core.shareddata.AsyncMap;
-import io.vertx.rxjava.core.shareddata.SharedData;
-import io.vertx.rxjava.ext.web.RoutingContext;
+import io.vertx.core.shareddata.AsyncMap;
+import io.vertx.core.shareddata.SharedData;
+import io.vertx.ext.web.RoutingContext;
 
 public class ClusterMap {
 	  protected static final Logger log = org.apache.logging.log4j.LogManager

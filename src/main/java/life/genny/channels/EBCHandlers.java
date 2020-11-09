@@ -1,14 +1,10 @@
 package life.genny.channels;
 
 import java.lang.invoke.MethodHandles;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.Logger;
-
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-
-import io.vertx.rxjava.core.Vertx;
-import io.vertx.rxjava.core.eventbus.EventBus;
 import life.genny.channel.Consumer;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.JsonUtils;
@@ -22,7 +18,7 @@ public class EBCHandlers {
 
 	public static void registerHandlers(final EventBus eventBus) {
 
-		Consumer.getFromMessages().subscribe(arg -> {
+		Consumer.getFromMessages().handler(arg -> {
 			log.info("Received EVENT :"
 					+ (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
 						

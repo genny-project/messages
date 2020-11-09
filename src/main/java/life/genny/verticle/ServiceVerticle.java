@@ -1,22 +1,17 @@
 package life.genny.verticle;
 
 import java.lang.invoke.MethodHandles;
-
 import org.apache.logging.log4j.Logger;
-
-import io.vertx.rxjava.core.AbstractVerticle;
-import io.vertx.rxjava.core.Future;
-
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import life.genny.channel.Routers;
 import life.genny.channels.EBCHandlers;
 import life.genny.cluster.Cluster;
-
 import life.genny.cluster.CurrentVtxCtx;
 import life.genny.eventbus.EventBusInterface;
 import life.genny.eventbus.EventBusVertx;
 import life.genny.eventbus.VertxCache;
 import life.genny.qwandautils.GennyCacheInterface;
-
 import life.genny.utils.VertxUtils;
 
 public class ServiceVerticle extends AbstractVerticle {
