@@ -1,6 +1,8 @@
-FROM openjdk:8u212-jre-alpine3.9
-RUN echo http://mirror.yandex.ru/mirrors/alpine/v3.9/main > /etc/apk/repositories; \
-    echo http://mirror.yandex.ru/mirrors/alpine/v3.9/community >> /etc/apk/repositories
+FROM adoptopenjdk/openjdk11:alpine
+RUN echo http://mirror.yandex.ru/mirrors/alpine/v3.12/main > /etc/apk/repositories; \
+    echo http://mirror.yandex.ru/mirrors/alpine/v3.12/community >> /etc/apk/repositories
+RUN mv /usr/glibc-compat/lib/ld-linux-x86-64.so.2 /usr/glibc-compat/lib/ld-linux-x86-64.so
+RUN ln -s /usr/glibc-compat/lib/ld-linux-x86-64.so /usr/glibc-compat/lib/ld-linux-x86-64.so.2
 
 RUN apk update && apk add jq && apk add bash && apk add curl
 
