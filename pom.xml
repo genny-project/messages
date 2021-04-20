@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>life.genny</groupId>
 	<artifactId>messages</artifactId>
-	<version>7.27.0</version>
+	<version>7.28.0</version>
 	<name>messages</name>
 	<properties>
 		<genny-verticle.version>${project.version}</genny-verticle.version>
