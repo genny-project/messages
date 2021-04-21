@@ -6,8 +6,10 @@ RUN ln -s /usr/glibc-compat/lib/ld-linux-x86-64.so /usr/glibc-compat/lib/ld-linu
 
 RUN apk update && apk add jq && apk add bash && apk add curl
 
-ADD target/messages-fat.jar /service.jar
+#ADD target/messages-7.27.0-runner.jar /service.jar
 #ADD cluster.xml /cluster.xml
+COPY target/lib/* /deployments/lib/
+COPY target/*-runner.jar /deployments/service.jar
 
 RUN mkdir /realm
 ADD realm /opt/realm

@@ -1,45 +1,38 @@
 package life.genny.channels;
 
 import java.lang.invoke.MethodHandles;
+
+import javax.enterprise.context.ApplicationScoped;
+
 import org.apache.logging.log4j.Logger;
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
+
 import io.vertx.core.json.JsonObject;
-import life.genny.channel.Consumer;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.util.MessageProcessHelper;
 
+@ApplicationScoped
 public class EBCHandlers {
 	
 	  protected static final Logger log = org.apache.logging.log4j.LogManager
 		      .getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 
-	public static void registerHandlers(final EventBus eventBus) {
-
-		Consumer.getFromMessages().handler(arg -> {
+		@Incoming("messages")
+		public void getFromMessages(String arg){
 			log.info("Received EVENT :"
 					+ (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
-						
-			Vertx.vertx().executeBlocking(arg1->{
-				final JsonObject payload = new JsonObject(arg.body().toString());
-				
-				log.info(payload);
-				log.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
-				
-				log.info("GENERIC MESSAGES");
-					final QMessageGennyMSG message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
-					MessageProcessHelper.processGenericMessage(message, payload.getString("token"), eventBus);
+
+			final JsonObject payload = new JsonObject(arg);
+
+			log.info(payload);
+			log.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
+
+			log.info("GENERIC MESSAGES");
+			final QMessageGennyMSG message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
+			MessageProcessHelper.processGenericMessage(message, payload.getString("token"));
 					
-			
-				
-			}, arg2->{
-				
-			});			
-
-		});
-
-	}
+		}
 
 }
