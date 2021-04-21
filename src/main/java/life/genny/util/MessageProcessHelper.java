@@ -4,7 +4,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import life.genny.message.QMessageFactory;
@@ -38,7 +37,7 @@ public class MessageProcessHelper {
 	 *            message will be set and message will be triggered
 	 *            </p>
 	 */
-	public static void processGenericMessage(QMessageGennyMSG message, String tokenString, EventBus eventbus) {
+	public static void processGenericMessage(QMessageGennyMSG message, String tokenString) {
 
 		logger.info("message model ::" + message.toString());
 
@@ -53,12 +52,12 @@ public class MessageProcessHelper {
 		if (recipientArr != null && recipientArr.length > 0) {
 
 			logger.info("recipient array length ::" + recipientArr.length);
-			messageProcessorForBaseEntityRecipientArray(message, tokenString, eventbus, baseEntityContextMap);
+			messageProcessorForBaseEntityRecipientArray(message, tokenString, baseEntityContextMap);
 
 		} else if(to != null && to.length > 0) {
 			
 			logger.info("to array length ::" + to.length);
-			messageProcessorForDirectRecipientArray(message, tokenString, eventbus, baseEntityContextMap);
+			messageProcessorForDirectRecipientArray(message, tokenString, baseEntityContextMap);
 		}
 		else {
 			logger.error(ANSI_RED + "  RECIPIENT NULL OR EMPTY  " + ANSI_RESET);
@@ -98,7 +97,7 @@ public class MessageProcessHelper {
 	
 	/* When recipientArray is an array of BaseEntityCodeArray, we use this method to send message */
 	private static void messageProcessorForBaseEntityRecipientArray(QMessageGennyMSG message, String tokenString,
-			EventBus eventbus, Map<String, Object> baseEntityContextMap) {
+			Map<String, Object> baseEntityContextMap) {
 		
 		// Extract the project from the tokenString
 		
@@ -148,13 +147,13 @@ public class MessageProcessHelper {
 				 */
 				if (isUserUnsubscribed && !message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
 					logger.info("unsubscribed");
-					provider.sendMessage(msgMessage, eventbus, newMap);
+					provider.sendMessage(msgMessage, newMap);
 				}
 
 				/* if subscribed, allow messages */
 				if (!isUserUnsubscribed) {
 					logger.info("subscribed");
-					provider.sendMessage(msgMessage, eventbus, newMap);
+					provider.sendMessage(msgMessage, newMap);
 				}
 
 			} else {
@@ -167,7 +166,7 @@ public class MessageProcessHelper {
 	
 	/* When recipientArray is an array of emailIds OR array of phone-numbers, we use this method to send message */
 	private static void messageProcessorForDirectRecipientArray(QMessageGennyMSG message, String tokenString,
-			EventBus eventbus, Map<String, Object> baseEntityContextMap) {
+			Map<String, Object> baseEntityContextMap) {
 		
 		// Setting Message values		
 		/* directToValue -> actual emailId or phoneNumber */
@@ -189,7 +188,7 @@ public class MessageProcessHelper {
 				
 				//TODO Need to implement unsubscription for direct email list
 				
-				provider.sendMessage(msgMessage, eventbus, baseEntityContextMap);
+				provider.sendMessage(msgMessage, baseEntityContextMap);
 						
 				
 			} else {

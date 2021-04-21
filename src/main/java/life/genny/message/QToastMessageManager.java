@@ -2,11 +2,14 @@ package life.genny.message;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
-import io.vertx.core.eventbus.EventBus;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import life.genny.channel.Producer;
+import life.genny.channels.Producer;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
@@ -18,6 +21,7 @@ import life.genny.qwandautils.MergeUtil;
 import life.genny.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
 
+@ApplicationScoped
 public class QToastMessageManager implements QMessageProvider{
 	
 	public static final String ANSI_RESET = "\u001B[0m";
@@ -27,8 +31,11 @@ public class QToastMessageManager implements QMessageProvider{
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
+	@Inject
+	Producer producer;
+
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, Object> contextMap) {
+	public void sendMessage(QBaseMSGMessage message, Map<String, Object> contextMap) {
 		
 		logger.info("About to send toast message");
 		
@@ -43,7 +50,7 @@ public class QToastMessageManager implements QMessageProvider{
 		String toastJson = JsonUtils.toJson(toastMsg);
 		JsonObject toastJsonObj = new JsonObject(toastJson);
 		
-		Producer.getToWebData().write(toastJsonObj);
+		producer.getToWebData().send(toastJsonObj.toString());
 	}
 
 

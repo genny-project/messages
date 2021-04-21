@@ -10,7 +10,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mail.MailAttachment;
@@ -47,7 +46,7 @@ public class QVertxMailManager implements QMessageProvider{
 	final public static Boolean IS_STAGING = System.getenv("GENNYSTAGING") == null ? false : true;
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, Object> contextMap) {
+	public void sendMessage(QBaseMSGMessage message, Map<String, Object> contextMap) {
 
 		vertx = Vertx.vertx();
 

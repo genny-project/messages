@@ -13,7 +13,6 @@ import javax.mail.internet.MimeMessage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import life.genny.qwanda.entity.BaseEntity;
@@ -37,7 +36,7 @@ public class QEmailMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus bus, Map<String, Object> contextMap) {
+	public void sendMessage(QBaseMSGMessage message, Map<String, Object> contextMap) {
 
 		Properties emailProperties = setProperties();
 

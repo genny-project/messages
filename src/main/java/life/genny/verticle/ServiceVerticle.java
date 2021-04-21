@@ -1,37 +1,39 @@
 package life.genny.verticle;
 
 import java.lang.invoke.MethodHandles;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.apache.logging.log4j.Logger;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
+
+import io.quarkus.runtime.Startup;
 import life.genny.channel.Routers;
-import life.genny.channels.EBCHandlers;
-import life.genny.cluster.Cluster;
-import life.genny.cluster.CurrentVtxCtx;
 import life.genny.eventbus.EventBusInterface;
 import life.genny.eventbus.EventBusVertx;
 import life.genny.eventbus.VertxCache;
 import life.genny.qwandautils.GennyCacheInterface;
 import life.genny.utils.VertxUtils;
+import io.vertx.core.Vertx;
 
-public class ServiceVerticle extends AbstractVerticle {
+@Startup
+@ApplicationScoped
+public class ServiceVerticle {
 
 	protected static final Logger log = org.apache.logging.log4j.LogManager
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
-	@Override
+  @Inject 
+  Vertx vertx;
+
+	@PostConstruct
 	public void start() {
 		log.info("Setting up routes");
-		final Future<Void> startFuture = Future.future();
-		Cluster.joinCluster().compose(res -> {
-			EventBusInterface eventBus = new EventBusVertx();
-			GennyCacheInterface vertxCache = new VertxCache();
-			VertxUtils.init(eventBus, vertxCache);
-			Routers.routers(vertx);
-			Routers.activate(vertx);
-			EBCHandlers.registerHandlers(CurrentVtxCtx.getCurrentCtx().getClusterVtx().eventBus());
-			startFuture.complete();
-		}, startFuture);
-
+		EventBusInterface eventBus = new EventBusVertx();
+		GennyCacheInterface vertxCache = new VertxCache();
+		VertxUtils.init(eventBus, vertxCache);
+		Routers.routers(vertx);
+		Routers.activate(vertx);
 	}
 }

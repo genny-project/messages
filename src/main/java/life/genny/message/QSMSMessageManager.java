@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import life.genny.qwanda.entity.BaseEntity;
@@ -27,7 +26,7 @@ public class QSMSMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	@Override
-	public void sendMessage(QBaseMSGMessage message, EventBus eventBus, Map<String, Object> contextMap) {
+	public void sendMessage(QBaseMSGMessage message, Map<String, Object> contextMap) {
 		logger.info(ANSI_GREEN+">>>>>>>>>>>About to trigger SMS<<<<<<<<<<<<<<"+ANSI_RESET);
 		
 		BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
