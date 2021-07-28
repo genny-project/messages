@@ -3,11 +3,12 @@ package life.genny.message;
 import java.util.Map;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.utils.BaseEntityUtils;
 
 public interface QMessageProvider {
 	
-	public void sendMessage(QBaseMSGMessage message, Map<String, Object> contextMap);
-	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap, String token);
-	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(QMessageGennyMSG message, Map<String, Object> entityTemplateMap, String token, String to);
+	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap);
+	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, Map<String, Object> entityTemplateMap);
+	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message, Map<String, Object> entityTemplateMap, String to);
 
 }

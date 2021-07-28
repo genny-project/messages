@@ -2,7 +2,10 @@ package life.genny.message;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -16,15 +19,17 @@ import org.jsoup.nodes.Element;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.util.MergeHelper;
+import life.genny.notifications.EmailHelper;
 import life.genny.utils.BaseEntityUtils;
 
-public class QEmailMessageManager implements QMessageProvider {
+public class QSendGridMessageManager implements QMessageProvider {
 	
 	public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";
@@ -39,60 +44,58 @@ public class QEmailMessageManager implements QMessageProvider {
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
 
-		Properties emailProperties = setProperties();
+		logger.info("SendGrid email type");
 
-		Session session = Session.getInstance(emailProperties, new javax.mail.Authenticator() {
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				
-				return new PasswordAuthentication(System.getenv("EMAIL_USERNAME"), System.getenv("EMAIL_PASSWORD"));
+		String target = message.getTarget();
+		if (target != null && !target.isEmpty()) {
+
+			List<String> ccList = new ArrayList<>();
+			List<String> bccList = new ArrayList<>();
+
+			String templateId = message.getSubject();
+
+			// Build a general data map from context BEs
+			HashMap<String, String> templateData = new HashMap<>();
+
+			for (String key : contextMap.keySet()) {
+
+				Object value = contextMap.get(key);
+
+				if (value.getClass().equals(BaseEntity.class)) {
+					BaseEntity be = (BaseEntity) value;
+					for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+
+						String attrCode = ea.getAttributeCode();
+						if (attrCode.startsWith("LNK") || attrCode.startsWith("PRI")) {
+							String valueString = ea.getValue().toString();
+							templateData.put(key+"."+attrCode, valueString);
+						}
+					}
+				} else if(value.getClass().equals(BaseEntity.class)) {
+					templateData.put(key, (String) value);
+				}
 			}
-		});
 
-		try {
-			
-	        logger.info("email type");
-	        
-			String target = message.getTarget();
-			if (target != null && !target.isEmpty()) {
 
-				MimeMessage msg = new MimeMessage(session);
-				msg.setFrom(new InternetAddress(message.getSource()));
-				
-				msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(message.getTarget(), false));
-				msg.setSubject(message.getSubject());
-				msg.setContent(message.getMsgMessageData(), "text/html; charset=utf-8");
-				
-				Transport.send(msg, msg.getAllRecipients());
-				logger.info(ANSI_GREEN + "Email to " + message.getTarget() +" is sent" + ANSI_RESET);
+			// NOTE: This bool determines if email is sent on non-prod servers
+			Boolean testFlag = true;
 
+			try {
+				EmailHelper.sendGrid(beUtils, target, ccList, bccList, "", templateId, templateData, testFlag);
+			} catch (IOException e) {
+				logger.error(e.getStackTrace());
 			}
 
-		} catch (Exception e) {
-			logger.error("ERROR", e);
-		} 
+		}
 
 	}
-
-	private static Properties setProperties() {
-
-		Properties properties = new Properties();
-
-		properties.put("mail.smtp.auth", System.getenv("MAIL_SMTP_AUTH"));
-		properties.put("mail.smtp.starttls.enable", System.getenv("MAIL_SMTP_STARTTLS_ENABLE"));
-		properties.put("mail.smtp.host", System.getenv("MAIL_SMTP_HOST"));
-		properties.put("mail.smtp.port", System.getenv("MAIL_SMTP_PORT"));
-
-		return properties;
-	}
-	
-
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, Map<String, Object> entityTemplateMap) {
-		
-		String token = beUtils.getGennyToken().getToken();
+	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message,
+			Map<String, Object> entityTemplateMap) {
 
+		String token = beUtils.getGennyToken().getToken();
+		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 		BaseEntity recipientBe = (BaseEntity)entityTemplateMap.get("RECIPIENT");
@@ -150,9 +153,9 @@ public class QEmailMessageManager implements QMessageProvider {
 	@Override
 	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
 			Map<String, Object> entityTemplateMap, String to) {
-
-		String token = beUtils.getGennyToken().getToken();
 		
+		String token = beUtils.getGennyToken().getToken();
+
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 	

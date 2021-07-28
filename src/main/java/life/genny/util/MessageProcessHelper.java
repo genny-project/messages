@@ -15,6 +15,7 @@ import life.genny.qwanda.message.QBaseMSGMessageType;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.KeycloakUtils;
 import life.genny.utils.VertxUtils;
+import life.genny.utils.BaseEntityUtils;
 
 public class MessageProcessHelper {
 
@@ -41,9 +42,12 @@ public class MessageProcessHelper {
 
 		logger.info("message model ::" + message.toString());
 
+		GennyToken userToken = new GennyToken(tokenString);
+		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
+
 		// Create context map with BaseEntities
 		Map<String, Object> baseEntityContextMap = new HashMap<>();
-		baseEntityContextMap = createBaseEntityContextMap(message, tokenString);
+		baseEntityContextMap = createBaseEntityContextMap(beUtils, message);
 
 		String[] recipientArr = message.getRecipientArr();
 		String[] to = message.getTo();
@@ -52,12 +56,12 @@ public class MessageProcessHelper {
 		if (recipientArr != null && recipientArr.length > 0) {
 
 			logger.info("recipient array length ::" + recipientArr.length);
-			messageProcessorForBaseEntityRecipientArray(message, tokenString, baseEntityContextMap);
+			messageProcessorForBaseEntityRecipientArray(beUtils, message, baseEntityContextMap);
 
 		} else if(to != null && to.length > 0) {
 			
 			logger.info("to array length ::" + to.length);
-			messageProcessorForDirectRecipientArray(message, tokenString, baseEntityContextMap);
+			messageProcessorForDirectRecipientArray(beUtils, message, baseEntityContextMap);
 		}
 		else {
 			logger.error(ANSI_RED + "  RECIPIENT NULL OR EMPTY  " + ANSI_RESET);
@@ -65,10 +69,10 @@ public class MessageProcessHelper {
 
 	}
 
-	private static Map<String, Object> createBaseEntityContextMap(QMessageGennyMSG message, String tokenString) {
+	private static Map<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils, QMessageGennyMSG message) {
 		
 		Map<String, Object> baseEntityContextMap = new HashMap<>();
-		JSONObject decodedToken = KeycloakUtils.getDecodedToken(tokenString);
+		JSONObject decodedToken = KeycloakUtils.getDecodedToken(beUtils.getGennyToken().getToken());
 		String realm = decodedToken.getString("aud");
 		
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
@@ -80,7 +84,7 @@ public class MessageProcessHelper {
 		    if ((value != null) && (value.length()>4))
 		    {
 		    	if (value.matches("[A-Z]{3}\\_.*")) { // MUST BE A BE CODE
-		    		be = VertxUtils.readFromDDT(realm,value, tokenString);
+		    		be = VertxUtils.readFromDDT(realm,value, beUtils.getGennyToken().getToken());
 		    	}
 		    }
 		    
@@ -96,19 +100,17 @@ public class MessageProcessHelper {
 	}
 	
 	/* When recipientArray is an array of BaseEntityCodeArray, we use this method to send message */
-	private static void messageProcessorForBaseEntityRecipientArray(QMessageGennyMSG message, String tokenString,
+	private static void messageProcessorForBaseEntityRecipientArray(BaseEntityUtils beUtils, QMessageGennyMSG message,
 			Map<String, Object> baseEntityContextMap) {
 		
-		// Extract the project from the tokenString
-		
-		GennyToken gennyToken = new GennyToken(tokenString);
-		
+		String token = beUtils.getGennyToken().getToken();
+		String realm = beUtils.getGennyToken().getRealm();
 
 		for (String recipientCode : message.getRecipientArr()) {
 
 			// Setting Message values
 			QBaseMSGMessage msgMessage = new QBaseMSGMessage();
-			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(gennyToken.getRealm(),recipientCode, tokenString);
+			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(realm, recipientCode, token);
 			if (recipientBeFromDDT == null) {
 				
 				logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned for "+recipientCode+" is null<<<<<<<<<"
@@ -123,7 +125,7 @@ public class MessageProcessHelper {
 			QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
 
 			/* set values for sending message */
-			msgMessage = provider.setGenericMessageValue(message, newMap, tokenString);
+			msgMessage = provider.setGenericMessageValue(beUtils, message, newMap);
 
 			if (msgMessage != null) {
 
@@ -133,7 +135,7 @@ public class MessageProcessHelper {
 					msgMessage.setAttachmentList(message.getAttachmentList());
 				}
 
-				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT(gennyToken.getRealm(),"COM_EMAIL_UNSUBSCRIPTION", tokenString);
+				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT(realm, "COM_EMAIL_UNSUBSCRIPTION", token);
 				logger.info("unsubscribe be :: " + unsubscriptionBe);
 				String templateCode = message.getTemplate_code() + "_UNSUBSCRIBE";
 
@@ -147,13 +149,13 @@ public class MessageProcessHelper {
 				 */
 				if (isUserUnsubscribed && !message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
 					logger.info("unsubscribed");
-					provider.sendMessage(msgMessage, newMap);
+					provider.sendMessage(beUtils, msgMessage, newMap);
 				}
 
 				/* if subscribed, allow messages */
 				if (!isUserUnsubscribed) {
 					logger.info("subscribed");
-					provider.sendMessage(msgMessage, newMap);
+					provider.sendMessage(beUtils, msgMessage, newMap);
 				}
 
 			} else {
@@ -165,9 +167,11 @@ public class MessageProcessHelper {
 	}
 	
 	/* When recipientArray is an array of emailIds OR array of phone-numbers, we use this method to send message */
-	private static void messageProcessorForDirectRecipientArray(QMessageGennyMSG message, String tokenString,
+	private static void messageProcessorForDirectRecipientArray(BaseEntityUtils beUtils, QMessageGennyMSG message,
 			Map<String, Object> baseEntityContextMap) {
 		
+		String token = beUtils.getGennyToken().getToken();
+
 		// Setting Message values		
 		/* directToValue -> actual emailId or phoneNumber */
 		for(String directToValue : message.getTo()) {
@@ -176,7 +180,7 @@ public class MessageProcessHelper {
 			QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
 			
 			/* set values for sending message */
-			QBaseMSGMessage msgMessage = provider.setGenericMessageValueForDirectRecipient(message, baseEntityContextMap, tokenString, directToValue);
+			QBaseMSGMessage msgMessage = provider.setGenericMessageValueForDirectRecipient(beUtils, message, baseEntityContextMap, directToValue);
 			
 			if (msgMessage != null) {
 				
@@ -188,7 +192,7 @@ public class MessageProcessHelper {
 				
 				//TODO Need to implement unsubscription for direct email list
 				
-				provider.sendMessage(msgMessage, baseEntityContextMap);
+				provider.sendMessage(beUtils, msgMessage, baseEntityContextMap);
 						
 				
 			} else {

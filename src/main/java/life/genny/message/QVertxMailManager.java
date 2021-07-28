@@ -27,6 +27,7 @@ import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwandautils.StringFormattingUtils;
 import life.genny.util.MergeHelper;
+import life.genny.utils.BaseEntityUtils;
 
 public class QVertxMailManager implements QMessageProvider{
 	
@@ -46,7 +47,7 @@ public class QVertxMailManager implements QMessageProvider{
 	final public static Boolean IS_STAGING = System.getenv("GENNYSTAGING") == null ? false : true;
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, Map<String, Object> contextMap) {
+	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
 
 		vertx = Vertx.vertx();
 
@@ -210,9 +211,11 @@ public class QVertxMailManager implements QMessageProvider{
 
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap,
-			String token) {													
+	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, 
+			Map<String, Object> entityTemplateMap) {													
 		
+		String token = beUtils.getGennyToken().getToken();
+
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 		BaseEntity recipientBe = (BaseEntity)entityTemplateMap.get("RECIPIENT");
@@ -231,7 +234,8 @@ public class QVertxMailManager implements QMessageProvider{
 					if(projectBe != null) {
 						
 						/* Getting base email template (which contains the header and footer) from "NTF_BASE_TEMPLATE" attribute of project BaseEntity */
-						urlString = projectBe.findEntityAttribute("NTF_BASE_TEMPLATE").isPresent()?projectBe.findEntityAttribute("NTF_BASE_TEMPLATE").get().getAsString():null; //QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
+						urlString = projectBe.findEntityAttribute("NTF_BASE_TEMPLATE").isPresent()?projectBe.findEntityAttribute("NTF_BASE_TEMPLATE").get().getAsString():null;
+						//QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
 						
 						/* Getting content email template from notifications-doc and merging with contextMap */
 						String emailMsg = QwandaUtils.apiGet(emailLink, null);
@@ -243,16 +247,19 @@ public class QVertxMailManager implements QMessageProvider{
 						if (element != null) {
 							element.html(innerContentString);
 						}
-						/* Amazon mail accounts have an extra config of sourceEmail..amazon mail service do not have sameID username and email. Google account has the same ID for username and sourceEmail */
+						/* Amazon mail accounts have an extra config of sourceEmail..amazon mail service do not have sameID username and email. 
+						 * Google account has the same ID for username and sourceEmail */
 						String emailSourceEmail = projectBe.getValue("ENV_MAIL_SMTP_SOURCE_EMAIL", null);
 						
 						/* setting up all source, target, priority, subject, content, attachment list in the constructor */
 						if(emailSourceEmail != null) {
 							logger.info("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
-							baseMessage = new QBaseMSGMessage(emailSourceEmail, recipientBe.getValue("PRI_EMAIL", null), null, MergeUtil.merge(template.getSubject(), entityTemplateMap), doc.toString(), message.getAttachmentList());
+							baseMessage = new QBaseMSGMessage(emailSourceEmail, recipientBe.getValue("PRI_EMAIL", null), 
+									null, MergeUtil.merge(template.getSubject(), entityTemplateMap), doc.toString(), message.getAttachmentList());
 						} else {
 							logger.info("this email account does not sourceEmail, so setting username as source");
-							baseMessage = new QBaseMSGMessage(projectBe.getValue("ENV_EMAIL_USERNAME", null), recipientBe.getValue("PRI_EMAIL", null), null, template.getSubject(), doc.toString(), message.getAttachmentList());
+							baseMessage = new QBaseMSGMessage(projectBe.getValue("ENV_EMAIL_USERNAME", null), 
+									recipientBe.getValue("PRI_EMAIL", null), null, template.getSubject(), doc.toString(), message.getAttachmentList());
 						}
 								
 					} else {
@@ -289,8 +296,11 @@ public class QVertxMailManager implements QMessageProvider{
 	}
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap, String token, String to) {
+	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
+			Map<String, Object> entityTemplateMap, String to) {
+
+		String token = beUtils.getGennyToken().getToken();
+
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 		

@@ -14,6 +14,7 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.util.MergeHelper;
+import life.genny.utils.BaseEntityUtils;
 
 public class QSMSMessageManager implements QMessageProvider {
 	
@@ -26,7 +27,7 @@ public class QSMSMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	@Override
-	public void sendMessage(QBaseMSGMessage message, Map<String, Object> contextMap) {
+	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
 		logger.info(ANSI_GREEN+">>>>>>>>>>>About to trigger SMS<<<<<<<<<<<<<<"+ANSI_RESET);
 		
 		BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
@@ -69,8 +70,11 @@ public class QSMSMessageManager implements QMessageProvider {
 
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap,
-			String token) {
+	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, 
+			Map<String, Object> entityTemplateMap) {
+
+		String token = beUtils.getGennyToken().getToken();
+
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
 		BaseEntity recipientBe = (BaseEntity)(entityTemplateMap.get("RECIPIENT"));
@@ -106,8 +110,10 @@ public class QSMSMessageManager implements QMessageProvider {
 
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap, String token, String to) {
+	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
+			Map<String, Object> entityTemplateMap, String to) {
+
+		String token = beUtils.getGennyToken().getToken();
 		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);

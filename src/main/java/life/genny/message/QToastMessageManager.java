@@ -35,7 +35,7 @@ public class QToastMessageManager implements QMessageProvider{
 	Producer producer;
 
 	@Override
-	public void sendMessage(QBaseMSGMessage message, Map<String, Object> contextMap) {
+	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
 		
 		logger.info("About to send toast message");
 		
@@ -55,8 +55,10 @@ public class QToastMessageManager implements QMessageProvider{
 
 
 	@Override
-	public QBaseMSGMessage setGenericMessageValue(QMessageGennyMSG message, Map<String, Object> entityTemplateMap,
-			String token) {
+	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, 
+			Map<String, Object> entityTemplateMap) {
+
+		String token = beUtils.getGennyToken().getToken();
 		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
@@ -96,8 +98,10 @@ public class QToastMessageManager implements QMessageProvider{
 
 	/* refrain from using this method, instead pass the recipient array itself */
 	@Override
-	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap, String token, String to) {
+	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
+			Map<String, Object> entityTemplateMap, String to) {
+
+		String token = beUtils.getGennyToken().getToken();
 		
 		QBaseMSGMessage baseMessage = null;
 		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
