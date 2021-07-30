@@ -47,9 +47,12 @@ public class QVertxMailManager implements QMessageProvider{
 	final public static Boolean IS_STAGING = System.getenv("GENNYSTAGING") == null ? false : true;
 
 	@Override
-	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
+	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 
 		vertx = Vertx.vertx();
+
+		// TODO: FIX THIS BIT - Jasper (31/07/2021)
+		QBaseMSGMessage message = new QBaseMSGMessage();
 
 		if ( message.getTarget() != null ) {
 			
@@ -76,8 +79,8 @@ public class QVertxMailManager implements QMessageProvider{
 					result.cause().printStackTrace();
 				}
 			});
+
 		}
-		// END-OF manual hack
 		
 	}	
 
@@ -210,14 +213,14 @@ public class QVertxMailManager implements QMessageProvider{
 	  }
 
 
-	@Override
+	// @Override
 	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, 
 			Map<String, Object> entityTemplateMap) {													
 		
 		String token = beUtils.getGennyToken().getToken();
 
 		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
 		BaseEntity recipientBe = (BaseEntity)entityTemplateMap.get("RECIPIENT");
 		
 		if(recipientBe != null) {
@@ -295,14 +298,14 @@ public class QVertxMailManager implements QMessageProvider{
 		return mailAttachments;
 	}
 
-	@Override
+	// @Override
 	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
 			Map<String, Object> entityTemplateMap, String to) {
 
 		String token = beUtils.getGennyToken().getToken();
 
 		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
 		
 		if (template != null) {
 				

@@ -28,6 +28,7 @@ public class QEmailMessageManager implements QMessageProvider {
 	
 	public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_RED = "\u001B[31m";
 	
 	public static final String FILE_TYPE = "application/";
 	
@@ -37,7 +38,7 @@ public class QEmailMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
+	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 
 		Properties emailProperties = setProperties();
 
@@ -52,21 +53,55 @@ public class QEmailMessageManager implements QMessageProvider {
 		try {
 			
 	        logger.info("email type");
-	        
-			String target = message.getTarget();
-			if (target != null && !target.isEmpty()) {
 
-				MimeMessage msg = new MimeMessage(session);
-				msg.setFrom(new InternetAddress(message.getSource()));
-				
-				msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(message.getTarget(), false));
-				msg.setSubject(message.getSubject());
-				msg.setContent(message.getMsgMessageData(), "text/html; charset=utf-8");
-				
-				Transport.send(msg, msg.getAllRecipients());
-				logger.info(ANSI_GREEN + "Email to " + message.getTarget() +" is sent" + ANSI_RESET);
-
+			BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
+			BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
+			
+			if (target == null) {
+				logger.error(ANSI_RED+"Target is NULL"+ANSI_RESET);
+				return;
 			}
+			if (projectBe == null) {
+				logger.error(ANSI_RED+"ProjectBe is NULL"+ANSI_RESET);
+				return;
+			}
+
+			String targetEmail = target.getValue("PRI_EMAIL", null);
+
+			if (targetEmail == null) {
+				logger.error(ANSI_RED+"Target " + target.getCode() + ", PRI_EMAIL is NULL"+ANSI_RESET);
+				return;
+			}
+
+			String body = templateBe.getValue("PRI_BODY", null);
+			String subject = templateBe.getValue("PRI_SUBJECT", null);
+			String sender = projectBe.getValue("ENV_EMAIL_USERNAME", null);
+
+			if (body == null) {
+				logger.error(ANSI_RED+"Template BE " + templateBe.getCode() + ", PRI_BODY is NULL"+ANSI_RESET);
+				return;
+			}
+			if (subject == null) {
+				logger.error(ANSI_RED+"Template BE " + templateBe.getCode() + ", PRI_SUBJECT is NULL"+ANSI_RESET);
+				return;
+			}
+			if (sender == null) {
+				logger.error(ANSI_RED+"Project BE " + templateBe.getCode() + ", ENV_EMAIL_USERNAME is NULL"+ANSI_RESET);
+				return;
+			}
+
+			// Mail Merging Data
+			body = MergeUtil.merge(body, contextMap);
+
+			MimeMessage msg = new MimeMessage(session);
+			msg.setFrom(new InternetAddress(sender));
+			
+			msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(targetEmail, false));
+			msg.setSubject(subject);
+			msg.setContent(body, "text/html; charset=utf-8");
+			
+			Transport.send(msg, msg.getAllRecipients());
+			logger.info(ANSI_GREEN + "Email to " + targetEmail +" is sent" + ANSI_RESET);
 
 		} catch (Exception e) {
 			logger.error("ERROR", e);
@@ -88,13 +123,13 @@ public class QEmailMessageManager implements QMessageProvider {
 	
 
 
-	@Override
+	// @Override
 	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, Map<String, Object> entityTemplateMap) {
 		
 		String token = beUtils.getGennyToken().getToken();
 
 		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
 		BaseEntity recipientBe = (BaseEntity)entityTemplateMap.get("RECIPIENT");
 		
 		if(recipientBe != null) {
@@ -147,14 +182,14 @@ public class QEmailMessageManager implements QMessageProvider {
 		return baseMessage;
 	}
 
-	@Override
+	// @Override
 	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
 			Map<String, Object> entityTemplateMap, String to) {
 
 		String token = beUtils.getGennyToken().getToken();
 		
 		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
 	
 		if (template != null) {
 				

@@ -28,6 +28,7 @@ import life.genny.qwandautils.QwandaUtils;
 import life.genny.util.MergeHelper;
 import life.genny.notifications.EmailHelper;
 import life.genny.utils.BaseEntityUtils;
+import java.util.stream.Collectors;
 
 public class QSendGridMessageManager implements QMessageProvider {
 	
@@ -42,169 +43,67 @@ public class QSendGridMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
+	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 
 		logger.info("SendGrid email type");
 
-		String target = message.getTarget();
-		if (target != null && !target.isEmpty()) {
+		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 
-			List<String> ccList = new ArrayList<>();
-			List<String> bccList = new ArrayList<>();
+		if (target == null) {
+			logger.error("Target is NULL");
+		}
 
-			String templateId = message.getSubject();
+		String targetEmail = target.getValue("PRI_EMAIL", null);
 
-			// Build a general data map from context BEs
-			HashMap<String, String> templateData = new HashMap<>();
+		if (targetEmail == null) {
+			logger.error("Target " + target.getCode() + ", PRI_EMAIL is NULL");
+			return;
+		}
 
-			for (String key : contextMap.keySet()) {
+		String ccArr = (String) contextMap.get("CC");
+		String bccArr = (String) contextMap.get("BCC");
 
-				Object value = contextMap.get(key);
+		List<BaseEntity> ccEntities = MergeHelper.convertToBaseEntityArray(ccArr);
+		List<BaseEntity> bccEntities = MergeHelper.convertToBaseEntityArray(bccArr);
 
-				if (value.getClass().equals(BaseEntity.class)) {
-					BaseEntity be = (BaseEntity) value;
-					for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+		List<String> ccList = ccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
+				.filter(item -> !item.isEmpty()).collect(Collectors.toList());
+		List<String> bccList = bccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
+				.filter(item -> !item.isEmpty()).collect(Collectors.toList());
 
-						String attrCode = ea.getAttributeCode();
-						if (attrCode.startsWith("LNK") || attrCode.startsWith("PRI")) {
-							String valueString = ea.getValue().toString();
-							templateData.put(key+"."+attrCode, valueString);
-						}
+		String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
+
+		// Build a general data map from context BEs
+		HashMap<String, String> templateData = new HashMap<>();
+
+		for (String key : contextMap.keySet()) {
+
+			Object value = contextMap.get(key);
+
+			if (value.getClass().equals(BaseEntity.class)) {
+				BaseEntity be = (BaseEntity) value;
+				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+
+					String attrCode = ea.getAttributeCode();
+					if (attrCode.startsWith("LNK") || attrCode.startsWith("PRI")) {
+						String valueString = ea.getValue().toString();
+						templateData.put(key+"."+attrCode, valueString);
 					}
-				} else if(value.getClass().equals(BaseEntity.class)) {
-					templateData.put(key, (String) value);
 				}
+			} else if(value.getClass().equals(BaseEntity.class)) {
+				templateData.put(key, (String) value);
 			}
+		}
 
+		// NOTE: This bool determines if email is sent on non-prod servers
+		Boolean testFlag = true;
 
-			// NOTE: This bool determines if email is sent on non-prod servers
-			Boolean testFlag = true;
-
-			try {
-				EmailHelper.sendGrid(beUtils, target, ccList, bccList, "", templateId, templateData, testFlag);
-			} catch (IOException e) {
-				logger.error(e.getStackTrace());
-			}
-
+		try {
+			EmailHelper.sendGrid(beUtils, targetEmail, ccList, bccList, "", templateId, templateData, testFlag);
+		} catch (IOException e) {
+			logger.error(e.getStackTrace());
 		}
 
 	}
-
-	@Override
-	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap) {
-
-		String token = beUtils.getGennyToken().getToken();
-		
-		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
-		BaseEntity recipientBe = (BaseEntity)entityTemplateMap.get("RECIPIENT");
-		
-		if(recipientBe != null) {
-			if (template != null) {
-					
-				baseMessage = new QBaseMSGMessage();
-				String emailLink = template.getEmail_templateId();
-			
-				String urlString = null;
-				String innerContentString = null;
-				Document doc = null;
-				try {
-					
-					BaseEntity projectBe = (BaseEntity)entityTemplateMap.get("PROJECT");
-					
-					if(projectBe != null) {
-						
-						/* Getting base email template from project google doc */
-						urlString = QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
-						
-						/* Getting content email template from notifications-doc and merging with contextMap */
-						innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
-						
-						/* Inserting the content html into the main email html */
-						doc = Jsoup.parse(urlString);
-						Element element = doc.getElementById("content");
-						element.html(innerContentString);
-						
-						baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
-						baseMessage.setSubject(template.getSubject());
-						baseMessage.setMsgMessageData(doc.toString());
-						baseMessage.setTarget(MergeUtil.getBaseEntityAttrValueAsString(recipientBe, "PRI_EMAIL"));	
-						
-					} else {
-						logger.error("NO PROJECT BASEENTITY FOUND");
-					}
-					
-				} catch (IOException e) {
-					logger.error("ERROR", e);
-				}
-											
-			} else {
-				logger.error("NO TEMPLATE FOUND");
-			}
-		} else {
-			logger.error("Recipient BaseEntity is NULL");
-		}
-		
-		
-		return baseMessage;
-	}
-
-	@Override
-	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap, String to) {
-		
-		String token = beUtils.getGennyToken().getToken();
-
-		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
-	
-		if (template != null) {
-				
-			baseMessage = new QBaseMSGMessage();
-			String emailLink = template.getEmail_templateId();
-		
-			String urlString = null;
-			String innerContentString = null;
-			Document doc = null;
-			
-			try {
-				
-				BaseEntity projectBe = (BaseEntity)entityTemplateMap.get("PROJECT");
-				
-				if(projectBe != null) {
-					
-					/* Getting base email template from project google doc */
-					urlString = QwandaUtils.apiGet(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "NTF_BASE_TEMPLATE"), null);	
-					
-					/* Getting content email template from notifications-doc and merging with contextMap */
-					innerContentString = MergeUtil.merge(QwandaUtils.apiGet(emailLink, null), entityTemplateMap);
-					
-					/* Inserting the content html into the main email html */
-					doc = Jsoup.parse(urlString);
-					Element element = doc.getElementById("content");
-					element.html(innerContentString);
-					
-					baseMessage.setSource(MergeUtil.getBaseEntityAttrValueAsString(projectBe, "ENV_EMAIL_USERNAME"));
-					baseMessage.setSubject(template.getSubject());
-					baseMessage.setMsgMessageData(doc.toString());
-					baseMessage.setTarget(to);	
-					
-				} else {
-					logger.error("NO PROJECT BASEENTITY FOUND");
-				}
-				
-				} catch (IOException e) {
-					logger.error("ERROR", e);
-			}
-										
-		} else {
-			logger.error("NO TEMPLATE FOUND");
-		}	
-		
-		return baseMessage;
-	}
-
-	
 
 }
