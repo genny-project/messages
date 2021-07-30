@@ -76,7 +76,7 @@ public class QSMSMessageManager implements QMessageProvider {
 		String token = beUtils.getGennyToken().getToken();
 
 		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
 		BaseEntity recipientBe = (BaseEntity)(entityTemplateMap.get("RECIPIENT"));
 		
 		if(recipientBe != null) {
@@ -116,7 +116,7 @@ public class QSMSMessageManager implements QMessageProvider {
 		String token = beUtils.getGennyToken().getToken();
 		
 		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
 		
 		if (template != null) {
 			

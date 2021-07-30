@@ -110,59 +110,59 @@ public class MessageProcessHelper {
 
 			// Setting Message values
 			QBaseMSGMessage msgMessage = new QBaseMSGMessage();
-			BaseEntity recipientBeFromDDT = VertxUtils.readFromDDT(realm, recipientCode, token);
-			if (recipientBeFromDDT == null) {
+			BaseEntity recipientBe = beUtils.getBaseEntityByCoe(recipientCode);
+			if (recipientBe == null) {
 				
 				logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned for "+recipientCode+" is null<<<<<<<<<"
 						+ ANSI_RESET);
-			}
-			Map<String, Object> newMap = new HashMap<>();
-			newMap = baseEntityContextMap;
-			newMap.put("RECIPIENT", recipientBeFromDDT);
-			logger.info("new map ::" + newMap);
-
-			/* Get Message Provider */
-			QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
-
-			/* set values for sending message */
-			msgMessage = provider.setGenericMessageValue(beUtils, message, newMap);
-
-			if (msgMessage != null) {
-
-				// setting attachments
-				if (message.getAttachmentList() != null) {
-					logger.info("mail has attachments");
-					msgMessage.setAttachmentList(message.getAttachmentList());
-				}
-
-				BaseEntity unsubscriptionBe = VertxUtils.readFromDDT(realm, "COM_EMAIL_UNSUBSCRIPTION", token);
-				logger.info("unsubscribe be :: " + unsubscriptionBe);
-				String templateCode = message.getTemplate_code() + "_UNSUBSCRIBE";
-
-				/* check if unsubscription list for the template code has the userCode */
-				Boolean isUserUnsubscribed = VertxUtils.checkIfAttributeValueContainsString(unsubscriptionBe,
-						templateCode, recipientBeFromDDT.getCode());
-
-				/*
-				 * if user is unsubscribed, then dont send emails. But toast and sms are still
-				 * applicable
-				 */
-				if (isUserUnsubscribed && !message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
-					logger.info("unsubscribed");
-					provider.sendMessage(beUtils, msgMessage, newMap);
-				}
-
-				/* if subscribed, allow messages */
-				if (!isUserUnsubscribed) {
-					logger.info("subscribed");
-					provider.sendMessage(beUtils, msgMessage, newMap);
-				}
-
 			} else {
-				logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<"
-						+ ANSI_RESET);
-			}
+				Map<String, Object> newMap = new HashMap<>();
+				newMap = baseEntityContextMap;
+				newMap.put("RECIPIENT", recipientBe);
+				logger.info("new map ::" + newMap);
 
+				/* Get Message Provider */
+				QMessageProvider provider = messageFactory.getMessageProvider(message.getMsgMessageType());
+
+				/* set values for sending message */
+				msgMessage = provider.setGenericMessageValue(beUtils, message, newMap);
+
+				if (msgMessage != null) {
+
+					// setting attachments
+					if (message.getAttachmentList() != null) {
+						logger.info("mail has attachments");
+						msgMessage.setAttachmentList(message.getAttachmentList());
+					}
+
+					BaseEntity unsubscriptionBe = beUtils.getBaseEntityByCode("COM_EMAIL_UNSUBSCRIPTION");
+					logger.info("unsubscribe be :: " + unsubscriptionBe);
+					String templateCode = message.getTemplateCode() + "_UNSUBSCRIBE";
+
+					/* check if unsubscription list for the template code has the userCode */
+					Boolean isUserUnsubscribed = VertxUtils.checkIfAttributeValueContainsString(unsubscriptionBe,
+							templateCode, recipientBe.getCode());
+
+					/*
+					 * if user is unsubscribed, then dont send emails. But toast and sms are still
+					 * applicable
+					 */
+					if (isUserUnsubscribed && !message.getMsgMessageType().equals(QBaseMSGMessageType.EMAIL)) {
+						logger.info("unsubscribed");
+						provider.sendMessage(beUtils, msgMessage, newMap);
+					}
+
+					/* if subscribed, allow messages */
+					if (!isUserUnsubscribed) {
+						logger.info("subscribed");
+						provider.sendMessage(beUtils, msgMessage, newMap);
+					}
+
+				} else {
+					logger.error(ANSI_RED + ">>>>>>Message wont be sent since baseEntities returned is null<<<<<<<<<"
+							+ ANSI_RESET);
+				}
+			}
 		}
 	}
 	

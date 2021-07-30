@@ -61,7 +61,7 @@ public class QToastMessageManager implements QMessageProvider{
 		String token = beUtils.getGennyToken().getToken();
 		
 		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
 		BaseEntity recipientBe = (BaseEntity)(entityTemplateMap.get("RECIPIENT"));
 		
 		if(recipientBe != null) {
@@ -78,7 +78,7 @@ public class QToastMessageManager implements QMessageProvider{
 				baseMessage.setToken(token);
 				baseMessage.setTarget(recipientBe.getCode());
 				
-				if(message.getTemplate_code().contains("FAIL")) {
+				if(message.getTemplateCode().contains("FAIL")) {
 					baseMessage.setPriority("error");
 				} else {
 					baseMessage.setPriority("info");
@@ -104,7 +104,7 @@ public class QToastMessageManager implements QMessageProvider{
 		String token = beUtils.getGennyToken().getToken();
 		
 		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplate_code(), token);
+		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
 		
 		BaseEntityUtils baseEntity = new BaseEntityUtils(GennySettings.qwandaServiceUrl, token, null, null);
 		BaseEntity userBe = baseEntity.getBaseEntityByAttributeAndValue("PRI_EMAIL", to);
@@ -126,7 +126,7 @@ public class QToastMessageManager implements QMessageProvider{
 				baseMessage.setTarget(userBe.getCode());
 			}
 			
-			if(message.getTemplate_code().contains("FAIL")) {
+			if(message.getTemplateCode().contains("FAIL")) {
 				baseMessage.setPriority("error");
 			} else {
 				baseMessage.setPriority("info");
