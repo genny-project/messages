@@ -84,8 +84,12 @@ public class MessageProcessHelper {
 				String code = "RCP_" + UUID.randomUUID().toString().toUpperCase();
 				recipientBe = new BaseEntity(code, recipient);
 
-				EntityAttribute email = new EntityAttribute(recipientBe, emailAttr, 1.0, recipient);
-				recipientBe.addAttribute(email);
+				try {
+					EntityAttribute email = new EntityAttribute(recipientBe, emailAttr, 1.0, recipient);
+					recipientBe.addAttribute(email);
+				} catch (Exception e) {
+					logger.error(e);
+				}
 			}
 
 			if (recipientBe != null) {
