@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +18,7 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.QwandaUtils;
+import life.genny.qwanda.entity.BaseEntity;
 
 public class MergeHelper {
 	
@@ -93,6 +96,12 @@ public class MergeHelper {
 		}
 		
 		return path;
+	}
+
+	public static List<BaseEntity> convertToBaseEntityArray(String strArr) {
+
+		List<BaseEntity> entityList = new ArrayList<>();
+		return entityList;
 	}
 
 }

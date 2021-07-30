@@ -28,6 +28,7 @@ import life.genny.qwandautils.QwandaUtils;
 import life.genny.util.MergeHelper;
 import life.genny.notifications.EmailHelper;
 import life.genny.utils.BaseEntityUtils;
+import java.util.stream.Collectors;
 
 public class QSendGridMessageManager implements QMessageProvider {
 	
@@ -42,65 +43,67 @@ public class QSendGridMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
-	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
+	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 
 		logger.info("SendGrid email type");
 
-		String target = message.getTarget();
-		if (target != null && !target.isEmpty()) {
+		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 
-			List<String> ccList = new ArrayList<>();
-			List<String> bccList = new ArrayList<>();
-
-			String templateId = message.getSubject();
-
-			// Build a general data map from context BEs
-			HashMap<String, String> templateData = new HashMap<>();
-
-			for (String key : contextMap.keySet()) {
-
-				Object value = contextMap.get(key);
-
-				if (value.getClass().equals(BaseEntity.class)) {
-					BaseEntity be = (BaseEntity) value;
-					for (EntityAttribute ea : be.getBaseEntityAttributes()) {
-
-						String attrCode = ea.getAttributeCode();
-						if (attrCode.startsWith("LNK") || attrCode.startsWith("PRI")) {
-							String valueString = ea.getValue().toString();
-							templateData.put(key+"."+attrCode, valueString);
-						}
-					}
-				} else if(value.getClass().equals(BaseEntity.class)) {
-					templateData.put(key, (String) value);
-				}
-			}
-
-			// NOTE: This bool determines if email is sent on non-prod servers
-			Boolean testFlag = true;
-
-			try {
-				EmailHelper.sendGrid(beUtils, target, ccList, bccList, "", templateId, templateData, testFlag);
-			} catch (IOException e) {
-				logger.error(e.getStackTrace());
-			}
-
+		if (target == null) {
+			logger.error("Target is NULL");
 		}
 
-	}
+		String targetEmail = target.getValue("PRI_EMAIL", null);
 
-	@Override
-	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap) {
+		if (targetEmail == null) {
+			logger.error("Target " + target.getCode() + ", PRI_EMAIL is NULL");
+			return;
+		}
 
-		return null;
-	}
+		String ccArr = (String) contextMap.get("CC");
+		String bccArr = (String) contextMap.get("BCC");
 
-	@Override
-	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap, String to) {
-		
-		return null;
+		List<BaseEntity> ccEntities = MergeHelper.convertToBaseEntityArray(ccArr);
+		List<BaseEntity> bccEntities = MergeHelper.convertToBaseEntityArray(bccArr);
+
+		List<String> ccList = ccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
+				.filter(item -> !item.isEmpty()).collect(Collectors.toList());
+		List<String> bccList = bccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
+				.filter(item -> !item.isEmpty()).collect(Collectors.toList());
+
+		String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
+
+		// Build a general data map from context BEs
+		HashMap<String, String> templateData = new HashMap<>();
+
+		for (String key : contextMap.keySet()) {
+
+			Object value = contextMap.get(key);
+
+			if (value.getClass().equals(BaseEntity.class)) {
+				BaseEntity be = (BaseEntity) value;
+				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+
+					String attrCode = ea.getAttributeCode();
+					if (attrCode.startsWith("LNK") || attrCode.startsWith("PRI")) {
+						String valueString = ea.getValue().toString();
+						templateData.put(key+"."+attrCode, valueString);
+					}
+				}
+			} else if(value.getClass().equals(BaseEntity.class)) {
+				templateData.put(key, (String) value);
+			}
+		}
+
+		// NOTE: This bool determines if email is sent on non-prod servers
+		Boolean testFlag = true;
+
+		try {
+			EmailHelper.sendGrid(beUtils, targetEmail, ccList, bccList, "", templateId, templateData, testFlag);
+		} catch (IOException e) {
+			logger.error(e.getStackTrace());
+		}
+
 	}
 
 }

@@ -20,6 +20,7 @@ public class QSMSMessageManager implements QMessageProvider {
 	
 	public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_RED = "\u001B[31m";
     
     public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
 	
@@ -27,49 +28,63 @@ public class QSMSMessageManager implements QMessageProvider {
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	@Override
-	public void sendMessage(BaseEntityUtils beUtils, QBaseMSGMessage message, Map<String, Object> contextMap) {
+	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 		logger.info(ANSI_GREEN+">>>>>>>>>>>About to trigger SMS<<<<<<<<<<<<<<"+ANSI_RESET);
 		
-		BaseEntity projectBe = (BaseEntity)contextMap.get("PROJECT");
+		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
+		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 		
-		if(projectBe != null) {
-			//target is toPhoneNumber, Source is the fromPhoneNumber
-			String accountSID = projectBe.getValue("ENV_TWILIO_ACCOUNT_SID", null);
-			String sourcePhone = projectBe.getValue("ENV_TWILIO_SOURCE_PHONE", null);
-			String twilioAuthToken = projectBe.getValue("ENV_TWILIO_AUTH_TOKEN", null);
+		if (target == null) {
+			logger.error(ANSI_RED+"Target is NULL"+ANSI_RESET);
+			return;
+		}
+		if (projectBe == null) {
+			logger.error(ANSI_RED+"ProjectBe is NULL"+ANSI_RESET);
+			return;
+		}
 
-			
-			if(accountSID != null && sourcePhone != null && twilioAuthToken != null) {
-				Twilio.init(accountSID, twilioAuthToken);
-				message.setSource(sourcePhone);
-								
-				if (message.getTarget() != null && !message.getTarget().isEmpty()) {
-					
-					//target is a string array of multiple target phone numbers
-					String[] messageTargetArr = StringUtils.split(message.getTarget(), ",");
-					
-					for(String targetMobile : messageTargetArr) {
-						Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(message.getSource()), message.getMsgMessageData()).create();
-						logger.info("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
-						logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
-					}
-					
-				} else {
-					logger.error("SMS not sent since target phone number is empty or NULL");
-				}
-			} else {
-				logger.error("Twilio credentials not loaded into cache");
-			}
-			
+		String targetMobile = target.getValue("PRI_MOBILE", null);
+		String body = templateBe.getValue("PRI_BODY", null);
+
+		if (targetMobile == null) {
+			logger.error(ANSI_RED+"TargetMobile is NULL"+ANSI_RESET);
+			return;
+		}
+		if (body == null) {
+			logger.error(ANSI_RED+"Body is NULL"+ANSI_RESET);
+			return;
+		}
+
+		// Mail Merging Data
+		body = MergeUtil.merge(body, contextMap);
+
+		//target is toPhoneNumber, Source is the fromPhoneNumber
+		String accountSID = projectBe.getValue("ENV_TWILIO_ACCOUNT_SID", null);
+		String sourcePhone = projectBe.getValue("ENV_TWILIO_SOURCE_PHONE", null);
+		String twilioAuthToken = projectBe.getValue("ENV_TWILIO_AUTH_TOKEN", null);
+
+		// Debug logs for devs
+		logger.debug("accountSID = " + accountSID);
+		logger.debug("sourcePhone = " + sourcePhone);
+		logger.debug("twilioAuthToken = " + twilioAuthToken);
+		logger.debug("targetMobile = " + targetMobile);
+		
+		if(accountSID != null && sourcePhone != null && twilioAuthToken != null) {
+
+			Twilio.init(accountSID, twilioAuthToken);
+							
+			Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(sourcePhone), body).create();
+			logger.info("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
+			logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
+				
 		} else {
-			logger.error("SMS not sent since Project Baseentity is NULL");
+			logger.error(ANSI_RED+"Twilio credentials not loaded into cache"+ANSI_RESET);
 		}
 			
-		
 	}
 
 
-	@Override
+	// @Override
 	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, 
 			Map<String, Object> entityTemplateMap) {
 
@@ -109,7 +124,7 @@ public class QSMSMessageManager implements QMessageProvider {
 	}
 
 
-	@Override
+	// @Override
 	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
 			Map<String, Object> entityTemplateMap, String to) {
 
