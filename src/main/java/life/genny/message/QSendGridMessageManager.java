@@ -86,8 +86,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 					String attrCode = ea.getAttributeCode();
 					if (attrCode.startsWith("LNK") || attrCode.startsWith("PRI")) {
-						String valueString = ea.getValue().toString();
-						templateData.put(key+"."+attrCode, valueString);
+						Object attrVal = ea.getValue();
+						if (attrVal != null) {
+							String valueString = attrVal.toString();
+							templateData.put(key+"."+attrCode, valueString);
+						}
 					}
 				}
 			} else if(value.getClass().equals(BaseEntity.class)) {
