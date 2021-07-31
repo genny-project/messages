@@ -69,6 +69,8 @@ public class MessageProcessHelper {
 			logger.error(ANSI_RED + "No Template found for " + message.getTemplateCode() + ANSI_RESET);
 		}
 
+		logger.info("Using TemplateBE " + templateBe.getCode());
+
 		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", token);
 
 		for (String recipient : recipientArr) {
