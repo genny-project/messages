@@ -56,9 +56,12 @@ public class MessageProcessHelper {
 		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
 		String realm = beUtils.getGennyToken().getRealm();
 
+		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+beUtils.getGennyToken().getRealm().toUpperCase());
+
 		// Create context map with BaseEntities
 		Map<String, Object> baseEntityContextMap = new HashMap<>();
 		baseEntityContextMap = createBaseEntityContextMap(beUtils, message);
+		baseEntityContextMap.put("PROJECT", projectBe);
 
 		String[] recipientArr = message.getRecipientArr();
 		List<BaseEntity> recipientBeList = new ArrayList<BaseEntity>();
