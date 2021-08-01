@@ -106,11 +106,19 @@ public class QSendGridMessageManager implements QMessageProvider {
 							String valueString = attrVal.toString();
 
 							if (attrVal.getClass().equals(LocalDate.class)) {
-								String format = (String) contextMap.get("DATEFORMAT");
-								valueString = MergeUtil.getFormattedDateString((LocalDate) attrVal, format);
+								if (contextMap.containsKey("DATEFORMAT")) {
+									String format = (String) contextMap.get("DATEFORMAT");
+									valueString = MergeUtil.getFormattedDateString((LocalDate) attrVal, format);
+								} else {
+									logger.info("No DATEFORMAT key present in context map, defaulting to stringified date");
+								}
 							} else if (attrVal.getClass().equals(LocalDateTime.class)) {
-								String format = (String) contextMap.get("DATETIMEFORMAT");
-								valueString = MergeUtil.getFormattedDateTimeString((LocalDateTime) attrVal, format);
+								if (contextMap.containsKey("DATETIMEFORMAT")) {
+									String format = (String) contextMap.get("DATETIMEFORMAT");
+									valueString = MergeUtil.getFormattedDateTimeString((LocalDateTime) attrVal, format);
+								} else {
+									logger.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");
+								}
 							}
 							// templateData.put(key+"."+attrCode, valueString);
 							deepReplacementMap.put(attrCode, valueString);
