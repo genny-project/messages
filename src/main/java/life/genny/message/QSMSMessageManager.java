@@ -13,14 +13,12 @@ import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
+import life.genny.qwandautils.ANSIColour;
 import life.genny.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
 
 public class QSMSMessageManager implements QMessageProvider {
 	
-	public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-	public static final String ANSI_RED = "\u001B[31m";
     
     public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
 	
@@ -29,17 +27,17 @@ public class QSMSMessageManager implements QMessageProvider {
 	
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
-		logger.info(ANSI_GREEN+">>>>>>>>>>>About to trigger SMS<<<<<<<<<<<<<<"+ANSI_RESET);
+		logger.info(ANSIColour.GREEN+">>>>>>>>>>>About to trigger SMS<<<<<<<<<<<<<<"+ANSIColour.RESET);
 		
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
 		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 		
 		if (target == null) {
-			logger.error(ANSI_RED+"Target is NULL"+ANSI_RESET);
+			logger.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 			return;
 		}
 		if (projectBe == null) {
-			logger.error(ANSI_RED+"ProjectBe is NULL"+ANSI_RESET);
+			logger.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
 			return;
 		}
 
@@ -47,11 +45,11 @@ public class QSMSMessageManager implements QMessageProvider {
 		String body = templateBe.getValue("PRI_BODY", null);
 
 		if (targetMobile == null) {
-			logger.error(ANSI_RED+"TargetMobile is NULL"+ANSI_RESET);
+			logger.error(ANSIColour.RED+"TargetMobile is NULL"+ANSIColour.RESET);
 			return;
 		}
 		if (body == null) {
-			logger.error(ANSI_RED+"Body is NULL"+ANSI_RESET);
+			logger.error(ANSIColour.RED+"Body is NULL"+ANSIColour.RESET);
 			return;
 		}
 
@@ -75,10 +73,10 @@ public class QSMSMessageManager implements QMessageProvider {
 							
 			Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(sourcePhone), body).create();
 			logger.info("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
-			logger.info(ANSI_GREEN+" SMS Sent to "+targetMobile +ANSI_RESET);
+			logger.info(ANSIColour.GREEN+" SMS Sent to "+targetMobile +ANSIColour.RESET);
 				
 		} else {
-			logger.error(ANSI_RED+"Twilio credentials not loaded into cache"+ANSI_RESET);
+			logger.error(ANSIColour.RED+"Twilio credentials not loaded into cache"+ANSIColour.RESET);
 		}
 			
 	}
@@ -98,7 +96,7 @@ public class QSMSMessageManager implements QMessageProvider {
 			if (template != null) {
 				
 				String smsMesssage = template.getSms_template();
-				logger.info(ANSI_GREEN+"sms template from google sheet ::"+smsMesssage+ANSI_RESET);
+				logger.info(ANSIColour.GREEN+"sms template from google sheet ::"+smsMesssage+ANSIColour.RESET);
 				
 				// Merging SMS template message with BaseEntity values
 				String messageData = MergeUtil.merge(smsMesssage, entityTemplateMap);
@@ -136,7 +134,7 @@ public class QSMSMessageManager implements QMessageProvider {
 		if (template != null) {
 			
 			String smsMesssage = template.getSms_template();
-			logger.info(ANSI_GREEN+"sms template from google sheet ::"+smsMesssage+ANSI_RESET);
+			logger.info(ANSIColour.GREEN+"sms template from google sheet ::"+smsMesssage+ANSIColour.RESET);
 			
 			// Merging SMS template message with BaseEntity values
 			String messageData = MergeUtil.merge(smsMesssage, entityTemplateMap);

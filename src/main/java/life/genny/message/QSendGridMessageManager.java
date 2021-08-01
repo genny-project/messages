@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
@@ -26,6 +28,7 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
+import life.genny.qwandautils.ANSIColour;
 import life.genny.util.MergeHelper;
 import life.genny.notifications.EmailHelper;
 import life.genny.utils.BaseEntityUtils;
@@ -42,9 +45,6 @@ import com.sendgrid.helpers.mail.objects.Personalization;
 
 public class QSendGridMessageManager implements QMessageProvider {
 	
-	public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-	public static final String ANSI_RED = "\u001B[31m";
 	
 	public static final String FILE_TYPE = "application/";
 	
@@ -62,13 +62,13 @@ public class QSendGridMessageManager implements QMessageProvider {
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
 
 		if (recipientBe == null) {
-			logger.error(ANSI_RED+"Target is NULL"+ANSI_RESET);
+			logger.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 		}
 
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
 
 		if (recipient == null) {
-			logger.error(ANSI_RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSI_RESET);
+			logger.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 			return;
 		}
 
@@ -102,7 +102,16 @@ public class QSendGridMessageManager implements QMessageProvider {
 					if (attrCode.startsWith("LNK") || attrCode.startsWith("PRI")) {
 						Object attrVal = ea.getValue();
 						if (attrVal != null) {
+
 							String valueString = attrVal.toString();
+
+							if (attrVal.getClass().equals(LocalDate.class)) {
+								String format = (String) contextMap.get("DATEFORMAT");
+								valueString = MergeUtil.getFormattedDateString((LocalDate) attrVal, format);
+							} else if (attrVal.getClass().equals(LocalDateTime.class)) {
+								String format = (String) contextMap.get("DATETIMEFORMAT");
+								valueString = MergeUtil.getFormattedDateTimeString((LocalDateTime) attrVal, format);
+							}
 							// templateData.put(key+"."+attrCode, valueString);
 							deepReplacementMap.put(attrCode, valueString);
 						}
@@ -117,15 +126,16 @@ public class QSendGridMessageManager implements QMessageProvider {
 		String sendGridEmailSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_SENDER");
 		String sendGridEmailNameSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_NAME_SENDER");
 		String sendGridApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
-		System.out.println("The name for email sender "+ sendGridEmailNameSender);		
+		logger.info("The name for email sender "+ sendGridEmailNameSender);
 
 		Email from = new Email(sendGridEmailSender, sendGridEmailNameSender);
 		Email to = new Email(recipient);
 
 		String urlBasedAttribute = GennySettings.projectUrl.replace("https://","").replace(".gada.io","").replace("-","_").toUpperCase();
+		logger.info("Searching for email attr " + urlBasedAttribute);
 		String dedicatedTestEmail = projectBe.getValue("EML_" + urlBasedAttribute, null);
 		if (dedicatedTestEmail != null) {
-			System.out.println("Found email " + dedicatedTestEmail + " for project attribute EML_" + urlBasedAttribute);
+			logger.info("Found email " + dedicatedTestEmail + " for project attribute EML_" + urlBasedAttribute);
 			to = new Email(dedicatedTestEmail);
 		}
 
@@ -154,7 +164,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			if (key.equals("password")) {
 				printValue = "REDACTED";
 			}
-			System.out.println("key: " + key + ", value: " + printValue);
+			logger.info("key: " + key + ", value: " + printValue);
 			personalization.addDynamicTemplateData(key, templateData.get(key));
 		}
 
@@ -169,11 +179,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 			request.setEndpoint("mail/send");
 			request.setBody(mail.build());
 			Response response = sg.api(request);
-			System.out.println(response.getStatusCode());
-			System.out.println(response.getBody());
-			System.out.println(response.getHeaders());
+			logger.info(response.getStatusCode());
+			logger.info(response.getBody());
+			logger.info(response.getHeaders());
 
-			logger.info(ANSI_GREEN+"SendGrid Message Sent!"+ANSI_RESET);
+			logger.info(ANSIColour.GREEN+"SendGrid Message Sent!"+ANSIColour.RESET);
 		} catch (IOException e) {
 			logger.error(e);
 		}

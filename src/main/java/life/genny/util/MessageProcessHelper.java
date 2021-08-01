@@ -19,6 +19,7 @@ import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageType;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.KeycloakUtils;
+import life.genny.qwandautils.ANSIColour;
 import life.genny.utils.VertxUtils;
 import life.genny.utils.BaseEntityUtils;
 import life.genny.utils.RulesUtils;
@@ -27,10 +28,6 @@ public class MessageProcessHelper {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
-
-	public static final String ANSI_RESET = "\u001B[0m";
-	public static final String ANSI_BLUE = "\u001B[34m";
-	public static final String ANSI_RED = "\u001B[31m";
 
 	static QMessageFactory messageFactory = new QMessageFactory();
 
@@ -47,7 +44,7 @@ public class MessageProcessHelper {
 	public static void processGenericMessage(QMessageGennyMSG message, String token) {
 
 		if (message == null) {
-			logger.error(ANSI_RED + "GENNY COM MESSAGE IS NULL" + ANSI_RESET);
+			logger.error(ANSIColour.RED + "GENNY COM MESSAGE IS NULL" + ANSIColour.RESET);
 		}
 
 		logger.info("message model ::" + message.toString());
@@ -55,8 +52,9 @@ public class MessageProcessHelper {
 		GennyToken userToken = new GennyToken(token);
 		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
 		String realm = beUtils.getGennyToken().getRealm();
+		logger.info("Realm is " + realm);
 
-		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+beUtils.getGennyToken().getRealm().toUpperCase());
+		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
 
 		// Create context map with BaseEntities
 		Map<String, Object> baseEntityContextMap = new HashMap<>();
@@ -69,7 +67,7 @@ public class MessageProcessHelper {
 		BaseEntity templateBe = beUtils.getBaseEntityByCode(message.getTemplateCode());
 
 		if (templateBe == null) {
-			logger.error(ANSI_RED + "No Template found for " + message.getTemplateCode() + ANSI_RESET);
+			logger.error(ANSIColour.RED + "No Template found for " + message.getTemplateCode() + ANSIColour.RESET);
 		}
 
 		logger.info("Using TemplateBE " + templateBe.getCode());
@@ -100,7 +98,7 @@ public class MessageProcessHelper {
 			if (recipientBe != null) {
 				recipientBeList.add(recipientBe);
 			} else {
-				logger.error(ANSI_RED + "Could not process recipient " + recipient + ANSI_RESET);
+				logger.error(ANSIColour.RED + "Could not process recipient " + recipient + ANSIColour.RESET);
 			}
 		}
 
@@ -141,7 +139,7 @@ public class MessageProcessHelper {
 						provider.sendMessage(beUtils, templateBe, baseEntityContextMap);
 					}
 				} else {
-					logger.error(ANSI_RED + ">>>>>> Provider is NULL for entity: " + ", msgType: " + msgType.toString() + " <<<<<<<<<" + ANSI_RESET);
+					logger.error(ANSIColour.RED + ">>>>>> Provider is NULL for entity: " + ", msgType: " + msgType.toString() + " <<<<<<<<<" + ANSIColour.RESET);
 				}
 			}
 		}

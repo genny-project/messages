@@ -21,14 +21,12 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
+import life.genny.qwandautils.ANSIColour;
 import life.genny.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
 
 public class QEmailMessageManager implements QMessageProvider {
 	
-	public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-	public static final String ANSI_RED = "\u001B[31m";
 	
 	public static final String FILE_TYPE = "application/";
 	
@@ -58,18 +56,18 @@ public class QEmailMessageManager implements QMessageProvider {
 			BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 			
 			if (target == null) {
-				logger.error(ANSI_RED+"Target is NULL"+ANSI_RESET);
+				logger.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 				return;
 			}
 			if (projectBe == null) {
-				logger.error(ANSI_RED+"ProjectBe is NULL"+ANSI_RESET);
+				logger.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
 				return;
 			}
 
 			String targetEmail = target.getValue("PRI_EMAIL", null);
 
 			if (targetEmail == null) {
-				logger.error(ANSI_RED+"Target " + target.getCode() + ", PRI_EMAIL is NULL"+ANSI_RESET);
+				logger.error(ANSIColour.RED+"Target " + target.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 				return;
 			}
 
@@ -78,15 +76,15 @@ public class QEmailMessageManager implements QMessageProvider {
 			String sender = projectBe.getValue("ENV_EMAIL_USERNAME", null);
 
 			if (body == null) {
-				logger.error(ANSI_RED+"Template BE " + templateBe.getCode() + ", PRI_BODY is NULL"+ANSI_RESET);
+				logger.error(ANSIColour.RED+"Template BE " + templateBe.getCode() + ", PRI_BODY is NULL"+ANSIColour.RESET);
 				return;
 			}
 			if (subject == null) {
-				logger.error(ANSI_RED+"Template BE " + templateBe.getCode() + ", PRI_SUBJECT is NULL"+ANSI_RESET);
+				logger.error(ANSIColour.RED+"Template BE " + templateBe.getCode() + ", PRI_SUBJECT is NULL"+ANSIColour.RESET);
 				return;
 			}
 			if (sender == null) {
-				logger.error(ANSI_RED+"Project BE " + templateBe.getCode() + ", ENV_EMAIL_USERNAME is NULL"+ANSI_RESET);
+				logger.error(ANSIColour.RED+"Project BE " + templateBe.getCode() + ", ENV_EMAIL_USERNAME is NULL"+ANSIColour.RESET);
 				return;
 			}
 
@@ -101,7 +99,7 @@ public class QEmailMessageManager implements QMessageProvider {
 			msg.setContent(body, "text/html; charset=utf-8");
 			
 			Transport.send(msg, msg.getAllRecipients());
-			logger.info(ANSI_GREEN + "Email to " + targetEmail +" is sent" + ANSI_RESET);
+			logger.info(ANSIColour.GREEN + "Email to " + targetEmail +" is sent" + ANSIColour.RESET);
 
 		} catch (Exception e) {
 			logger.error("ERROR", e);

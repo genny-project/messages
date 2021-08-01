@@ -26,6 +26,7 @@ import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwandautils.StringFormattingUtils;
+import life.genny.qwandautils.ANSIColour;
 import life.genny.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
 
@@ -33,8 +34,6 @@ public class QVertxMailManager implements QMessageProvider{
 	
 	private Vertx vertx;
 	
-	public static final String ANSI_RESET = "\u001B[0m"; 
-    public static final String ANSI_GREEN = "\u001B[32m";
 			
     public final static String PDF_GEN_SERVICE_API_URL = System.getenv("PDF_GEN_SERVICE_API_URL") == null ? "http://localhost:7331/raw"
 			: System.getenv("PDF_GEN_SERVICE_API_URL");

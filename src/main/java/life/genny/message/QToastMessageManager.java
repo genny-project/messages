@@ -18,14 +18,13 @@ import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.GennySettings;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.MergeUtil;
+import life.genny.qwandautils.ANSIColour;
 import life.genny.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
 
 @ApplicationScoped
 public class QToastMessageManager implements QMessageProvider{
 	
-	public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
 
 	
 	private static final Logger logger = LoggerFactory
@@ -85,7 +84,7 @@ public class QToastMessageManager implements QMessageProvider{
 			if (template != null) {
 				
 				String toastMessage = template.getToast_template();
-				logger.info(ANSI_GREEN+"toast template from google sheet ::"+toastMessage+ANSI_RESET);
+				logger.info(ANSIColour.GREEN+"toast template from google sheet ::"+toastMessage+ANSIColour.RESET);
 				
 				// Merging SMS template message with BaseEntity values
 				String messageData = MergeUtil.merge(toastMessage, entityTemplateMap);
@@ -130,7 +129,7 @@ public class QToastMessageManager implements QMessageProvider{
 		if (template != null) {
 				
 			String toastMessage = template.getToast_template();
-			logger.info(ANSI_GREEN+"toast template from google sheet ::"+toastMessage+ANSI_RESET);
+			logger.info(ANSIColour.GREEN+"toast template from google sheet ::"+toastMessage+ANSIColour.RESET);
 			
 			// Merging SMS template message with BaseEntity values
 			String messageData = MergeUtil.merge(toastMessage, entityTemplateMap);
