@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.json.JSONObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -70,6 +72,13 @@ public class MessageProcessHelper {
 			logger.error(ANSIColour.RED + "No Template found for " + message.getTemplateCode() + ANSIColour.RESET);
 		}
 
+		List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
+		if (Arrays.stream(message.getMessageTypeArr()).anyMatch(item -> item == QBaseMSGMessageType.DEFAULT)) {
+			// Use default if told to do so
+			List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
+			messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
+		}
+
 		logger.info("Using TemplateBE " + templateBe.getCode());
 
 		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", token);
@@ -114,7 +123,7 @@ public class MessageProcessHelper {
 			baseEntityContextMap.put("RECIPIENT", recipientBe);
 
 			// Iterate our array of send types
-			for (QBaseMSGMessageType msgType : message.getMessageTypeArr()) {
+			for (QBaseMSGMessageType msgType : messageTypeList) {
 
 				/* Get Message Provider */
 				QMessageProvider provider = messageFactory.getMessageProvider(msgType);

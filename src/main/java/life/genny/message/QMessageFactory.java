@@ -28,6 +28,9 @@ public class QMessageFactory {
 	    case SENDGRID:
 	    	provider = new QSendGridMessageManager();
 	    	break;
+	    case SLACK:
+	    	provider = new QSlackMessageManager();
+	    	break;
 	    default:
 	    	provider = new QEmailMessageManager();    
 	    }

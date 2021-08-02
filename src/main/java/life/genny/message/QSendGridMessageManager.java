@@ -45,11 +45,6 @@ import com.sendgrid.helpers.mail.objects.Personalization;
 
 public class QSendGridMessageManager implements QMessageProvider {
 	
-	
-	public static final String FILE_TYPE = "application/";
-	
-	public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
-	
 	private static final Logger logger = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
