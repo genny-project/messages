@@ -15,12 +15,14 @@ import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QDataToastMessage;
 import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.qwanda.message.QCmdMessage;
 import life.genny.qwandautils.GennySettings;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.ANSIColour;
 import life.genny.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
+import life.genny.utils.VertxUtils;
 
 @ApplicationScoped
 public class QToastMessageManager implements QMessageProvider{
@@ -40,33 +42,44 @@ public class QToastMessageManager implements QMessageProvider{
 		
 		/* message.getPriority() returns "error" for templateCode containing "FAIL", returns "info" for other templates */ 
 		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
-		String body = templateBe.getValue("PRI_BODY", null);
-		String style = templateBe.getValue("PRI_STYLE", "info");
 
 		if (target == null) {
 			logger.error("Target is NULL");
 			return;
 		}
 
+		// Check for Toast Body
+		String body = null;
+		if (contextMap.containsKey("BODY")) {
+			body = (String) contextMap.get("BODY");
+		} else {
+			body = templateBe.getValue("PRI_BODY", null);
+		}
 		if (body == null) {
 			logger.error("body is NULL");
+			return;
+		}
+
+		// Check for Toast Style
+		String style = null;
+		if (contextMap.containsKey("STYLE")) {
+			style = (String) contextMap.get("STYLE");
+		} else {
+			style = templateBe.getValue("PRI_STYLE", "INFO");
+		}
+		if (style == null) {
+			logger.error("style is NULL");
 			return;
 		}
 
 		// Mail Merging Data
 		body = MergeUtil.merge(body, contextMap);
 
-		QDataToastMessage toastMsg = new QDataToastMessage(style, body);
-		toastMsg.setToken(beUtils.getGennyToken().getToken());
-		
-		String[] recipientArr = { target.getCode() };
-		
-		toastMsg.setRecipientCodeArray(recipientArr);
-		
-		String toastJson = JsonUtils.toJson(toastMsg);
-		JsonObject toastJsonObj = new JsonObject(toastJson);
-		
-		producer.getToWebData().send(toastJsonObj.toString());
+		QCmdMessage msg = new QCmdMessage("TOAST", style);
+		msg.setMessage(body);
+		msg.setToken(beUtils.getGennyToken().getToken());
+		msg.setSend(true);
+		VertxUtils.writeMsg("webcmds", msg);
 	}
 
 

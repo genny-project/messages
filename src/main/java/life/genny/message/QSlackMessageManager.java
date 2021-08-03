@@ -45,11 +45,16 @@ public class QSlackMessageManager implements QMessageProvider {
 		}
 
 		String targetUrl = target.getValue("PRI_SLACK_URL", null);
-		String body = templateBe.getValue("PRI_BODY", null);
-
 		if (targetUrl == null) {
 			logger.error(ANSIColour.RED+"targetUrl is NULL"+ANSIColour.RESET);
 			return;
+		}
+
+		String body = null;
+		if (contextMap.containsKey("BODY")) {
+			body = (String) contextMap.get("BODY");
+		} else {
+			body = templateBe.getValue("PRI_BODY", null);
 		}
 		if (body == null) {
 			logger.error(ANSIColour.RED+"Body is NULL"+ANSIColour.RESET);

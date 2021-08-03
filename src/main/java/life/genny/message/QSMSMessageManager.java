@@ -42,11 +42,16 @@ public class QSMSMessageManager implements QMessageProvider {
 		}
 
 		String targetMobile = target.getValue("PRI_MOBILE", null);
-		String body = templateBe.getValue("PRI_BODY", null);
-
 		if (targetMobile == null) {
 			logger.error(ANSIColour.RED+"TargetMobile is NULL"+ANSIColour.RESET);
 			return;
+		}
+
+		String body = null;
+		if (contextMap.containsKey("BODY")) {
+			body = (String) contextMap.get("BODY");
+		} else {
+			body = templateBe.getValue("PRI_BODY", null);
 		}
 		if (body == null) {
 			logger.error(ANSIColour.RED+"Body is NULL"+ANSIColour.RESET);
