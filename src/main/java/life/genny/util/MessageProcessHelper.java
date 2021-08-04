@@ -82,6 +82,7 @@ public class MessageProcessHelper {
 		logger.info("Using TemplateBE " + templateBe.getCode());
 
 		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", token);
+		Attribute mobileAttr = RulesUtils.getAttribute("PRI_MOBILE", token);
 
 		for (String recipient : recipientArr) {
 
@@ -99,6 +100,8 @@ public class MessageProcessHelper {
 				try {
 					EntityAttribute email = new EntityAttribute(recipientBe, emailAttr, 1.0, recipient);
 					recipientBe.addAttribute(email);
+					EntityAttribute mobile = new EntityAttribute(recipientBe, mobileAttr, 1.0, recipient);
+					recipientBe.addAttribute(mobile);
 				} catch (Exception e) {
 					logger.error(e);
 				}
