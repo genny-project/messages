@@ -70,6 +70,8 @@ public class MessageProcessHelper {
 
 		if (templateBe == null) {
 			logger.error(ANSIColour.RED + "No Template found for " + message.getTemplateCode() + ANSIColour.RESET);
+		} else {
+			logger.info("Using TemplateBE " + templateBe.getCode());
 		}
 
 		List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
@@ -78,8 +80,6 @@ public class MessageProcessHelper {
 			List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
 			messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
 		}
-
-		logger.info("Using TemplateBE " + templateBe.getCode());
 
 		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", token);
 		Attribute mobileAttr = RulesUtils.getAttribute("PRI_MOBILE", token);
