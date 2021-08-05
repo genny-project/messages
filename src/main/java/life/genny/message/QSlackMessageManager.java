@@ -44,7 +44,7 @@ public class QSlackMessageManager implements QMessageProvider {
 			return;
 		}
 
-		String targetUrl = templateBe.getValue("PRI_URL", null);
+		String targetUrl = target.getValue("PRI_URL", null);
 		if (targetUrl == null) {
 			logger.error(ANSIColour.RED+"targetUrl is NULL"+ANSIColour.RESET);
 			return;
