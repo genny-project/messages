@@ -39,10 +39,13 @@ public class QSlackMessageManager implements QMessageProvider {
 			logger.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 			return;
 		}
+		logger.info("Target is " + target.getCode());
+
 		if (projectBe == null) {
 			logger.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
 			return;
 		}
+		logger.info("Project is " + projectBe.getCode());
 
 		String targetUrl = target.getValue("PRI_URL", null);
 		if (targetUrl == null) {
@@ -60,6 +63,7 @@ public class QSlackMessageManager implements QMessageProvider {
 			logger.error(ANSIColour.RED+"Body is NULL"+ANSIColour.RESET);
 			return;
 		}
+		logger.info("Body is " + body);
 
 		// Mail Merging Data
 		body = MergeUtil.merge(body, contextMap);
