@@ -173,7 +173,8 @@ public class MessageProcessHelper {
 		    if ((value != null) && (value.length()>4))
 		    {
 		    	if (value.matches("[A-Z]{3}\\_.*")) { // MUST BE A BE CODE
-		    		be = VertxUtils.readFromDDT(realm,value, beUtils.getGennyToken().getToken());
+		    		// be = VertxUtils.readFromDDT(realm,value, beUtils.getGennyToken().getToken());
+					be = beUtils.getBaseEntityByCode(value);
 		    	}
 		    }
 		    
