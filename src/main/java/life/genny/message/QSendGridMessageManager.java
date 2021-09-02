@@ -88,32 +88,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 		String sendGridApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
 		logger.info("The name for email sender "+ sendGridEmailNameSender);
 
-		if (("internmatch@outcomelife.com.au".equals(recipient.trim())) || ("spc@outcome.life".equals(recipient.trim())) ){
-
-			recipientBe = beUtils.getBaseEntityByCode("PRJ_INTERNMATCH");
-
-		} else {
-
-			SearchEntity searchBE = new SearchEntity("SBE_EMAIL", "Search By Email")
-				.addFilter("PRI_EMAIL", SearchEntity.StringFilter.EQUAL, recipient.trim())
-				.addFilter("PRI_CODE", SearchEntity.StringFilter.LIKE, "PER_%").setPageStart(0)
-				.setSearchStatus(EEntityStatus.PENDING)
-				.setPageSize(10000);
-
-			List<BaseEntity> results = beUtils.getBaseEntitys(searchBE);
-			if (results != null && !(results.isEmpty())) {
-				recipientBe = results.get(0);
-				// String timezoneId = recipientBE.getValue("PRI_TIMEZONE_ID",
-				// 		recipientBE.getValue("PRI_TIME_ZONE", "Australia/Melbourne"));
-			} else {
-				logger.error("CANNOT FIND RECIPIENT from email:" + recipient + ", skip sending email!!!");
-				return;
-			}
-		}
-
-		// Update Recipient in case it has changed
-		contextMap.put("RECIPIENT", recipientBe);
-
 		// Build a general data map from context BEs
 		HashMap<String, Object> templateData = new HashMap<>();
 
