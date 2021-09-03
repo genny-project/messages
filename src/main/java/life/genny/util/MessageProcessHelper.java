@@ -168,7 +168,7 @@ public class MessageProcessHelper {
 			String key = entry.getKey();
 		    String value = entry.getValue();
 
-			String logStr = "key: " + key + ", value: " + (key.toUpperCase().equals("PASSWORD") ? key : "REDACTED");
+			String logStr = "key: " + key + ", value: " + (key.toUpperCase().equals("PASSWORD") ? "REDACTED" : value);
 			logger.info(logStr);
 		    
 		    BaseEntity be = null;
