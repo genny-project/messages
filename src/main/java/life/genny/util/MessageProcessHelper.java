@@ -171,19 +171,31 @@ public class MessageProcessHelper {
 			String logStr = "key: " + key + ", value: " + (key.toUpperCase().equals("PASSWORD") ? "REDACTED" : value);
 			logger.info(logStr);
 		    
-		    BaseEntity be = null;
-		    if ((value != null) && (value.length()>4)) {
-				// MUST BE A BE CODE
+		    if ((value != null) && (value.length() > 4)) {
+
+				// MUST CONTAIN A BE CODE
 		    	if (value.matches("[A-Z]{3}\\_.*")) {
-					be = beUtils.getBaseEntityByCode(value);
-		    	}
+					// Create Array of Codes
+					String[] codeArr = beUtils.cleanUpAttributeValue(value).split(",");
+
+					// Convert to BEs
+					BaseEntity[] beArray = Arrays.stream(codeArr)
+						.map(item -> (BaseEntity) beUtils.getBaseEntityByCode(item))
+						.toArray(BaseEntity[]::new);
+
+					if (beArray.length == 0) {
+						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray[0]);
+					} else {
+						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray);
+					}
+
+					continue;
+
+				}
 		    }
 		    
-		    if (be != null) {
-			    baseEntityContextMap.put(entry.getKey().toUpperCase(), be);
-		    } else {
-			    baseEntityContextMap.put(entry.getKey().toUpperCase(), value);
-		    }
+			// By Default, add it as is
+			baseEntityContextMap.put(entry.getKey().toUpperCase(), value);
 		}
 		
 		return baseEntityContextMap;

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
@@ -67,23 +68,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 		if (recipient == null) {
 			logger.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 			return;
-		}
-
-		List<String> ccList = null;
-		List<String> bccList = null;
-
-		if (contextMap.containsKey("CC")) {
-			String ccArr = (String) contextMap.get("CC");
-			List<BaseEntity> ccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, ccArr);
-			ccList = ccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
-					.filter(item -> !item.isEmpty()).collect(Collectors.toList());
-		}
-		if (contextMap.containsKey("BCC")) {
-			String bccArr = (String) contextMap.get("BCC");
-			List<BaseEntity> bccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, bccArr);
-			logger.info("bcc ents = " + bccEntities.size());
-			bccList = bccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
-					.filter(item -> !item.isEmpty()).collect(Collectors.toList());
 		}
 
 		logger.info("ccList = " + ccList);
@@ -158,19 +142,44 @@ public class QSendGridMessageManager implements QMessageProvider {
 		personalization.addTo(to);
 		personalization.setSubject(subject);
 
-		if (ccList != null) {
-			for (String email : ccList) {
-				logger.info("Found CC Email: " + email);
-				if (!email.equals(to.getEmail())) {
+		// Hande CC and BCC
+		Object ccVal = contextMap.get("CC");
+		Object bccVal = contextMap.get("BCC");
+
+		if (ccVal != null) {
+			BaseEntity[] ccArray = new BaseEntity[1];
+
+			if (ccVal.getClass().equals(BaseEntity.class)) {
+				ccArray[0] = (BaseEntity) ccVal;
+			} else {
+				ccArray = (BaseEntity[]) ccVal;
+			}
+			for (BaseEntity item : ccArray) {
+
+				String email = item.getValue("PRI_EMAIL", null);
+
+				if (email != null && !email.equals(to.getEmail())) {
 					personalization.addCc(new Email(email));
+					logger.info("Found CC Email: " + email);
 				}
 			}
 		}
-		if (bccList != null) {
-			for (String email : bccList) {
-				logger.info("Found BCC Email: " + email);
-				if (!email.equals(to.getEmail())) {
+
+		if (bccVal != null) {
+			BaseEntity[] bccArray = new BaseEntity[1];
+
+			if (bccVal.getClass().equals(BaseEntity.class)) {
+				bccArray[0] = (BaseEntity) bccVal;
+			} else {
+				bccArray = (BaseEntity[]) bccVal;
+			}
+			for (BaseEntity item : bccArray) {
+
+				String email = item.getValue("PRI_EMAIL", null);
+
+				if (email != null && !email.equals(to.getEmail())) {
 					personalization.addBcc(new Email(email));
+					logger.info("Found BCC Email: " + email);
 				}
 			}
 		}
