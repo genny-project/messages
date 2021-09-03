@@ -158,6 +158,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			for (String email : ccList) {
 				if (!email.equals(to.getEmail())) {
 					personalization.addCc(new Email(email));
+					logger.info("Found CC Email: " + email);
 				}
 			}
 		}
@@ -165,6 +166,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			for (String email : bccList) {
 				if (!email.equals(to.getEmail())) {
 					personalization.addBcc(new Email(email));
+					logger.info("Found BCC Email: " + email);
 				}
 			}
 		}
