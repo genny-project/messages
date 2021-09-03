@@ -69,16 +69,21 @@ public class QSendGridMessageManager implements QMessageProvider {
 			return;
 		}
 
-		String ccArr = (String) contextMap.get("CC");
-		String bccArr = (String) contextMap.get("BCC");
+		List<String> ccList = null;
+		List<String> bccList = null;
 
-		List<BaseEntity> ccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, ccArr);
-		List<BaseEntity> bccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, bccArr);
-
-		List<String> ccList = ccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
-				.filter(item -> !item.isEmpty()).collect(Collectors.toList());
-		List<String> bccList = bccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
-				.filter(item -> !item.isEmpty()).collect(Collectors.toList());
+		if (contextMap.containsKey("CC")) {
+			String ccArr = (String) contextMap.get("CC");
+			List<BaseEntity> ccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, ccArr);
+			ccList = ccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
+					.filter(item -> !item.isEmpty()).collect(Collectors.toList());
+		}
+		if (contextMap.containsKey("CC")) {
+			String bccArr = (String) contextMap.get("BCC");
+			List<BaseEntity> bccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, bccArr);
+			bccList = bccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
+					.filter(item -> !item.isEmpty()).collect(Collectors.toList());
+		}
 
 		String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
 		String subject = templateBe.getValue("PRI_SUBJECT", null);
