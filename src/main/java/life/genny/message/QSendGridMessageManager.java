@@ -93,6 +93,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 		for (String key : contextMap.keySet()) {
 
+			logger.info(key);
+
 			Object value = contextMap.get(key);
 
 			if (value.getClass().equals(BaseEntity.class)) {
