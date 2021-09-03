@@ -70,9 +70,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 			return;
 		}
 
-		logger.info("ccList = " + ccList);
-		logger.info("bccList = " + bccList);
-
 		String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
 		String subject = templateBe.getValue("PRI_SUBJECT", null);
 
