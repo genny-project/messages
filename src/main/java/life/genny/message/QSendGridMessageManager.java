@@ -81,9 +81,13 @@ public class QSendGridMessageManager implements QMessageProvider {
 		if (contextMap.containsKey("CC")) {
 			String bccArr = (String) contextMap.get("BCC");
 			List<BaseEntity> bccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, bccArr);
+			logger.info("bcc ents = " + bccEntities.size());
 			bccList = bccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
 					.filter(item -> !item.isEmpty()).collect(Collectors.toList());
 		}
+
+		logger.info("ccList = " + ccList);
+		logger.info("bccList = " + bccList);
 
 		String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
 		String subject = templateBe.getValue("PRI_SUBJECT", null);
@@ -156,17 +160,17 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 		if (ccList != null) {
 			for (String email : ccList) {
+				logger.info("Found CC Email: " + email);
 				if (!email.equals(to.getEmail())) {
 					personalization.addCc(new Email(email));
-					logger.info("Found CC Email: " + email);
 				}
 			}
 		}
 		if (bccList != null) {
 			for (String email : bccList) {
+				logger.info("Found BCC Email: " + email);
 				if (!email.equals(to.getEmail())) {
 					personalization.addBcc(new Email(email));
-					logger.info("Found BCC Email: " + email);
 				}
 			}
 		}
