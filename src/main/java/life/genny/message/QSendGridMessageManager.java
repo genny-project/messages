@@ -165,11 +165,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 
 		for (String key : templateData.keySet()) {
-			Object printValue = templateData.get(key);
-			if (key.toUpperCase().equals("PASSWORD")) {
-				printValue = "REDACTED";
-			}
-			logger.debug("key: " + key + ", value: " + printValue);
+			// Object printValue = templateData.get(key);
+			// if (key.toUpperCase().equals("PASSWORD")) {
+			// 	printValue = "REDACTED";
+			// }
+			// logger.debug("key: " + key + ", value: " + printValue);
 			personalization.addDynamicTemplateData(key, templateData.get(key));
 		}
 

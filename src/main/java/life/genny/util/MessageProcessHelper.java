@@ -155,7 +155,6 @@ public class MessageProcessHelper {
 				}
 			}
 		}
-
 	}
 
 	private static Map<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils, QMessageGennyMSG message) {
@@ -166,22 +165,23 @@ public class MessageProcessHelper {
 		
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
 		{
-			logger.info(entry.getKey() + "/" + entry.getValue());
-		    
+			String key = entry.getKey();
 		    String value = entry.getValue();
+
+			String logStr = "key: " + key + ", value: " + (key.toUpperCase().equals("PASSWORD") ? key : "REDACTED");
+			logger.info(logStr);
+		    
 		    BaseEntity be = null;
-		    if ((value != null) && (value.length()>4))
-		    {
-		    	if (value.matches("[A-Z]{3}\\_.*")) { // MUST BE A BE CODE
-		    		// be = VertxUtils.readFromDDT(realm,value, beUtils.getGennyToken().getToken());
+		    if ((value != null) && (value.length()>4)) {
+				// MUST BE A BE CODE
+		    	if (value.matches("[A-Z]{3}\\_.*")) {
 					be = beUtils.getBaseEntityByCode(value);
 		    	}
 		    }
 		    
-		    if(be != null) {
+		    if (be != null) {
 			    baseEntityContextMap.put(entry.getKey().toUpperCase(), be);
-		    }
-		    else {
+		    } else {
 			    baseEntityContextMap.put(entry.getKey().toUpperCase(), value);
 		    }
 		}
