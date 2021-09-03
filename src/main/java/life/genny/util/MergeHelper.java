@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -19,6 +21,7 @@ import life.genny.qwanda.message.QMSGMessage;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwanda.entity.BaseEntity;
+import life.genny.utils.BaseEntityUtils;
 
 public class MergeHelper {
 	
@@ -98,9 +101,14 @@ public class MergeHelper {
 		return path;
 	}
 
-	public static List<BaseEntity> convertToBaseEntityArray(String strArr) {
+	public static List<BaseEntity> convertCodesToBaseEntityArray(BaseEntityUtils beUtils, String strArr) {
 
-		List<BaseEntity> entityList = new ArrayList<>();
+		String[] arr = strArr.replace("\"", "").replace("[", "").replace("]", "").replace(" ", "").split(",");
+        List<BaseEntity> entityList = Arrays.stream(arr)
+			.filter(item -> !item.isEmpty())
+			.map(item -> (BaseEntity) beUtils.getBaseEntityByCode(item))
+			.collect(Collectors.toList());
+
 		return entityList;
 	}
 

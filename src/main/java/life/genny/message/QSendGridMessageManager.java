@@ -72,8 +72,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 		String ccArr = (String) contextMap.get("CC");
 		String bccArr = (String) contextMap.get("BCC");
 
-		List<BaseEntity> ccEntities = MergeHelper.convertToBaseEntityArray(ccArr);
-		List<BaseEntity> bccEntities = MergeHelper.convertToBaseEntityArray(bccArr);
+		List<BaseEntity> ccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, ccArr);
+		List<BaseEntity> bccEntities = MergeHelper.convertCodesToBaseEntityArray(beUtils, bccArr);
 
 		List<String> ccList = ccEntities.stream().map(item -> item.getValue("PRI_EMAIL", ""))
 				.filter(item -> !item.isEmpty()).collect(Collectors.toList());
