@@ -93,8 +93,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 		for (String key : contextMap.keySet()) {
 
-			logger.info(key);
-
 			Object value = contextMap.get(key);
 
 			if (value.getClass().equals(BaseEntity.class)) {
@@ -130,7 +128,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 					}
 				}
 				templateData.put(key, deepReplacementMap);
-			} else if(value.getClass().equals(BaseEntity.class)) {
+			} else if(value.getClass().equals(String.class)) {
 				templateData.put(key, (String) value);
 			}
 		}
@@ -168,10 +166,10 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 		for (String key : templateData.keySet()) {
 			Object printValue = templateData.get(key);
-			if (key.equals("password")) {
+			if (key.toUpperCase().equals("PASSWORD")) {
 				printValue = "REDACTED";
 			}
-			logger.info("key: " + key + ", value: " + printValue);
+			logger.debug("key: " + key + ", value: " + printValue);
 			personalization.addDynamicTemplateData(key, templateData.get(key));
 		}
 
