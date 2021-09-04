@@ -48,25 +48,25 @@ import com.sendgrid.helpers.mail.objects.Personalization;
 
 public class QSendGridMessageManager implements QMessageProvider {
 	
-	private static final Logger logger = LoggerFactory
+	private static final Logger log = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 
-		logger.info("SendGrid email type");
+		log.info("SendGrid email type");
 
 		BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
 
 		if (recipientBe == null) {
-			logger.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 		}
 
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
 
 		if (recipient == null) {
-			logger.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 			return;
 		}
 
@@ -76,7 +76,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 		String sendGridEmailSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_SENDER");
 		String sendGridEmailNameSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_NAME_SENDER");
 		String sendGridApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
-		logger.info("The name for email sender "+ sendGridEmailNameSender);
+		log.info("The name for email sender "+ sendGridEmailNameSender);
 
 		// Build a general data map from context BEs
 		HashMap<String, Object> templateData = new HashMap<>();
@@ -102,14 +102,14 @@ public class QSendGridMessageManager implements QMessageProvider {
 									String format = (String) contextMap.get("DATEFORMAT");
 									valueString = MergeUtil.getFormattedDateString((LocalDate) attrVal, format);
 								} else {
-									logger.info("No DATEFORMAT key present in context map, defaulting to stringified date");
+									log.info("No DATEFORMAT key present in context map, defaulting to stringified date");
 								}
 							} else if (attrVal.getClass().equals(LocalDateTime.class)) {
 								if (contextMap.containsKey("DATETIMEFORMAT")) {
 									String format = (String) contextMap.get("DATETIMEFORMAT");
 									valueString = MergeUtil.getFormattedDateTimeString((LocalDateTime) attrVal, format);
 								} else {
-									logger.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");
+									log.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");
 								}
 							}
 							// templateData.put(key+"."+attrCode, valueString);
@@ -127,10 +127,10 @@ public class QSendGridMessageManager implements QMessageProvider {
 		Email to = new Email(recipient);
 
 		String urlBasedAttribute = GennySettings.projectUrl.replace("https://","").replace(".gada.io","").replace("-","_").toUpperCase();
-		logger.info("Searching for email attr " + urlBasedAttribute);
+		log.info("Searching for email attr " + urlBasedAttribute);
 		String dedicatedTestEmail = projectBe.getValue("EML_" + urlBasedAttribute, null);
 		if (dedicatedTestEmail != null) {
-			logger.info("Found email " + dedicatedTestEmail + " for project attribute EML_" + urlBasedAttribute);
+			log.info("Found email " + dedicatedTestEmail + " for project attribute EML_" + urlBasedAttribute);
 			to = new Email(dedicatedTestEmail);
 		}
 
@@ -157,7 +157,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 				if (email != null && !email.equals(to.getEmail())) {
 					personalization.addCc(new Email(email));
-					logger.info("Found CC Email: " + email);
+					log.info("Found CC Email: " + email);
 				}
 			}
 		}
@@ -176,7 +176,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 				if (email != null && !email.equals(to.getEmail())) {
 					personalization.addBcc(new Email(email));
-					logger.info("Found BCC Email: " + email);
+					log.info("Found BCC Email: " + email);
 				}
 			}
 		}
@@ -196,13 +196,13 @@ public class QSendGridMessageManager implements QMessageProvider {
 			request.setEndpoint("mail/send");
 			request.setBody(mail.build());
 			Response response = sg.api(request);
-			logger.info(response.getStatusCode());
-			logger.info(response.getBody());
-			logger.info(response.getHeaders());
+			log.info(response.getStatusCode());
+			log.info(response.getBody());
+			log.info(response.getHeaders());
 
-			logger.info(ANSIColour.GREEN+"SendGrid Message Sent!"+ANSIColour.RESET);
+			log.info(ANSIColour.GREEN+"SendGrid Message Sent!"+ANSIColour.RESET);
 		} catch (IOException e) {
-			logger.error(e);
+			log.error(e);
 		}
 		
 	}

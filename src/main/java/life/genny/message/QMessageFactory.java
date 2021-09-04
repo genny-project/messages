@@ -8,13 +8,13 @@ import life.genny.qwanda.message.QBaseMSGMessageType;
 
 public class QMessageFactory {
 	
-	private static final Logger logger = LoggerFactory
+	private static final Logger log = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	public QMessageProvider getMessageProvider(QBaseMSGMessageType messageType)
 	  {
 		QMessageProvider provider;
-		logger.info("message type::"+messageType.toString());
+		log.info("message type::"+messageType.toString());
 	    switch(messageType) {
 	    case SMS:
 	    	provider = new QSMSMessageManager();

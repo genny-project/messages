@@ -25,31 +25,31 @@ import java.io.IOException;
 
 public class QSlackMessageManager implements QMessageProvider {
 	
-	private static final Logger logger = LoggerFactory
+	private static final Logger log = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
-		logger.info(ANSIColour.GREEN+">>>>>>>>>>> About to trigger SLACK <<<<<<<<<<<<<<"+ANSIColour.RESET);
+		log.info(ANSIColour.GREEN+">>>>>>>>>>> About to trigger SLACK <<<<<<<<<<<<<<"+ANSIColour.RESET);
 		
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
 		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 		
 		if (target == null) {
-			logger.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 			return;
 		}
-		logger.info("Target is " + target.getCode());
+		log.info("Target is " + target.getCode());
 
 		if (projectBe == null) {
-			logger.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
 			return;
 		}
-		logger.info("Project is " + projectBe.getCode());
+		log.info("Project is " + projectBe.getCode());
 
 		String targetUrl = target.getValue("PRI_URL", null);
 		if (targetUrl == null) {
-			logger.error(ANSIColour.RED+"targetUrl is NULL"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+"targetUrl is NULL"+ANSIColour.RESET);
 			return;
 		}
 
@@ -60,10 +60,10 @@ public class QSlackMessageManager implements QMessageProvider {
 			body = templateBe.getValue("PRI_BODY", null);
 		}
 		if (body == null) {
-			logger.error(ANSIColour.RED+"Body is NULL"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+"Body is NULL"+ANSIColour.RESET);
 			return;
 		}
-		logger.info("Body is " + body);
+		log.info("Body is " + body);
 
 		// Mail Merging Data
 		body = MergeUtil.merge(body, contextMap);
@@ -79,13 +79,13 @@ public class QSlackMessageManager implements QMessageProvider {
 			response = client.send(request,
 					HttpResponse.BodyHandlers.ofString());
 		} catch (IOException | InterruptedException e) {
-			logger.error(e.getLocalizedMessage());
+			log.error(e.getLocalizedMessage());
 		}
 
 		if (response != null) {
-			logger.info(ANSIColour.GREEN+"SLACK response status code = " + response.statusCode() + ANSIColour.RESET);
+			log.info(ANSIColour.GREEN+"SLACK response status code = " + response.statusCode() + ANSIColour.RESET);
 		} else {
-			logger.info(ANSIColour.RED+"SLACK response is NULL"+ANSIColour.RESET);
+			log.info(ANSIColour.RED+"SLACK response is NULL"+ANSIColour.RESET);
 		}
 			
 	}

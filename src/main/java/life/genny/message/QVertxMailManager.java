@@ -40,7 +40,7 @@ public class QVertxMailManager implements QMessageProvider{
 	
 	public static final Boolean devMode = System.getenv("GENNYDEV") == null ? false : true;
 	
-	private static final Logger logger = LoggerFactory
+	private static final Logger log = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 	
 	final public static Boolean IS_STAGING = System.getenv("GENNYSTAGING") == null ? false : true;
@@ -73,7 +73,7 @@ public class QVertxMailManager implements QMessageProvider{
 			/* Trigger email */
 			mailClient.sendMail(mailmessage, result -> {
 				if (result.succeeded()) {
-					logger.info("email sent to ::" + mailmessage.getTo());
+					log.info("email sent to ::" + mailmessage.getTo());
 				} else {
 					result.cause().printStackTrace();
 				}
@@ -110,13 +110,13 @@ public class QVertxMailManager implements QMessageProvider{
 	    		devs.add("anish@gada.io");
 	    		
 	    		String testEmailIds = projectBe.getValue("PRI_TEST_EMAIL_IDS", null);
-	    		logger.info("testEmailIds ::"+testEmailIds);
+	    		log.info("testEmailIds ::"+testEmailIds);
 		    /* add bcc list only if environment is not dev */
 			if (testEmailIds != null) {
 				List<String> listOfTestRecipients = StringFormattingUtils.splitCharacterSeperatedStringToList(testEmailIds, ",");
 				if (listOfTestRecipients != null) {
 					devs.addAll(listOfTestRecipients);
-					logger.info("listOfTestRecipients :"+listOfTestRecipients.toString());
+					log.info("listOfTestRecipients :"+listOfTestRecipients.toString());
 				}
 			}	    		
 	    		message.setTo(devs);
@@ -139,7 +139,7 @@ public class QVertxMailManager implements QMessageProvider{
 			List<String> listOfBccRecipients = StringFormattingUtils.splitCharacterSeperatedStringToList(bccString, ",");
 			if (listOfBccRecipients != null) {
 				message.setBcc(listOfBccRecipients);
-				logger.info("listOfBccRecipients :"+listOfBccRecipients.toString());
+				log.info("listOfBccRecipients :"+listOfBccRecipients.toString());
 			}
 		}
     	    
@@ -202,11 +202,11 @@ public class QVertxMailManager implements QMessageProvider{
 				
 				attachment.setName(message.getNamePrefix());
 			} else {
-				logger.error("Error happened during byte conversion of attachment content");
+				log.error("Error happened during byte conversion of attachment content");
 			}
 				
 		} else {
-			logger.error("Attachment content is null");
+			log.error("Attachment content is null");
 		}  
 	    return attachment;
 	  }
@@ -255,17 +255,17 @@ public class QVertxMailManager implements QMessageProvider{
 						
 						/* setting up all source, target, priority, subject, content, attachment list in the constructor */
 						if(emailSourceEmail != null) {
-							logger.info("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
+							log.info("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
 							baseMessage = new QBaseMSGMessage(emailSourceEmail, recipientBe.getValue("PRI_EMAIL", null), 
 									null, MergeUtil.merge(template.getSubject(), entityTemplateMap), doc.toString(), message.getAttachmentList());
 						} else {
-							logger.info("this email account does not sourceEmail, so setting username as source");
+							log.info("this email account does not sourceEmail, so setting username as source");
 							baseMessage = new QBaseMSGMessage(projectBe.getValue("ENV_EMAIL_USERNAME", null), 
 									recipientBe.getValue("PRI_EMAIL", null), null, template.getSubject(), doc.toString(), message.getAttachmentList());
 						}
 								
 					} else {
-						logger.error("NO PROJECT BASEENTITY FOUND");
+						log.error("NO PROJECT BASEENTITY FOUND");
 					}
 					
 				} catch (IOException e) {
@@ -273,10 +273,10 @@ public class QVertxMailManager implements QMessageProvider{
 				}
 											
 			} else {
-				logger.error("NO TEMPLATE FOUND");
+				log.error("NO TEMPLATE FOUND");
 			}
 		} else {
-			logger.error("Recipient BaseEntity is NULL");
+			log.error("Recipient BaseEntity is NULL");
 		}
 		
 		return baseMessage;
@@ -334,15 +334,15 @@ public class QVertxMailManager implements QMessageProvider{
 					
 					/* setting up all source, target, priority, subject, content, attachment list in the constructor */
 					if(emailSourceEmail != null) {
-						logger.info("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
+						log.info("this email account has sourceEmail, so setting it as source ::" +emailSourceEmail);
 						baseMessage = new QBaseMSGMessage(emailSourceEmail, to, null, MergeUtil.merge(template.getSubject(), entityTemplateMap), doc.toString(), message.getAttachmentList());
 					} else {
-						logger.info("this email account does not sourceEmail, so setting username as source");
+						log.info("this email account does not sourceEmail, so setting username as source");
 						baseMessage = new QBaseMSGMessage(projectBe.getValue("ENV_EMAIL_USERNAME", null), to, null, template.getSubject(), doc.toString(), message.getAttachmentList());
 					}
 							
 				} else {
-					logger.error("NO PROJECT BASEENTITY FOUND");
+					log.error("NO PROJECT BASEENTITY FOUND");
 				}
 				
 			} catch (IOException e) {
@@ -350,7 +350,7 @@ public class QVertxMailManager implements QMessageProvider{
 			}
 										
 		} else {
-			logger.error("NO TEMPLATE FOUND");
+			log.error("NO TEMPLATE FOUND");
 		}
 		
 		return baseMessage;

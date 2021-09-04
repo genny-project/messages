@@ -29,7 +29,7 @@ public class QToastMessageManager implements QMessageProvider{
 	
 
 	
-	private static final Logger logger = LoggerFactory
+	private static final Logger log = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	@Inject
@@ -38,13 +38,13 @@ public class QToastMessageManager implements QMessageProvider{
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 		
-		logger.info("About to send toast message");
+		log.info("About to send toast message");
 		
 		/* message.getPriority() returns "error" for templateCode containing "FAIL", returns "info" for other templates */ 
 		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 
 		if (target == null) {
-			logger.error("Target is NULL");
+			log.error("Target is NULL");
 			return;
 		}
 
@@ -56,7 +56,7 @@ public class QToastMessageManager implements QMessageProvider{
 			body = templateBe.getValue("PRI_BODY", null);
 		}
 		if (body == null) {
-			logger.error("body is NULL");
+			log.error("body is NULL");
 			return;
 		}
 
@@ -68,7 +68,7 @@ public class QToastMessageManager implements QMessageProvider{
 			style = templateBe.getValue("PRI_STYLE", "INFO");
 		}
 		if (style == null) {
-			logger.error("style is NULL");
+			log.error("style is NULL");
 			return;
 		}
 
@@ -97,7 +97,7 @@ public class QToastMessageManager implements QMessageProvider{
 			if (template != null) {
 				
 				String toastMessage = template.getToast_template();
-				logger.info(ANSIColour.GREEN+"toast template from google sheet ::"+toastMessage+ANSIColour.RESET);
+				log.info(ANSIColour.GREEN+"toast template from google sheet ::"+toastMessage+ANSIColour.RESET);
 				
 				// Merging SMS template message with BaseEntity values
 				String messageData = MergeUtil.merge(toastMessage, entityTemplateMap);
@@ -113,13 +113,13 @@ public class QToastMessageManager implements QMessageProvider{
 					baseMessage.setPriority("info");
 				}
 				
-				logger.info("------->TOAST DETAILS ::"+baseMessage+"<---------");
+				log.info("------->TOAST DETAILS ::"+baseMessage+"<---------");
 								
 			} else {
-				logger.error("NO TEMPLATE FOUND");
+				log.error("NO TEMPLATE FOUND");
 			}
 		} else {
-			logger.error("Recipient BaseEntity is NULL");
+			log.error("Recipient BaseEntity is NULL");
 		}
 		return baseMessage;
 	}
@@ -137,12 +137,12 @@ public class QToastMessageManager implements QMessageProvider{
 		
 		BaseEntityUtils baseEntity = new BaseEntityUtils(GennySettings.qwandaServiceUrl, token, null, null);
 		BaseEntity userBe = baseEntity.getBaseEntityByAttributeAndValue("PRI_EMAIL", to);
-		logger.info("direct user recipient for toast ::"+userBe.getCode());
+		log.info("direct user recipient for toast ::"+userBe.getCode());
 			
 		if (template != null) {
 				
 			String toastMessage = template.getToast_template();
-			logger.info(ANSIColour.GREEN+"toast template from google sheet ::"+toastMessage+ANSIColour.RESET);
+			log.info(ANSIColour.GREEN+"toast template from google sheet ::"+toastMessage+ANSIColour.RESET);
 			
 			// Merging SMS template message with BaseEntity values
 			String messageData = MergeUtil.merge(toastMessage, entityTemplateMap);
@@ -161,10 +161,10 @@ public class QToastMessageManager implements QMessageProvider{
 				baseMessage.setPriority("info");
 			}
 			
-			logger.info("------->TOAST DETAILS ::"+baseMessage+"<---------");
+			log.info("------->TOAST DETAILS ::"+baseMessage+"<---------");
 								
 		} else {
-			logger.error("NO TEMPLATE FOUND");
+			log.error("NO TEMPLATE FOUND");
 		}
 		
 		return baseMessage;

@@ -28,7 +28,7 @@ import life.genny.utils.RulesUtils;
 
 public class MessageProcessHelper {
 
-	private static final Logger logger = LoggerFactory
+	private static final Logger log = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
 	static QMessageFactory messageFactory = new QMessageFactory();
@@ -46,15 +46,15 @@ public class MessageProcessHelper {
 	public static void processGenericMessage(QMessageGennyMSG message, String token) {
 
 		if (message == null) {
-			logger.error(ANSIColour.RED + "GENNY COM MESSAGE IS NULL" + ANSIColour.RESET);
+			log.error(ANSIColour.RED + "GENNY COM MESSAGE IS NULL" + ANSIColour.RESET);
 		}
 
-		logger.info("message model ::" + message.toString());
+		log.info("message model ::" + message.toString());
 
 		GennyToken userToken = new GennyToken(token);
 		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
 		String realm = beUtils.getGennyToken().getRealm();
-		logger.info("Realm is " + realm);
+		log.info("Realm is " + realm);
 
 		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
 
@@ -69,9 +69,9 @@ public class MessageProcessHelper {
 		BaseEntity templateBe = beUtils.getBaseEntityByCode(message.getTemplateCode());
 
 		if (templateBe == null) {
-			logger.error(ANSIColour.RED + "No Template found for " + message.getTemplateCode() + ANSIColour.RESET);
+			log.warn(ANSIColour.YELLOW + "No Template found for " + message.getTemplateCode() + ANSIColour.RESET);
 		} else {
-			logger.info("Using TemplateBE " + templateBe.getCode());
+			log.info("Using TemplateBE " + templateBe.getCode());
 		}
 
 		List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
@@ -103,19 +103,19 @@ public class MessageProcessHelper {
 					EntityAttribute mobile = new EntityAttribute(recipientBe, mobileAttr, 1.0, recipient);
 					recipientBe.addAttribute(mobile);
 				} catch (Exception e) {
-					logger.error(e);
+					log.error(e);
 				}
 			}
 
 			if (recipientBe != null) {
 				recipientBeList.add(recipientBe);
 			} else {
-				logger.error(ANSIColour.RED + "Could not process recipient " + recipient + ANSIColour.RESET);
+				log.error(ANSIColour.RED + "Could not process recipient " + recipient + ANSIColour.RESET);
 			}
 		}
 
 		BaseEntity unsubscriptionBe = beUtils.getBaseEntityByCode("COM_EMAIL_UNSUBSCRIPTION");
-		logger.info("unsubscribe be :: " + unsubscriptionBe);
+		log.info("unsubscribe be :: " + unsubscriptionBe);
 		String templateCode = message.getTemplateCode() + "_UNSUBSCRIBE";
 
 
@@ -141,17 +141,17 @@ public class MessageProcessHelper {
 					 * applicable
 					 */
 					if (isUserUnsubscribed && !msgType.equals(QBaseMSGMessageType.EMAIL)) {
-						logger.info("unsubscribed");
+						log.info("unsubscribed");
 						provider.sendMessage(beUtils, templateBe, baseEntityContextMap);
 					}
 
 					/* if subscribed, allow messages */
 					if (!isUserUnsubscribed) {
-						logger.info("subscribed");
+						log.info("subscribed");
 						provider.sendMessage(beUtils, templateBe, baseEntityContextMap);
 					}
 				} else {
-					logger.error(ANSIColour.RED + ">>>>>> Provider is NULL for entity: " + ", msgType: " + msgType.toString() + " <<<<<<<<<" + ANSIColour.RESET);
+					log.error(ANSIColour.RED + ">>>>>> Provider is NULL for entity: " + ", msgType: " + msgType.toString() + " <<<<<<<<<" + ANSIColour.RESET);
 				}
 			}
 		}
@@ -169,7 +169,7 @@ public class MessageProcessHelper {
 		    String value = entry.getValue();
 
 			String logStr = "key: " + key + ", value: " + (key.toUpperCase().equals("PASSWORD") ? "REDACTED" : value);
-			logger.info(logStr);
+			log.info(logStr);
 		    
 		    if ((value != null) && (value.length() > 4)) {
 
