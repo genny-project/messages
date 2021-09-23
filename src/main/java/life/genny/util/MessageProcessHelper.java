@@ -184,6 +184,7 @@ public class MessageProcessHelper {
 						.toArray(BaseEntity[]::new);
 
 					if (beArray.length == 0) {
+						log.info("found be " + beArray[0]);
 						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray[0]);
 					} else {
 						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray);
