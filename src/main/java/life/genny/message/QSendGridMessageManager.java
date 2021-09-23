@@ -117,6 +117,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 						}
 					}
 				}
+				log.info("DEEP REPL: " + deepReplacementMap);
 				templateData.put(key, deepReplacementMap);
 			} else if(value.getClass().equals(String.class)) {
 				templateData.put(key, (String) value);
