@@ -177,6 +177,7 @@ public class MessageProcessHelper {
 		    	if (value.matches("[A-Z]{3}\\_.*")) {
 					// Create Array of Codes
 					String[] codeArr = beUtils.cleanUpAttributeValue(value).split(",");
+					log.info("codeArr = " + codeArr);
 
 					// Convert to BEs
 					BaseEntity[] beArray = Arrays.stream(codeArr)
@@ -187,6 +188,7 @@ public class MessageProcessHelper {
 						log.info("found be " + beArray[0]);
 						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray[0]);
 					} else {
+						log.info("found be Array" + beArray);
 						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray);
 					}
 

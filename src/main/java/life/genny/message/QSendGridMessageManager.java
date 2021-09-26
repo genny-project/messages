@@ -86,6 +86,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			Object value = contextMap.get(key);
 
 			if (value.getClass().equals(BaseEntity.class)) {
+				log.info("Processing key as BASEENTITY: " + key);
 				BaseEntity be = (BaseEntity) value;
 				HashMap<String, String> deepReplacementMap = new HashMap<>();
 				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
@@ -117,9 +118,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 						}
 					}
 				}
-				log.info("DEEP REPL: " + deepReplacementMap);
 				templateData.put(key, deepReplacementMap);
 			} else if(value.getClass().equals(String.class)) {
+				log.info("Processing key as STRING: " + key);
 				templateData.put(key, (String) value);
 			}
 		}
