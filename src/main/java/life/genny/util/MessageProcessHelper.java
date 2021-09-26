@@ -177,12 +177,12 @@ public class MessageProcessHelper {
 		    	if (value.matches("[A-Z]{3}\\_.*")) {
 					// Create Array of Codes
 					String[] codeArr = beUtils.cleanUpAttributeValue(value).split(",");
-					log.info("codeArr = " + codeArr);
 
 					// Convert to BEs
 					BaseEntity[] beArray = Arrays.stream(codeArr)
 						.map(item -> (BaseEntity) beUtils.getBaseEntityByCode(item))
 						.toArray(BaseEntity[]::new);
+					log.info(beArray.length);
 
 					if (beArray.length == 0) {
 						log.info("found be " + beArray[0]);
