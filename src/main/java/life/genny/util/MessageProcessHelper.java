@@ -45,6 +45,9 @@ public class MessageProcessHelper {
 	 */
 	public static void processGenericMessage(QMessageGennyMSG message, String token) {
 
+		// Begin recording duration
+		long start = System.currentTimeMillis();
+
 		if (message == null) {
 			log.error(ANSIColour.RED + "GENNY COM MESSAGE IS NULL" + ANSIColour.RESET);
 		}
@@ -155,6 +158,9 @@ public class MessageProcessHelper {
 				}
 			}
 		}
+
+		long duration = System.currentTimeMillis() - start;
+		log.info("FINISHED PROCESSING MESSAGE :: time taken = " + String.valueOf(duration));
 	}
 
 	private static Map<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils, QMessageGennyMSG message) {
@@ -185,10 +191,8 @@ public class MessageProcessHelper {
 					log.info(beArray.length);
 
 					if (beArray.length == 1) {
-						log.info("found be " + beArray[0]);
 						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray[0]);
 					} else {
-						log.info("found be Array" + beArray);
 						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray);
 					}
 

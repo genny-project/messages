@@ -26,10 +26,11 @@ public class EBCHandlers {
 
 			final JsonObject payload = new JsonObject(arg);
 
-			log.info(payload);
-			log.info(">>>>>>>>>>>>>>>>>>GOT THE PAYLOAD IN MESSAGES<<<<<<<<<<<<<<<<<<<<<<");
+			log.debug(payload);
+			log.info("################################################################");
+			log.info(">>>>>>>>>>>>>>>>>> PROCESSING NEW MESSAGE <<<<<<<<<<<<<<<<<<<<<<");
+			log.info("################################################################");
 
-			log.info("GENERIC MESSAGES");
 			final QMessageGennyMSG message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
 			MessageProcessHelper.processGenericMessage(message, payload.getString("token"));
 					
