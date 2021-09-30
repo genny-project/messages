@@ -64,6 +64,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
+		if (recipient != null) {
+			recipient = recipient.trim();
+		}
 
 		if (recipient == null) {
 			log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
@@ -156,6 +159,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 			for (BaseEntity item : ccArray) {
 
 				String email = item.getValue("PRI_EMAIL", null);
+				if (email != null) {
+					email = email.trim();
+				}
 
 				if (email != null && !email.equals(to.getEmail())) {
 					personalization.addCc(new Email(email));
@@ -177,6 +183,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 			for (BaseEntity item : bccArray) {
 
 				String email = item.getValue("PRI_EMAIL", null);
+				if (email != null) {
+					email = email.trim();
+				}
 
 				if (email != null && !email.equals(to.getEmail())) {
 					personalization.addBcc(new Email(email));
