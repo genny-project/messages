@@ -47,7 +47,7 @@ import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 
 public class QSendGridMessageManager implements QMessageProvider {
-	
+
 	private static final Logger log = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
 
@@ -164,6 +164,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 			}
 		}
 
+		String bccEmail = "";
+
 		if (bccVal != null) {
 			BaseEntity[] bccArray = new BaseEntity[1];
 
@@ -179,6 +181,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 				if (email != null && !email.equals(to.getEmail())) {
 					personalization.addBcc(new Email(email));
 					log.info("Found BCC Email: " + email);
+					bccEmail = email;
 				}
 			}
 		}
@@ -202,11 +205,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 			log.info(response.getBody());
 			log.info(response.getHeaders());
 
-			log.info(ANSIColour.GREEN+"SendGrid Message Sent!"+ANSIColour.RESET);
+			log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipient + "! BCC: " + bccEmail +ANSIColour.RESET);
 		} catch (IOException e) {
 			log.error(e);
 		}
-		
+
 	}
 
 }
