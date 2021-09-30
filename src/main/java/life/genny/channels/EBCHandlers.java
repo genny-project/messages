@@ -10,7 +10,7 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 import io.vertx.core.json.JsonObject;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.JsonUtils;
-import life.genny.util.MessageProcessHelper;
+import life.genny.process.MessageProcessor;
 
 @ApplicationScoped
 public class EBCHandlers {
@@ -32,7 +32,7 @@ public class EBCHandlers {
 			log.info("################################################################");
 
 			final QMessageGennyMSG message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
-			MessageProcessHelper.processGenericMessage(message, payload.getString("token"));
+			MessageProcessor.processGenericMessage(message, payload.getString("token"));
 					
 		}
 

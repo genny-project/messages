@@ -1,4 +1,4 @@
-package life.genny.util;
+package life.genny.process;
 
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
@@ -21,12 +21,15 @@ import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageType;
 import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.KeycloakUtils;
+import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.ANSIColour;
 import life.genny.utils.VertxUtils;
 import life.genny.utils.BaseEntityUtils;
 import life.genny.utils.RulesUtils;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
-public class MessageProcessHelper {
+public class MessageProcessor {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
@@ -34,14 +37,10 @@ public class MessageProcessHelper {
 	static QMessageFactory messageFactory = new QMessageFactory();
 
 	/**
+	 * Generic Message Handling method.
 	 * 
 	 * @param message
 	 * @param token
-	 * @param eventbus
-	 *            <p>
-	 *            Based on the message provider (SMS/Email/Voice), information for
-	 *            message will be set and message will be triggered
-	 *            </p>
 	 */
 	public static void processGenericMessage(QMessageGennyMSG message, String token) {
 
@@ -54,6 +53,7 @@ public class MessageProcessHelper {
 
 		log.info("message model ::" + message.toString());
 
+		// Init utility objects
 		GennyToken userToken = new GennyToken(token);
 		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
 		String realm = beUtils.getGennyToken().getRealm();
@@ -62,7 +62,7 @@ public class MessageProcessHelper {
 		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
 
 		// Create context map with BaseEntities
-		Map<String, Object> baseEntityContextMap = new HashMap<>();
+		HashMap<String, Object> baseEntityContextMap = new HashMap<>();
 		baseEntityContextMap = createBaseEntityContextMap(beUtils, message);
 		baseEntityContextMap.put("PROJECT", projectBe);
 
@@ -117,6 +117,12 @@ public class MessageProcessHelper {
 			}
 		}
 
+		// Handle any default context associations
+		String contextAssociations = templateBe.getValue("PRI_CONTEXT_ASSOCIATIONS", null);
+		if (contextAssociations != null) {
+			MergeUtil.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations);
+		}
+
 		BaseEntity unsubscriptionBe = beUtils.getBaseEntityByCode("COM_EMAIL_UNSUBSCRIPTION");
 		log.info("unsubscribe be :: " + unsubscriptionBe);
 		String templateCode = message.getTemplateCode() + "_UNSUBSCRIBE";
@@ -163,9 +169,9 @@ public class MessageProcessHelper {
 		log.info("FINISHED PROCESSING MESSAGE :: time taken = " + String.valueOf(duration));
 	}
 
-	private static Map<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils, QMessageGennyMSG message) {
+	private static HashMap<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils, QMessageGennyMSG message) {
 		
-		Map<String, Object> baseEntityContextMap = new HashMap<>();
+		HashMap<String, Object> baseEntityContextMap = new HashMap<>();
 		JSONObject decodedToken = KeycloakUtils.getDecodedToken(beUtils.getGennyToken().getToken());
 		String realm = decodedToken.getString("aud");
 		
