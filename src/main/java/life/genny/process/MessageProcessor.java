@@ -51,6 +51,8 @@ public class MessageProcessor {
 			log.error(ANSIColour.RED + "GENNY COM MESSAGE IS NULL" + ANSIColour.RESET);
 		}
 
+		log.debug("Incoming Message ::" + message.toString());
+
 		// Init utility objects
 		GennyToken userToken = new GennyToken(token);
 		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
