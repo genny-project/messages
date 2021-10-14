@@ -72,7 +72,7 @@ public class MessageProcessor {
 		List<BaseEntity> recipientBeList = new ArrayList<BaseEntity>();
 
 		BaseEntity templateBe = null;
-		if (message.getTemplateCode() == null) {
+		if (message.getTemplateCode() != null) {
 			templateBe = beUtils.getBaseEntityByCode(message.getTemplateCode());
 		}
 
