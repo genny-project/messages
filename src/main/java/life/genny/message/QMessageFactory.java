@@ -31,8 +31,13 @@ public class QMessageFactory {
 	    case SLACK:
 	    	provider = new QSlackMessageManager();
 	    	break;
+	    case DEFAULT:
+			// Default to Error Manager if no proper message is found
+	    	provider = new QErrorManager();
+	    	break;
 	    default:
-	    	provider = new QEmailMessageManager();    
+			// Default to Error Manager if no proper message is found
+	    	provider = new QErrorManager();    
 	    }
 	    
 	    return provider;

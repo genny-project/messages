@@ -66,22 +66,34 @@ public class MessageProcessor {
 		baseEntityContextMap = createBaseEntityContextMap(beUtils, message);
 		baseEntityContextMap.put("PROJECT", projectBe);
 
+		List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
+
 		String[] recipientArr = message.getRecipientArr();
 		List<BaseEntity> recipientBeList = new ArrayList<BaseEntity>();
 
-		BaseEntity templateBe = beUtils.getBaseEntityByCode(message.getTemplateCode());
+		BaseEntity templateBe = null;
+		if (message.getTemplateCode() == null) {
+			templateBe = beUtils.getBaseEntityByCode(message.getTemplateCode());
+		}
 
 		if (templateBe == null) {
 			log.warn(ANSIColour.YELLOW + "No Template found for " + message.getTemplateCode() + ANSIColour.RESET);
 		} else {
 			log.info("Using TemplateBE " + templateBe.getCode());
-		}
 
-		List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
-		if (Arrays.stream(message.getMessageTypeArr()).anyMatch(item -> item == QBaseMSGMessageType.DEFAULT)) {
-			// Use default if told to do so
-			List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
-			messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
+			// Handle any default context associations
+			String contextAssociations = templateBe.getValue("PRI_CONTEXT_ASSOCIATIONS", null);
+			if (contextAssociations != null) {
+				MergeUtil.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations);
+			}
+
+			// Check for Default Message
+			if (Arrays.stream(message.getMessageTypeArr()).anyMatch(item -> item == QBaseMSGMessageType.DEFAULT)) {
+				// Use default if told to do so
+				List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
+				messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
+			}
+
 		}
 
 		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", token);
@@ -115,12 +127,6 @@ public class MessageProcessor {
 			} else {
 				log.error(ANSIColour.RED + "Could not process recipient " + recipient + ANSIColour.RESET);
 			}
-		}
-
-		// Handle any default context associations
-		String contextAssociations = templateBe.getValue("PRI_CONTEXT_ASSOCIATIONS", null);
-		if (contextAssociations != null) {
-			MergeUtil.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations);
 		}
 
 		BaseEntity unsubscriptionBe = beUtils.getBaseEntityByCode("COM_EMAIL_UNSUBSCRIPTION");
