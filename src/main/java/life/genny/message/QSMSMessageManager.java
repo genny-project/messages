@@ -74,11 +74,19 @@ public class QSMSMessageManager implements QMessageProvider {
 		
 		if(accountSID != null && sourcePhone != null && twilioAuthToken != null) {
 
-			Twilio.init(accountSID, twilioAuthToken);
-							
-			Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(sourcePhone), body).create();
-			log.info("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
-			log.info(ANSIColour.GREEN+" SMS Sent to "+targetMobile +ANSIColour.RESET);
+			// Use Try-Catch Block to ensure consumer does not die upon error.
+			try {
+				// Init and Send SMS
+				Twilio.init(accountSID, twilioAuthToken);
+				Message msg = Message.creator(new PhoneNumber(targetMobile), new PhoneNumber(sourcePhone), body).create();
+
+				// Log response
+				log.info("message status:" + msg.getStatus() + ", message SID:" + msg.getSid());
+				log.info(ANSIColour.GREEN+" SMS Sent to "+targetMobile +ANSIColour.RESET);
+
+			} catch (Exception e) {
+				log.error(ANSIColour.RED+"Could Not Send SMS!!! Exception:" + e.getStackTrace());
+			}
 				
 		} else {
 			log.error(ANSIColour.RED+"Twilio credentials not loaded into cache"+ANSIColour.RESET);
