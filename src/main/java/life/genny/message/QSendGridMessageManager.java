@@ -59,6 +59,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 		BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
 
+		if (templateBe == null) {
+			log.error(ANSIColour.RED+"TemplateBE passed is NULL!!!!"+ANSIColour.RESET);
+			return;
+		}
+
 		if (recipientBe == null) {
 			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 		}
