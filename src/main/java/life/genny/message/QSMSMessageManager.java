@@ -85,7 +85,7 @@ public class QSMSMessageManager implements QMessageProvider {
 				log.info(ANSIColour.GREEN+" SMS Sent to "+targetMobile +ANSIColour.RESET);
 
 			} catch (Exception e) {
-				log.error(ANSIColour.RED+"Could Not Send SMS!!! Exception:" + e.getStackTrace()+ANSIColour.RESET);
+				log.error(ANSIColour.RED+"Could Not Send SMS!!! Exception:"+e+ANSIColour.RESET);
 			}
 				
 		} else {

@@ -12,6 +12,8 @@ import life.genny.qwanda.message.QMessageGennyMSG;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.process.MessageProcessor;
 
+import life.genny.qwandautils.ANSIColour;
+
 @ApplicationScoped
 public class EBCHandlers {
 	
@@ -31,8 +33,14 @@ public class EBCHandlers {
 			log.info(">>>>>>>>>>>>>>>>>> PROCESSING NEW MESSAGE <<<<<<<<<<<<<<<<<<<<<<");
 			log.info("################################################################");
 
-			final QMessageGennyMSG message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
-			MessageProcessor.processGenericMessage(message, payload.getString("token"));
+			// Try Catch to stop consumer from dying upon error
+			try {
+				final QMessageGennyMSG message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
+				MessageProcessor.processGenericMessage(message, payload.getString("token"));
+			} catch (Exception e) {
+				log.error(ANSIColour.RED+"Message Handling Failed!!!!!"+ANSIColour.RESET);
+				log.error(ANSIColour.RED+e+ANSIColour.RESET);
+			}
 					
 		}
 
