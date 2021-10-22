@@ -36,6 +36,8 @@ import life.genny.util.MergeHelper;
 import life.genny.notifications.EmailHelper;
 import life.genny.utils.BaseEntityUtils;
 import life.genny.qwandautils.GennySettings;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -68,7 +70,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 		}
 
-		String recipient = recipientBe.getValue("PRI_EMAIL", null);
+		String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", null);
+		String recipient = recipientBe.getValue("PRI_EMAIL", "UTC");
 		if (recipient != null) {
 			recipient = recipient.trim();
 		}
@@ -115,8 +118,16 @@ public class QSendGridMessageManager implements QMessageProvider {
 								}
 							} else if (attrVal.getClass().equals(LocalDateTime.class)) {
 								if (contextMap.containsKey("DATETIMEFORMAT")) {
+
 									String format = (String) contextMap.get("DATETIMEFORMAT");
-									valueString = MergeUtil.getFormattedDateTimeString((LocalDateTime) attrVal, format);
+									LocalDateTime dtt = (LocalDateTime) attrVal;
+
+									ZonedDateTime zonedDateTime = dtt.atZone(ZoneId.of("UTC"));
+									ZonedDateTime converted = zonedDateTime.withZoneSameInstant(ZoneId.of(timezone));
+									LocalDateTime zonedLocalDateTime = converted.toLocalDateTime();
+
+									valueString = MergeUtil.getFormattedDateTimeString(zonedLocalDateTime, format);
+
 								} else {
 									log.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");
 								}
