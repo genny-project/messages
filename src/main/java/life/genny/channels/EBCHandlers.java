@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 
 import io.vertx.core.json.JsonObject;
-import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.process.MessageProcessor;
 

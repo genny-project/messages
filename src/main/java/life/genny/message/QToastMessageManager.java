@@ -14,7 +14,7 @@ import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.qwanda.message.QDataToastMessage;
-import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.qwanda.message.QCmdMessage;
 import life.genny.qwandautils.GennySettings;
 import life.genny.qwandautils.JsonUtils;

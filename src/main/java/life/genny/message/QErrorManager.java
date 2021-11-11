@@ -11,7 +11,7 @@ import io.vertx.core.logging.LoggerFactory;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.ANSIColour;
 import life.genny.util.MergeHelper;

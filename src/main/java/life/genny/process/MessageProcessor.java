@@ -19,7 +19,7 @@ import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.attribute.Attribute;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageType;
-import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.qwandautils.KeycloakUtils;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.ANSIColour;

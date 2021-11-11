@@ -2,7 +2,7 @@ package life.genny.message;
 
 import java.util.Map;
 import life.genny.qwanda.message.QBaseMSGMessage;
-import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.utils.BaseEntityUtils;
 
