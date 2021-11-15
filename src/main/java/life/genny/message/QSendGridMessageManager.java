@@ -70,10 +70,13 @@ public class QSendGridMessageManager implements QMessageProvider {
 			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 		}
 
-		String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
+		String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", null);
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
 		if (recipient != null) {
 			recipient = recipient.trim();
+		}
+		if (timezone == null || timezone.replaceAll(" ", "").isEmpty()) {
+			timezone = "UTC";
 		}
 		log.info("Recipient: " + recipient + ", Timezone: " + timezone);
 
