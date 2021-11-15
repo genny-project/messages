@@ -200,7 +200,6 @@ public class MessageProcessor {
 					BaseEntity[] beArray = Arrays.stream(codeArr)
 						.map(item -> (BaseEntity) beUtils.getBaseEntityByCode(item))
 						.toArray(BaseEntity[]::new);
-					log.info(beArray.length);
 
 					if (beArray.length == 1) {
 						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray[0]);
