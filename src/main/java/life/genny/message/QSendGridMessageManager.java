@@ -28,7 +28,7 @@ import life.genny.qwanda.EEntityStatus;
 import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.qwanda.message.QMessageGennyMSG;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwandautils.ANSIColour;
