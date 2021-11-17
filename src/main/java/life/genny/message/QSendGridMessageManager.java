@@ -75,6 +75,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 		if (recipient != null) {
 			recipient = recipient.trim();
 		}
+		if (timezone == null || timezone.replaceAll(" ", "").isEmpty()) {
+			timezone = "UTC";
+		}
 		log.info("Recipient: " + recipient + ", Timezone: " + timezone);
 
 		if (recipient == null) {
