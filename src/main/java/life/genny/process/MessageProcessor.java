@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.io.IOException;
 import org.json.JSONObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -28,6 +29,9 @@ import life.genny.utils.BaseEntityUtils;
 import life.genny.utils.RulesUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import life.genny.util.MsgUtils;
+import life.genny.qwandautils.GennySettings;
 
 public class MessageProcessor {
 
@@ -139,6 +143,35 @@ public class MessageProcessor {
 
 			// Set our current recipient
 			baseEntityContextMap.put("RECIPIENT", recipientBe);
+
+			// Process any URL contexts for this recipient
+			if (baseEntityContextMap.containsKey("URL:ENCODE")) {
+				// Fetch form contexts
+				String[] componentArray = ((String) baseEntityContextMap.get("URL:ENCODE")).split("/");
+				// Init and grab url structure
+				String parentCode = null;
+				String code = null;
+				String targetCode = null;
+				if (componentArray.length > 0) {
+					parentCode = componentArray[0];
+				}
+				if (componentArray.length > 1) {
+					code = componentArray[1];
+				}
+				if (componentArray.length > 2) {
+					targetCode = componentArray[2];
+				}
+				// Fetch access token
+				String accessToken = null;
+				try {
+					accessToken = KeycloakUtils.getImpersonatedToken(userToken.getKeycloakUrl(), userToken.getRealm(), projectBe, recipientBe, userToken.getToken());
+				} catch (IOException e) {
+					log.error("Could not fetch Token: " + e.getStackTrace());
+				}
+				// Encode URL and put back in the map
+				String url = MsgUtils.encodeUrl(GennySettings.projectUrl+"/home", parentCode, code, targetCode, accessToken);
+				baseEntityContextMap.put("URL", url);
+			}
 
 			// Iterate our array of send types
 			for (QBaseMSGMessageType msgType : messageTypeList) {
