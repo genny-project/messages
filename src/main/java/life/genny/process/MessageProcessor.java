@@ -10,8 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.io.IOException;
 import org.json.JSONObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.jboss.logging.Logger;
 import life.genny.message.QMessageFactory;
 import life.genny.message.QMessageProvider;
 import life.genny.models.GennyToken;
@@ -35,8 +34,7 @@ import life.genny.qwandautils.GennySettings;
 
 public class MessageProcessor {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	private static final Logger log = Logger.getLogger(MessageProcessor.class);
 
 	static QMessageFactory messageFactory = new QMessageFactory();
 
@@ -44,9 +42,10 @@ public class MessageProcessor {
 	 * Generic Message Handling method.
 	 * 
 	 * @param message
-	 * @param token
+	 * @param serviceToken
+	 * @param userToken
 	 */
-	public static void processGenericMessage(QMessageGennyMSG message, String token) {
+	public static void processGenericMessage(QMessageGennyMSG message, GennyToken serviceToken, GennyToken userToken) {
 
 		// Begin recording duration
 		long start = System.currentTimeMillis();
@@ -58,8 +57,7 @@ public class MessageProcessor {
 		log.debug("Incoming Message ::" + message.toString());
 
 		// Init utility objects
-		GennyToken userToken = new GennyToken(token);
-		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
+		BaseEntityUtils beUtils = new BaseEntityUtils(serviceToken, userToken);
 		String realm = beUtils.getGennyToken().getRealm();
 		log.info("Realm is " + realm);
 
@@ -100,8 +98,8 @@ public class MessageProcessor {
 
 		}
 
-		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", token);
-		Attribute mobileAttr = RulesUtils.getAttribute("PRI_MOBILE", token);
+		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", userToken.getToken());
+		Attribute mobileAttr = RulesUtils.getAttribute("PRI_MOBILE", userToken.getToken());
 
 		for (String recipient : recipientArr) {
 
