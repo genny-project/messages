@@ -147,23 +147,31 @@ public class MessageProcessor {
 			// Process any URL contexts for this recipient
 			if (baseEntityContextMap.containsKey("URL:ENCODE")) {
 				// Fetch form contexts
+				log.info("Handling Encoding...");
 				String[] componentArray = ((String) baseEntityContextMap.get("URL:ENCODE")).split("/");
 				// Init and grab url structure
 				String parentCode = null;
 				String code = null;
 				String targetCode = null;
 				if (componentArray.length > 0) {
+					log.info("length 1");
+					log.info(componentArray[0]);
 					parentCode = componentArray[0];
 				}
 				if (componentArray.length > 1) {
+					log.info("length 2");
+					log.info(componentArray[1]);
 					code = componentArray[1];
 				}
 				if (componentArray.length > 2) {
+					log.info("length 3");
+					log.info(componentArray[2]);
 					targetCode = componentArray[2];
 				}
 				// Fetch access token
 				String accessToken = null;
 				try {
+					log.info("Fetching Token for " + recipientBe.getCode());
 					accessToken = KeycloakUtils.getImpersonatedToken(userToken.getKeycloakUrl(), userToken.getRealm(), projectBe, recipientBe, userToken.getToken());
 				} catch (IOException e) {
 					log.error("Could not fetch Token: " + e.getStackTrace());
