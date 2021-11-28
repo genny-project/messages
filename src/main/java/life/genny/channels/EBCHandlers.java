@@ -1,7 +1,5 @@
 package life.genny.channels;
 
-import java.lang.invoke.MethodHandles;
-
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
@@ -23,11 +21,9 @@ public class EBCHandlers {
 
 	GennyToken serviceToken;
 
-
 	@Incoming("messages")
 	public void getFromMessages(String arg) {
-		log.info("Received EVENT :"
-				+ (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
+		log.info("Received EVENT :" + (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
 
 		final JsonObject payload = new JsonObject(arg);
 
