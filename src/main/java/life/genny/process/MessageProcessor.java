@@ -233,7 +233,7 @@ public class MessageProcessor {
 		    if ((value != null) && (value.length() > 4)) {
 
 				// MUST CONTAIN A BE CODE
-		    	if (value.matches("[A-Z]{3}\\_.*")) {
+		    	if (value.matches("[A-Z]{3}\\_.*") && !key.startsWith("URL")) {
 					// Create Array of Codes
 					String[] codeArr = beUtils.cleanUpAttributeValue(value).split(",");
 
