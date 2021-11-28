@@ -1,4 +1,4 @@
-package life.genny.channels;
+package life.genny.messages.channels;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -8,7 +8,7 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 import io.vertx.core.json.JsonObject;
 import life.genny.message.QMessageGennyMSG;
 import life.genny.qwandautils.JsonUtils;
-import life.genny.process.MessageProcessor;
+import life.genny.messages.process.MessageProcessor;
 
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.runtime.ShutdownEvent;
@@ -16,7 +16,7 @@ import javax.enterprise.event.Observes;
 
 import life.genny.qwandautils.ANSIColour;
 import life.genny.models.GennyToken;
-import life.genny.util.KeycloakUtils;
+import life.genny.messages.util.KeycloakUtils;
 
 @ApplicationScoped
 public class EBCHandlers {

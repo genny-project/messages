@@ -1,4 +1,4 @@
-package life.genny.process;
+package life.genny.messages.process;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import java.io.IOException;
 import org.json.JSONObject;
 import org.jboss.logging.Logger;
-import life.genny.message.QMessageFactory;
-import life.genny.message.QMessageProvider;
+import life.genny.messages.managers.QMessageFactory;
+import life.genny.messages.managers.QMessageProvider;
 import life.genny.models.GennyToken;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.attribute.EntityAttribute;
@@ -25,7 +25,7 @@ import life.genny.utils.VertxUtils;
 import life.genny.utils.BaseEntityUtils;
 import life.genny.utils.RulesUtils;
 
-import life.genny.util.MsgUtils;
+import life.genny.messages.util.MsgUtils;
 import life.genny.qwandautils.GennySettings;
 
 public class MessageProcessor {

@@ -1,4 +1,4 @@
-package life.genny.message;
+package life.genny.messages.managers;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -14,7 +14,7 @@ import life.genny.qwanda.message.QBaseMSGMessageTemplate;
 import life.genny.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.ANSIColour;
-import life.genny.util.MergeHelper;
+import life.genny.messages.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
 
 public class QSMSMessageManager implements QMessageProvider {

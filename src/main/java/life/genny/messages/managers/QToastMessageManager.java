@@ -1,4 +1,4 @@
-package life.genny.message;
+package life.genny.messages.managers;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -6,21 +6,18 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import life.genny.channels.Producer;
+import life.genny.messages.channels.Producer;
 import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessage;
 import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.qwanda.message.QDataToastMessage;
 import life.genny.message.QMessageGennyMSG;
 import life.genny.qwanda.message.QCmdMessage;
 import life.genny.qwandautils.GennySettings;
-import life.genny.qwandautils.JsonUtils;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.ANSIColour;
-import life.genny.util.MergeHelper;
+import life.genny.messages.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
 import life.genny.utils.VertxUtils;
 

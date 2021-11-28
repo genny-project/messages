@@ -1,4 +1,4 @@
-package life.genny.message;
+package life.genny.messages.managers;
 
 import java.util.Map;
 import life.genny.qwanda.message.QBaseMSGMessage;
@@ -9,7 +9,5 @@ import life.genny.utils.BaseEntityUtils;
 public interface QMessageProvider {
 	
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap);
-	// public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, Map<String, Object> entityTemplateMap);
-	// public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message, Map<String, Object> entityTemplateMap, String to);
 
 }

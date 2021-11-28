@@ -1,4 +1,4 @@
-package life.genny.channels;
+package life.genny.messages.channels;
 
 import java.lang.invoke.MethodHandles;
 import org.apache.logging.log4j.Logger;

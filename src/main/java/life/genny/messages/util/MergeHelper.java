@@ -1,4 +1,4 @@
-package life.genny.util;
+package life.genny.messages.util;
 
 import java.io.IOException;
 import java.io.InputStream;

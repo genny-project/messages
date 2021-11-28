@@ -1,4 +1,4 @@
-package life.genny.message;
+package life.genny.messages.managers;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -22,8 +22,9 @@ import life.genny.message.QMessageGennyMSG;
 import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.QwandaUtils;
 import life.genny.qwandautils.ANSIColour;
-import life.genny.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
+
+import life.genny.messages.util.MergeHelper;
 
 public class QEmailMessageManager implements QMessageProvider {
 	

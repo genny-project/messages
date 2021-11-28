@@ -1,4 +1,4 @@
-package life.genny.message;
+package life.genny.messages.managers;
 
 import java.lang.invoke.MethodHandles;
 

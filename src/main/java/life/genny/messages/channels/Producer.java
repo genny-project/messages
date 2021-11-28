@@ -1,4 +1,4 @@
-package life.genny.channels;
+package life.genny.messages.channels;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -14,7 +14,6 @@ public class Producer {
   public Emitter<String> getToWebData() {
     return webData;
   }
-
 
 }
 

@@ -1,20 +1,11 @@
-package life.genny.message;
+package life.genny.messages.managers;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
-import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.message.QBaseMSGMessage;
-import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.message.QMessageGennyMSG;
-import life.genny.qwandautils.MergeUtil;
 import life.genny.qwandautils.ANSIColour;
-import life.genny.util.MergeHelper;
 import life.genny.utils.BaseEntityUtils;
 
 public class QErrorManager implements QMessageProvider {
