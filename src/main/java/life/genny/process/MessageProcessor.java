@@ -170,7 +170,7 @@ public class MessageProcessor {
 				String accessToken = null;
 				try {
 					log.info("Fetching Token for " + recipientBe.getCode());
-					accessToken = KeycloakUtils.getImpersonatedToken(userToken.getKeycloakUrl(), userToken.getRealm(), projectBe, recipientBe, userToken.getToken());
+					accessToken = KeycloakUtils.getImpersonatedToken(serviceToken.getKeycloakUrl(), serviceToken.getRealm(), projectBe, recipientBe, serviceToken.getToken());
 				} catch (IOException e) {
 					log.error("Could not fetch Token: " + e.getStackTrace());
 				}
