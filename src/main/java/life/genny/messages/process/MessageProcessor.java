@@ -53,7 +53,7 @@ public class MessageProcessor {
 		log.debug("Incoming Message ::" + message.toString());
 
 		// Init utility objects
-		BaseEntityUtils beUtils = new BaseEntityUtils(serviceToken, userToken);
+		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
 		String realm = beUtils.getGennyToken().getRealm();
 		log.info("Realm is " + realm);
 
