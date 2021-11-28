@@ -10,6 +10,10 @@ import life.genny.message.QMessageGennyMSG;
 import life.genny.qwandautils.JsonUtils;
 import life.genny.process.MessageProcessor;
 
+import io.quarkus.runtime.StartupEvent;
+import io.quarkus.runtime.ShutdownEvent;
+import javax.enterprise.event.Observes;
+
 import life.genny.qwandautils.ANSIColour;
 import life.genny.models.GennyToken;
 import life.genny.util.KeycloakUtils;
@@ -20,6 +24,26 @@ public class EBCHandlers {
 	private static final Logger log = Logger.getLogger(EBCHandlers.class);
 
 	GennyToken serviceToken;
+
+    void onStart(@Observes StartupEvent ev) {
+        log.info("The application is starting...");
+
+		log.info("Fetching Environment Variables...");
+		String realm = System.getenv("PROJECT_REALM");
+		String keycloakUrl = System.getenv("KEYCLOAK_URL");
+		String clientId = System.getenv("KEYCLOAK_CLIENT_ID");
+		String secret = System.getenv("KEYCLOAK_SECRET");
+		String serviceUsername = System.getenv("SERVICE_USERNAME");
+		String servicePassword = System.getenv("SERVICE_PASSWORD");
+
+		log.info("Fetching serviceToken...");
+		serviceToken = new KeycloakUtils().getToken(keycloakUrl, realm, clientId, secret, serviceUsername, servicePassword, null);
+		log.info("Application Ready!");
+    }
+
+    void onStop(@Observes ShutdownEvent ev) {
+        log.info("The application is stopping...");
+    }
 
 	@Incoming("messages")
 	public void getFromMessages(String arg) {
@@ -32,14 +56,6 @@ public class EBCHandlers {
 		log.info(">>>>>>>>>>>>>>>>>> PROCESSING NEW MESSAGE <<<<<<<<<<<<<<<<<<<<<<");
 		log.info("################################################################");
 
-		String realm = System.getenv("PROJECT_REALM");
-		String keycloakUrl = System.getenv("KEYCLOAK_URL");
-		String clientId = System.getenv("KEYCLOAK_CLIENT_ID");
-		String secret = System.getenv("KEYCLOAK_SECRET");
-		String serviceUsername = System.getenv("SERVICE_USERNAME");
-		String servicePassword = System.getenv("SERVICE_PASSWORD");
-
-		GennyToken serviceToken = new KeycloakUtils().getToken(keycloakUrl, realm, clientId, secret, serviceUsername, servicePassword, null);
 		GennyToken userToken = new GennyToken(payload.getString("token"));
 
 		// Try Catch to stop consumer from dying upon error
