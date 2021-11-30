@@ -59,6 +59,14 @@ public class MessageProcessor {
 		log.info("Realm is " + realm + " amd  serviceToken set");
 
 		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
+		
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} /* TODO: horrible hack by ACC to give the be time to save - should use Shleemy , hopefully updated cache will help */
+
 
 		// Create context map with BaseEntities
 		HashMap<String, Object> baseEntityContextMap = new HashMap<>();
