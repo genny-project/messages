@@ -54,6 +54,7 @@ public class MessageProcessor {
 
 		// Init utility objects
 		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
+		beUtils.setServiceToken(serviceToken);
 		String realm = beUtils.getGennyToken().getRealm();
 		log.info("Realm is " + realm);
 
