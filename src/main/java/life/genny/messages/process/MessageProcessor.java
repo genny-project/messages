@@ -53,7 +53,7 @@ public class MessageProcessor {
 		log.debug("Incoming Message ::" + message.toString());
 
 		// Init utility objects
-		BaseEntityUtils beUtils = new BaseEntityUtils(serviceToken, userToken);
+		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
 		String realm = beUtils.getGennyToken().getRealm();
 		log.info("Realm is " + realm);
 
@@ -206,8 +206,6 @@ public class MessageProcessor {
 	private static HashMap<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils, QMessageGennyMSG message) {
 		
 		HashMap<String, Object> baseEntityContextMap = new HashMap<>();
-		JSONObject decodedToken = KeycloakUtils.getDecodedToken(beUtils.getGennyToken().getToken());
-		String realm = decodedToken.getString("aud");
 		
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
 		{

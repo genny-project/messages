@@ -59,12 +59,22 @@ public class EBCHandlers {
 		GennyToken userToken = new GennyToken(payload.getString("token"));
 
 		// Try Catch to stop consumer from dying upon error
+		QMessageGennyMSG message = null;
 		try {
-			final QMessageGennyMSG message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
-			MessageProcessor.processGenericMessage(message, serviceToken, userToken);
+			message = JsonUtils.fromJson(payload.toString(), QMessageGennyMSG.class);
 		} catch (Exception e) {
-			log.error(ANSIColour.RED+"Message Handling Failed!!!!!"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+"Message Deserialisation Failed!!!!!"+ANSIColour.RESET);
 			log.error(ANSIColour.RED+e+ANSIColour.RESET);
+		}
+
+		if (message != null) {
+			// Try Catch to stop consumer from dying upon error
+			try {
+				MessageProcessor.processGenericMessage(message, serviceToken, userToken);
+			} catch (Exception e) {
+				log.error(ANSIColour.RED+"Message Processing Failed!!!!!"+ANSIColour.RESET);
+				log.error(ANSIColour.RED+e+ANSIColour.RESET);
+			}
 		}
 				
 	}
