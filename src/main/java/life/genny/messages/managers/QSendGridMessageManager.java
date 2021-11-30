@@ -48,7 +48,17 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 
 		String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
+		
+		
+		// test data
+		log.info("Showing what is in recipient BE");
+		for (EntityAttribute ea : recipientBe.getBaseEntityAttributes()) {
+			log.info(ea);		
+		}
+		
+		
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
+		
 		if (recipient != null) {
 			recipient = recipient.trim();
 		}
@@ -57,6 +67,28 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 		log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
 
+		recipientBe = beUtils.getBaseEntityByCode(recipientBe.getCode());
+		log.info("Showing what is in recipient BE2");
+		for (EntityAttribute ea : recipientBe.getBaseEntityAttributes()) {
+			log.info(ea);		
+		}
+		
+		
+		recipient = recipientBe.getValue("PRI_EMAIL", null);
+		
+		if (recipient != null) {
+			recipient = recipient.trim();
+		}
+		if (timezone == null || timezone.replaceAll(" ", "").isEmpty()) {
+			timezone = "UTC";
+		}
+		log.info("Recipient BeCode2: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
+		
+		
+		
+		
+		
+		
 		if (recipient == null) {
 			log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 			return;
