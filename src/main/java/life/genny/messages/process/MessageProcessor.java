@@ -56,7 +56,7 @@ public class MessageProcessor {
 		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
 		beUtils.setServiceToken(serviceToken);
 		String realm = beUtils.getGennyToken().getRealm();
-		log.info("Realm is " + realm);
+		log.info("Realm is " + realm + " amd  serviceToken set");
 
 		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
 
