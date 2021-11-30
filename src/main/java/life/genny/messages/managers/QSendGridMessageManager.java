@@ -55,7 +55,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 		if (timezone == null || timezone.replaceAll(" ", "").isEmpty()) {
 			timezone = "UTC";
 		}
-		log.info("Recipient BeCode: " + recipientBe.getCode() + "Recipient Email: " + recipient + ", Timezone: " + timezone);
+		log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
 
 		if (recipient == null) {
 			log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
