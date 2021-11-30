@@ -222,10 +222,10 @@ public class MessageProcessor {
 		    	if (value.matches("[A-Z]{3}\\_.*") && !key.startsWith("URL")) {
 					// Create Array of Codes
 					String[] codeArr = beUtils.cleanUpAttributeValue(value).split(",");
-
+					log.info("Fetching contextCodeArray "+codeArr);
 					// Convert to BEs
 					BaseEntity[] beArray = Arrays.stream(codeArr)
-						.map(item -> (BaseEntity) beUtils.getBaseEntityByCode(item))
+						.map(itemCode -> (BaseEntity) beUtils.getBaseEntityByCode(itemCode))
 						.toArray(BaseEntity[]::new);
 
 					if (beArray.length == 1) {
