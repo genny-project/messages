@@ -59,11 +59,6 @@ public class MessageProcessor {
 
 		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
 
-		// Create context map with BaseEntities
-		HashMap<String, Object> baseEntityContextMap = new HashMap<>();
-		baseEntityContextMap = createBaseEntityContextMap(beUtils, message);
-		baseEntityContextMap.put("PROJECT", projectBe);
-
 		List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
 
 		String[] recipientArr = message.getRecipientArr();
@@ -73,6 +68,25 @@ public class MessageProcessor {
 		if (message.getTemplateCode() != null) {
 			templateBe = beUtils.getBaseEntityByCode(message.getTemplateCode());
 		}
+
+		if (templateBe != null) {
+			String cc = templateBe.getValue("PRI_CC", null);
+			String bcc = templateBe.getValue("PRI_BCC", null);
+
+			if (cc != null) {
+				log.debug("Using CC from template BaseEntity");
+				message.getMessageContextMap().put("CC", cc);
+			}
+			if (bcc != null) {
+				log.debug("Using BCC from template BaseEntity");
+				message.getMessageContextMap().put("BCC", bcc);
+			}
+		}
+
+		// Create context map with BaseEntities
+		HashMap<String, Object> baseEntityContextMap = new HashMap<>();
+		baseEntityContextMap = createBaseEntityContextMap(beUtils, message);
+		baseEntityContextMap.put("PROJECT", projectBe);
 
 		if (templateBe == null) {
 			log.warn(ANSIColour.YELLOW + "No Template found for " + message.getTemplateCode() + ANSIColour.RESET);
