@@ -37,6 +37,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 		BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
+		
+		recipientBe = beUtils.getBaseEntityByCode(recipientBe.getCode(), true);
 
 		if (templateBe == null) {
 			log.error(ANSIColour.RED+"TemplateBE passed is NULL!!!!"+ANSIColour.RESET);
@@ -48,15 +50,32 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 
 		String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
+		
+		
+		// test data
+		log.info("Showing what is in recipient BE");
+		for (EntityAttribute ea : recipientBe.getBaseEntityAttributes()) {
+			log.info(ea);		
+		}
+		
+		
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
+		
 		if (recipient != null) {
 			recipient = recipient.trim();
 		}
 		if (timezone == null || timezone.replaceAll(" ", "").isEmpty()) {
 			timezone = "UTC";
 		}
-		log.info("Recipient: " + recipient + ", Timezone: " + timezone);
+		log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
 
+
+		
+		
+		
+		
+		
+		
 		if (recipient == null) {
 			log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 			return;

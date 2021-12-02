@@ -54,10 +54,20 @@ public class MessageProcessor {
 
 		// Init utility objects
 		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
+		beUtils.setServiceToken(serviceToken);
 		String realm = beUtils.getGennyToken().getRealm();
-		log.info("Realm is " + realm);
+		log.info("Realm is " + realm + " amd  serviceToken set");
 
 		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
+		
+		try {
+			log.warn("*** HORRIBLE ACC HACK TO DELAY FOR 10 SEC TO ALLOW CACHE ITEM TO BE COMPLETE");
+			Thread.sleep(10000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} /* TODO: horrible hack by ACC to give the be time to save - should use Shleemy , hopefully updated cache will help */
+
 
 		List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
 
@@ -235,10 +245,10 @@ public class MessageProcessor {
 		    	if (value.matches("[A-Z]{3}\\_.*") && !key.startsWith("URL")) {
 					// Create Array of Codes
 					String[] codeArr = beUtils.cleanUpAttributeValue(value).split(",");
-
+					log.info("Fetching contextCodeArray "+codeArr);
 					// Convert to BEs
 					BaseEntity[] beArray = Arrays.stream(codeArr)
-						.map(item -> (BaseEntity) beUtils.getBaseEntityByCode(item))
+						.map(itemCode -> (BaseEntity) beUtils.getBaseEntityByCode(itemCode))
 						.toArray(BaseEntity[]::new);
 
 					if (beArray.length == 1) {
