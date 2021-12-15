@@ -1,20 +1,19 @@
 package life.genny.messages.managers;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Map;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwandautils.ANSIColour;
-import life.genny.utils.BaseEntityUtils;
+
+import org.jboss.logging.Logger;
+
+import life.genny.qwandaq.entity.BaseEntity;
+import life.genny.qwandaq.models.ANSIColour;
+import life.genny.qwandaq.utils.BaseEntityUtils;
 
 public class QErrorManager implements QMessageProvider {
 	
     
     public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
 	
-	private static final Logger log = LoggerFactory
-			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	private static final Logger log = Logger.getLogger(QErrorManager.class);
 	
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {

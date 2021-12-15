@@ -8,25 +8,24 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.io.IOException;
-import org.json.JSONObject;
+
 import org.jboss.logging.Logger;
+
 import life.genny.messages.managers.QMessageFactory;
 import life.genny.messages.managers.QMessageProvider;
-import life.genny.models.GennyToken;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.attribute.EntityAttribute;
-import life.genny.qwanda.attribute.Attribute;
-import life.genny.qwanda.message.QBaseMSGMessageType;
-import life.genny.message.QMessageGennyMSG;
-import life.genny.qwandautils.KeycloakUtils;
-import life.genny.qwandautils.MergeUtil;
-import life.genny.qwandautils.ANSIColour;
-import life.genny.utils.VertxUtils;
-import life.genny.utils.BaseEntityUtils;
-import life.genny.utils.RulesUtils;
-
+import life.genny.qwandaq.models.GennyToken;
+import life.genny.qwandaq.entity.BaseEntity;
+import life.genny.qwandaq.attribute.EntityAttribute;
+import life.genny.qwandaq.attribute.Attribute;
+import life.genny.qwandaq.message.QBaseMSGMessageType;
+import life.genny.qwandaq.message.QMessageGennyMSG;
+import life.genny.qwandaq.utils.KeycloakUtils;
+import life.genny.qwandaq.utils.MergeUtils;
+import life.genny.qwandaq.utils.BaseEntityUtils;
+import life.genny.qwandaq.models.GennySettings;
+import life.genny.qwandaq.models.ANSIColour;
+import life.genny.qwandaq.utils.QwandaUtils;
 import life.genny.messages.util.MsgUtils;
-import life.genny.qwandautils.GennySettings;
 
 public class MessageProcessor {
 
@@ -106,7 +105,7 @@ public class MessageProcessor {
 			// Handle any default context associations
 			String contextAssociations = templateBe.getValue("PRI_CONTEXT_ASSOCIATIONS", null);
 			if (contextAssociations != null) {
-				MergeUtil.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations, false);
+				MergeUtils.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations, false);
 			}
 
 			// Check for Default Message
@@ -118,8 +117,8 @@ public class MessageProcessor {
 
 		}
 
-		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", userToken.getToken());
-		Attribute mobileAttr = RulesUtils.getAttribute("PRI_MOBILE", userToken.getToken());
+		Attribute emailAttr = QwandaUtils.getAttribute("PRI_EMAIL", userToken);
+		Attribute mobileAttr = QwandaUtils.getAttribute("PRI_MOBILE", userToken);
 
 		for (String recipient : recipientArr) {
 
@@ -199,8 +198,8 @@ public class MessageProcessor {
 				QMessageProvider provider = messageFactory.getMessageProvider(msgType);
 
 				/* check if unsubscription list for the template code has the userCode */
-				Boolean isUserUnsubscribed = VertxUtils.checkIfAttributeValueContainsString(unsubscriptionBe,
-						templateCode, recipientBe.getCode());
+				String templateAssociation = unsubscriptionBe.getValue(templateCode, "");
+				Boolean isUserUnsubscribed = templateAssociation.contains(recipientBe.getCode());
 
 				if (provider != null) {
 					/*

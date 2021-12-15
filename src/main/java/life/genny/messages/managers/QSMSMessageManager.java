@@ -2,28 +2,29 @@ package life.genny.messages.managers;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
+
+import org.jboss.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.message.QBaseMSGMessage;
-import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.message.QMessageGennyMSG;
-import life.genny.qwandautils.MergeUtil;
-import life.genny.qwandautils.ANSIColour;
-import life.genny.messages.util.MergeHelper;
-import life.genny.utils.BaseEntityUtils;
+
+import life.genny.qwandaq.entity.BaseEntity;
+import life.genny.qwandaq.message.QMessageGennyMSG;
+import life.genny.qwandaq.message.QCmdMessage;
+import life.genny.qwandaq.utils.MergeUtils;
+import life.genny.qwandaq.utils.BaseEntityUtils;
+import life.genny.qwandaq.utils.KafkaUtils;
+import life.genny.qwandaq.models.GennySettings;
+import life.genny.qwandaq.models.ANSIColour;
 
 public class QSMSMessageManager implements QMessageProvider {
 	
     
     public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
 	
-	private static final Logger log = LoggerFactory
-			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	private static final Logger log = Logger.getLogger(QErrorManager.class);
 	
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
@@ -59,7 +60,7 @@ public class QSMSMessageManager implements QMessageProvider {
 		}
 
 		// Mail Merging Data
-		body = MergeUtil.merge(body, contextMap);
+		body = MergeUtils.merge(body, contextMap);
 
 		//target is toPhoneNumber, Source is the fromPhoneNumber
 		String accountSID = projectBe.getValue("ENV_TWILIO_ACCOUNT_SID", null);
@@ -92,78 +93,6 @@ public class QSMSMessageManager implements QMessageProvider {
 			log.error(ANSIColour.RED+"Twilio credentials not loaded into cache"+ANSIColour.RESET);
 		}
 			
-	}
-
-
-	// @Override
-	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, 
-			Map<String, Object> entityTemplateMap) {
-
-		String token = beUtils.getGennyToken().getToken();
-
-		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
-		BaseEntity recipientBe = (BaseEntity)(entityTemplateMap.get("RECIPIENT"));
-		
-		if(recipientBe != null) {
-			if (template != null) {
-				
-				String smsMesssage = template.getSms_template();
-				log.info(ANSIColour.GREEN+"sms template from google sheet ::"+smsMesssage+ANSIColour.RESET);
-				
-				// Merging SMS template message with BaseEntity values
-				String messageData = MergeUtil.merge(smsMesssage, entityTemplateMap);
-				
-				baseMessage = new QBaseMSGMessage();
-				baseMessage.setSubject(template.getSubject());
-				baseMessage.setMsgMessageData(messageData);
-				
-				String targetPhone = recipientBe.getValue("PRI_MOBILE", null);
-				log.info("target phone ::"+targetPhone);
-				
-				baseMessage.setTarget(targetPhone);
-				log.info("------->SMS DETAILS ::"+baseMessage+"<---------");
-								
-			} else {
-				log.error("NO TEMPLATE FOUND");
-			}
-		} else {
-			log.error("Recipient BaseEntity is NULL");
-		}
-		
-		return baseMessage;
-	}
-
-
-	// @Override
-	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap, String to) {
-
-		String token = beUtils.getGennyToken().getToken();
-		
-		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
-		
-		if (template != null) {
-			
-			String smsMesssage = template.getSms_template();
-			log.info(ANSIColour.GREEN+"sms template from google sheet ::"+smsMesssage+ANSIColour.RESET);
-			
-			// Merging SMS template message with BaseEntity values
-			String messageData = MergeUtil.merge(smsMesssage, entityTemplateMap);
-			
-			baseMessage = new QBaseMSGMessage();
-			baseMessage.setSubject(template.getSubject());
-			baseMessage.setMsgMessageData(messageData);
-			baseMessage.setTarget(to);
-			log.info("------->SMS DETAILS ::"+baseMessage+"<---------");
-							
-		} else {
-			log.error("NO TEMPLATE FOUND");
-		}
-		
-		
-		return baseMessage;
 	}
 
 }

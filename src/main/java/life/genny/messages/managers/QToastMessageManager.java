@@ -1,43 +1,35 @@
 package life.genny.messages.managers;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import life.genny.messages.channels.Producer;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.message.QBaseMSGMessage;
-import life.genny.qwanda.message.QBaseMSGMessageTemplate;
-import life.genny.message.QMessageGennyMSG;
-import life.genny.qwanda.message.QCmdMessage;
-import life.genny.qwandautils.GennySettings;
-import life.genny.qwandautils.MergeUtil;
-import life.genny.qwandautils.ANSIColour;
-import life.genny.messages.util.MergeHelper;
-import life.genny.utils.BaseEntityUtils;
-import life.genny.utils.VertxUtils;
+import org.jboss.logging.Logger;
+
+import life.genny.messages.live.data.InternalProducer;
+import life.genny.qwandaq.entity.BaseEntity;
+import life.genny.qwandaq.message.QCmdMessage;
+import life.genny.qwandaq.utils.MergeUtils;
+import life.genny.qwandaq.utils.BaseEntityUtils;
 
 @ApplicationScoped
 public class QToastMessageManager implements QMessageProvider{
 	
-
-	
-	private static final Logger log = LoggerFactory
-			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	private static final Logger log = Logger.getLogger(QToastMessageManager.class);
 
 	@Inject
-	Producer producer;
+	InternalProducer producer;
+
+	Jsonb jsonb = JsonbBuilder.create();
 
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 		
 		log.info("About to send toast message");
 		
-		/* message.getPriority() returns "error" for templateCode containing "FAIL", returns "info" for other templates */ 
 		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 
 		if (target == null) {
@@ -70,101 +62,16 @@ public class QToastMessageManager implements QMessageProvider{
 		}
 
 		// Mail Merging Data
-		body = MergeUtil.merge(body, contextMap);
+		body = MergeUtils.merge(body, contextMap);
 
 		QCmdMessage msg = new QCmdMessage("TOAST", style);
 		msg.setMessage(body);
 		msg.setToken(beUtils.getGennyToken().getToken());
 		msg.setSend(true);
-		VertxUtils.writeMsg("webcmds", msg);
-	}
 
+		String json = jsonb.toJson(msg);
 
-	// @Override
-	public QBaseMSGMessage setGenericMessageValue(BaseEntityUtils beUtils, QMessageGennyMSG message, 
-			Map<String, Object> entityTemplateMap) {
-
-		String token = beUtils.getGennyToken().getToken();
-		
-		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
-		BaseEntity recipientBe = (BaseEntity)(entityTemplateMap.get("RECIPIENT"));
-		
-		if(recipientBe != null) {
-			if (template != null) {
-				
-				String toastMessage = template.getToast_template();
-				log.info(ANSIColour.GREEN+"toast template from google sheet ::"+toastMessage+ANSIColour.RESET);
-				
-				// Merging SMS template message with BaseEntity values
-				String messageData = MergeUtil.merge(toastMessage, entityTemplateMap);
-				
-				baseMessage = new QBaseMSGMessage();
-				baseMessage.setMsgMessageData(messageData);
-				baseMessage.setToken(token);
-				baseMessage.setTarget(recipientBe.getCode());
-				
-				if(message.getTemplateCode().contains("FAIL")) {
-					baseMessage.setPriority("error");
-				} else {
-					baseMessage.setPriority("info");
-				}
-				
-				log.info("------->TOAST DETAILS ::"+baseMessage+"<---------");
-								
-			} else {
-				log.error("NO TEMPLATE FOUND");
-			}
-		} else {
-			log.error("Recipient BaseEntity is NULL");
-		}
-		return baseMessage;
-	}
-
-
-	/* refrain from using this method, instead pass the recipient array itself */
-	// @Override
-	public QBaseMSGMessage setGenericMessageValueForDirectRecipient(BaseEntityUtils beUtils, QMessageGennyMSG message,
-			Map<String, Object> entityTemplateMap, String to) {
-
-		String token = beUtils.getGennyToken().getToken();
-		
-		QBaseMSGMessage baseMessage = null;
-		QBaseMSGMessageTemplate template = MergeHelper.getTemplate(message.getTemplateCode(), token);
-		
-		BaseEntityUtils baseEntity = new BaseEntityUtils(GennySettings.qwandaServiceUrl, token, null, null);
-		BaseEntity userBe = baseEntity.getBaseEntityByAttributeAndValue("PRI_EMAIL", to);
-		log.info("direct user recipient for toast ::"+userBe.getCode());
-			
-		if (template != null) {
-				
-			String toastMessage = template.getToast_template();
-			log.info(ANSIColour.GREEN+"toast template from google sheet ::"+toastMessage+ANSIColour.RESET);
-			
-			// Merging SMS template message with BaseEntity values
-			String messageData = MergeUtil.merge(toastMessage, entityTemplateMap);
-			
-			baseMessage = new QBaseMSGMessage();
-			baseMessage.setMsgMessageData(messageData);
-			baseMessage.setToken(token);
-			
-			if(userBe != null) {
-				baseMessage.setTarget(userBe.getCode());
-			}
-			
-			if(message.getTemplateCode().contains("FAIL")) {
-				baseMessage.setPriority("error");
-			} else {
-				baseMessage.setPriority("info");
-			}
-			
-			log.info("------->TOAST DETAILS ::"+baseMessage+"<---------");
-								
-		} else {
-			log.error("NO TEMPLATE FOUND");
-		}
-		
-		return baseMessage;
+		producer.getToWebCmds().send(json);
 	}
 
 }
