@@ -82,14 +82,14 @@ public class MessageProcessor {
 			String cc = templateBe.getValue("PRI_CC", null);
 			String bcc = templateBe.getValue("PRI_BCC", null);
 
-			if (cc != null) {
-				log.debug("Using CC from template BaseEntity");
-				message.getMessageContextMap().put("CC", cc);
-			}
-			if (bcc != null) {
-				log.debug("Using BCC from template BaseEntity");
-				message.getMessageContextMap().put("BCC", bcc);
-			}
+			// if (cc != null) {
+			// 	log.debug("Using CC from template BaseEntity");
+			// 	message.getMessageContextMap().put("CC", cc);
+			// }
+			// if (bcc != null) {
+			// 	log.debug("Using BCC from template BaseEntity");
+			// 	message.getMessageContextMap().put("BCC", bcc);
+			// }
 		}
 
 		// Create context map with BaseEntities
