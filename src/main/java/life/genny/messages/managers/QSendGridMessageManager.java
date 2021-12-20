@@ -21,8 +21,6 @@ import com.sendgrid.helpers.mail.objects.Personalization;
 
 import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.entity.BaseEntity;
-import life.genny.qwandaq.message.QMessageGennyMSG;
-import life.genny.qwandaq.message.QCmdMessage;
 import life.genny.qwandaq.utils.MergeUtils;
 import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.KafkaUtils;
@@ -71,13 +69,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 		log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
 
-
-		
-		
-		
-		
-		
-		
 		if (recipient == null) {
 			log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 			return;
@@ -126,9 +117,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 									ZonedDateTime zonedDateTime = dtt.atZone(ZoneId.of("UTC"));
 									ZonedDateTime converted = zonedDateTime.withZoneSameInstant(ZoneId.of(timezone));
-									LocalDateTime zonedLocalDateTime = converted.toLocalDateTime();
 
-									valueString = MergeUtils.getFormattedDateTimeString(zonedLocalDateTime, format);
+									valueString = MergeUtils.getFormattedZonedDateTimeString(converted, format);
 
 								} else {
 									log.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");
