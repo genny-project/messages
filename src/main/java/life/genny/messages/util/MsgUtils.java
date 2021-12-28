@@ -42,4 +42,33 @@ public class MsgUtils {
 		return url;
 	}
 
+	public static String encodedUrlBuilder(String base, String parentCode, String code, String targetCode, String token) {
+		/**
+		 * A Function for Base64 encoding urls
+		 **/
+		StringBuilder url = new StringBuilder();
+		// Encode Parent and Code
+		url
+				.append(base)
+				.append("/")
+				.append(Base64.getEncoder().encodeToString(parentCode.getBytes()))
+				.append("/")
+				.append(Base64.getEncoder().encodeToString(code.getBytes()));
+
+		// Add encoded targetCode if not null
+		if (targetCode != null) {
+			url
+					.append("/")
+					.append(Base64.getEncoder().encodeToString(targetCode.getBytes()));
+		}
+
+		// Add access token if not null
+		if (token != null) {
+			url
+					.append("?token=")
+					.append(token);
+		}
+		return url.toString();
+	}
+
 }
