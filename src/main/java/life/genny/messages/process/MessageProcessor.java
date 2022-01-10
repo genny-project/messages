@@ -1,32 +1,26 @@
 package life.genny.messages.process;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.io.IOException;
-import org.json.JSONObject;
-import org.jboss.logging.Logger;
+import life.genny.message.QMessageGennyMSG;
 import life.genny.messages.managers.QMessageFactory;
 import life.genny.messages.managers.QMessageProvider;
+import life.genny.messages.util.MsgUtils;
 import life.genny.models.GennyToken;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.attribute.EntityAttribute;
 import life.genny.qwanda.attribute.Attribute;
+import life.genny.qwanda.attribute.EntityAttribute;
+import life.genny.qwanda.entity.BaseEntity;
 import life.genny.qwanda.message.QBaseMSGMessageType;
-import life.genny.message.QMessageGennyMSG;
+import life.genny.qwandautils.ANSIColour;
+import life.genny.qwandautils.GennySettings;
 import life.genny.qwandautils.KeycloakUtils;
 import life.genny.qwandautils.MergeUtil;
-import life.genny.qwandautils.ANSIColour;
-import life.genny.utils.VertxUtils;
 import life.genny.utils.BaseEntityUtils;
 import life.genny.utils.RulesUtils;
+import life.genny.utils.VertxUtils;
+import org.jboss.logging.Logger;
 
-import life.genny.messages.util.MsgUtils;
-import life.genny.qwandautils.GennySettings;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MessageProcessor {
 
@@ -188,7 +182,7 @@ public class MessageProcessor {
 					log.error("Could not fetch Token: " + e.getStackTrace());
 				}
 				// Encode URL and put back in the map
-				String url = MsgUtils.encodeUrl(GennySettings.projectUrl+"/home", parentCode, code, targetCode, accessToken);
+				String url = MsgUtils.encodedUrlBuilder(GennySettings.projectUrl+"/home", parentCode, code, targetCode, accessToken);
 				baseEntityContextMap.put("URL", url);
 			}
 
