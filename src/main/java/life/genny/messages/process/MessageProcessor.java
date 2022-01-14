@@ -40,22 +40,20 @@ public class MessageProcessor {
 	 * @param serviceToken
 	 * @param userToken
 	 */
-	public static void processGenericMessage(QMessageGennyMSG message, GennyToken serviceToken, GennyToken userToken) {
+	public static void processGenericMessage(QMessageGennyMSG message, BaseEntityUtils beUtils, QwandaUtils qwandaUtils) {
 
 		// Begin recording duration
 		long start = System.currentTimeMillis();
 
+		GennyToken userToken = beUtils.getGennyToken();
+		GennyToken serviceToken = beUtils.getServiceToken();
+		String realm = beUtils.getGennyToken().getRealm();
+
+		log.debug("Realm is " + realm + " - Incoming Message :: " + message.toString());
+
 		if (message == null) {
 			log.error(ANSIColour.RED + "GENNY COM MESSAGE IS NULL" + ANSIColour.RESET);
 		}
-
-		log.debug("Incoming Message ::" + message.toString());
-
-		// Init utility objects
-		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
-		beUtils.setServiceToken(serviceToken);
-		String realm = beUtils.getGennyToken().getRealm();
-		log.info("Realm is " + realm + " amd  serviceToken set");
 
 		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
 		
@@ -117,8 +115,8 @@ public class MessageProcessor {
 
 		}
 
-		Attribute emailAttr = QwandaUtils.getAttribute("PRI_EMAIL", userToken);
-		Attribute mobileAttr = QwandaUtils.getAttribute("PRI_MOBILE", userToken);
+		Attribute emailAttr = qwandaUtils.getAttribute("PRI_EMAIL");
+		Attribute mobileAttr = qwandaUtils.getAttribute("PRI_MOBILE");
 
 		for (String recipient : recipientArr) {
 

@@ -17,7 +17,10 @@ import life.genny.messages.process.MessageProcessor;
 import life.genny.qwandaq.message.QMessageGennyMSG;
 import life.genny.qwandaq.models.ANSIColour;
 import life.genny.qwandaq.models.GennyToken;
+import life.genny.qwandaq.utils.BaseEntityUtils;
+import life.genny.qwandaq.utils.DefUtils;
 import life.genny.qwandaq.utils.KeycloakUtils;
+import life.genny.qwandaq.utils.QwandaUtils;
 
 @ApplicationScoped
 public class InternalConsumer {
@@ -44,12 +47,30 @@ public class InternalConsumer {
 
 	GennyToken serviceToken;
 
+	BaseEntityUtils beUtils;
+
+	QwandaUtils qwandaUtils;
+
+	DefUtils defUtils;
+
 	Jsonb jsonb = JsonbBuilder.create();
 
     void onStart(@Observes StartupEvent ev) {
         log.info("The application is starting...");
 		log.info("Fetching serviceToken...");
+
 		serviceToken = new KeycloakUtils().getToken(keycloakUrl, keycloakRealm, clientId, secret, serviceUsername, servicePassword, null);
+
+		// Init Utility Objects
+		beUtils = new BaseEntityUtils(serviceToken);
+
+		qwandaUtils = new QwandaUtils(serviceToken);
+		qwandaUtils.loadAllAttributes();
+
+		defUtils = new DefUtils(beUtils, qwandaUtils);
+		defUtils.initializeDefs();
+
+
 		log.info("Application Ready!");
     }
 
@@ -59,9 +80,12 @@ public class InternalConsumer {
 
 	@Incoming("messages")
 	public void getFromMessages(String payload) {
+
 		log.info("Received EVENT :" + (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
 
+		// Log entire payload for debugging purposes
 		log.debug(payload);
+
 		log.info("################################################################");
 		log.info(">>>>>>>>>>>>>>>>>> PROCESSING NEW MESSAGE <<<<<<<<<<<<<<<<<<<<<<");
 		log.info("################################################################");
@@ -81,7 +105,7 @@ public class InternalConsumer {
 		if (message != null && userToken != null) {
 			// Try Catch to stop consumer from dying upon error
 			try {
-				MessageProcessor.processGenericMessage(message, serviceToken, userToken);
+				MessageProcessor.processGenericMessage(message, beUtils, qwandaUtils);
 			} catch (Exception e) {
 				log.error(ANSIColour.RED+"Message Processing Failed!!!!!"+ANSIColour.RESET);
 				log.error(ANSIColour.RED+e+ANSIColour.RESET);
