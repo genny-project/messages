@@ -56,22 +56,17 @@ public class InternalConsumer {
 	Jsonb jsonb = JsonbBuilder.create();
 
     void onStart(@Observes StartupEvent ev) {
-        log.info("The application is starting...");
-		log.info("Fetching serviceToken...");
 
+        log.info("The application is starting...");
 		serviceToken = new KeycloakUtils().getToken(keycloakUrl, keycloakRealm, clientId, secret, serviceUsername, servicePassword, null);
 
 		// Init Utility Objects
 		beUtils = new BaseEntityUtils(serviceToken);
 
-		qwandaUtils = new QwandaUtils(serviceToken);
-		qwandaUtils.loadAllAttributes();
+		QwandaUtils.init(serviceToken);
+		DefUtils.init(beUtils);
 
-		defUtils = new DefUtils(beUtils, qwandaUtils);
-		defUtils.initializeDefs();
-
-
-		log.info("Application Ready!");
+		log.info("[*] Consumer Ready!");
     }
 
     void onStop(@Observes ShutdownEvent ev) {
@@ -105,7 +100,7 @@ public class InternalConsumer {
 		if (message != null && userToken != null) {
 			// Try Catch to stop consumer from dying upon error
 			try {
-				MessageProcessor.processGenericMessage(message, beUtils, qwandaUtils);
+				MessageProcessor.processGenericMessage(message, beUtils);
 			} catch (Exception e) {
 				log.error(ANSIColour.RED+"Message Processing Failed!!!!!"+ANSIColour.RESET);
 				log.error(ANSIColour.RED+e+ANSIColour.RESET);

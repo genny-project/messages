@@ -40,7 +40,7 @@ public class MessageProcessor {
 	 * @param serviceToken
 	 * @param userToken
 	 */
-	public static void processGenericMessage(QMessageGennyMSG message, BaseEntityUtils beUtils, QwandaUtils qwandaUtils) {
+	public static void processGenericMessage(QMessageGennyMSG message, BaseEntityUtils beUtils) {
 
 		// Begin recording duration
 		long start = System.currentTimeMillis();
@@ -112,11 +112,10 @@ public class MessageProcessor {
 				List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
 				messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
 			}
-
 		}
 
-		Attribute emailAttr = qwandaUtils.getAttribute("PRI_EMAIL");
-		Attribute mobileAttr = qwandaUtils.getAttribute("PRI_MOBILE");
+		Attribute emailAttr = QwandaUtils.getAttribute("PRI_EMAIL");
+		Attribute mobileAttr = QwandaUtils.getAttribute("PRI_MOBILE");
 
 		for (String recipient : recipientArr) {
 
