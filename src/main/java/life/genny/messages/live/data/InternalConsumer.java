@@ -9,15 +9,20 @@ import io.quarkus.runtime.ShutdownEvent;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.persistence.EntityManager;
 
 import life.genny.messages.process.MessageProcessor;
+import life.genny.qwandaq.data.GennyCache;
 import life.genny.qwandaq.message.QMessageGennyMSG;
 import life.genny.qwandaq.models.ANSIColour;
 import life.genny.qwandaq.models.GennyToken;
 import life.genny.qwandaq.utils.BaseEntityUtils;
+import life.genny.qwandaq.utils.CacheUtils;
+import life.genny.qwandaq.utils.DatabaseUtils;
 import life.genny.qwandaq.utils.DefUtils;
 import life.genny.qwandaq.utils.KeycloakUtils;
 import life.genny.qwandaq.utils.QwandaUtils;
@@ -45,13 +50,15 @@ public class InternalConsumer {
 	@ConfigProperty(name = "genny.oidc.credentials.secret", defaultValue = "secret")
 	String secret;
 
+	@Inject
+	EntityManager entityManager;
+
+	@Inject
+	GennyCache cache;
+
 	GennyToken serviceToken;
 
 	BaseEntityUtils beUtils;
-
-	QwandaUtils qwandaUtils;
-
-	DefUtils defUtils;
 
 	Jsonb jsonb = JsonbBuilder.create();
 
@@ -63,8 +70,11 @@ public class InternalConsumer {
 		// Init Utility Objects
 		beUtils = new BaseEntityUtils(serviceToken);
 
+		// Establish connection to DB and cache, and init utilities
+		DatabaseUtils.init(entityManager);
+		CacheUtils.init(cache);
 		QwandaUtils.init(serviceToken);
-		DefUtils.init(beUtils);
+		// DefUtils.init(beUtils);
 
 		log.info("[*] Consumer Ready!");
     }
