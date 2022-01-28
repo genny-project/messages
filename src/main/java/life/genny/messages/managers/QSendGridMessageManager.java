@@ -51,7 +51,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 		String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
 
-		log.info("Timezone returned from recipient BE is:: " + timezone);
+		log.info("Timezone returned from recipient BE " + recipientBe.getCode() + " is:: " + timezone);
 
 		// test data
 		log.info("Showing what is in recipient BE");
