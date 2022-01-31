@@ -29,7 +29,7 @@ import life.genny.qwandaq.models.ANSIColour;
 
 public class QSendGridMessageManager implements QMessageProvider {
 
-	private static final Logger log = Logger.getLogger(QErrorManager.class);
+	private static final Logger log = Logger.getLogger(QSendGridMessageManager.class);
 
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {

@@ -20,7 +20,7 @@ public class QEmailMessageManager implements QMessageProvider {
 	
 	public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
 	
-	private static final Logger log = Logger.getLogger(QErrorManager.class);
+	private static final Logger log = Logger.getLogger(QEmailMessageManager.class);
 
 	@Inject
 	Mailer mailer;

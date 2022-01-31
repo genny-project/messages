@@ -49,10 +49,6 @@ public class MessageProcessor {
 		GennyToken serviceToken = beUtils.getServiceToken();
 		String realm = beUtils.getGennyToken().getRealm();
 
-		log.info("serviceToken keycloakUrl = " + serviceToken.getKeycloakUrl());
-		log.info("serviceToken realm = " + serviceToken.getRealm());
-		log.info("serviceToken token = " + serviceToken.getToken());
-
 		log.debug("Realm is " + realm + " - Incoming Message :: " + message.toString());
 
 		if (message == null) {
@@ -183,7 +179,7 @@ public class MessageProcessor {
 				String accessToken = null;
 				try {
 					log.info("Fetching Token for " + recipientBe.getCode());
-					accessToken = KeycloakUtils.getImpersonatedToken(serviceToken.getKeycloakUrl(), serviceToken.getRealm(), projectBe, recipientBe, serviceToken.getToken());
+					accessToken = KeycloakUtils.getImpersonatedToken(GennySettings.keycloakUrl, serviceToken.getRealm(), projectBe, recipientBe, serviceToken.getToken());
 				} catch (IOException e) {
 					log.error("Could not fetch Token: " + e.getStackTrace());
 				}

@@ -27,7 +27,7 @@ import life.genny.qwandaq.models.ANSIColour;
 
 public class QSlackMessageManager implements QMessageProvider {
 	
-	private static final Logger log = Logger.getLogger(QErrorManager.class);
+	private static final Logger log = Logger.getLogger(QSlackMessageManager.class);
 	
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
