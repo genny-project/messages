@@ -4,8 +4,6 @@ External Message Server used by the Genny-project. Used to send Emails, SMS and 
 
 ---
 
-# Project-Specific attributes to be added to GENNY sheet : 
-
 # EMAIL SERVICE
 
 Following are the attribute values to be added (to the Project-BaseEntity) in your project-specific sheet for using email-service for your project :
