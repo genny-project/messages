@@ -2,6 +2,7 @@ package life.genny.messages.live.data;
 
 import org.jboss.logging.Logger;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.quarkus.runtime.StartupEvent;
@@ -99,27 +100,26 @@ public class InternalConsumer {
 		GennyToken userToken = null;
 
 		// Try Catch to stop consumer from dying upon error
-		message = jsonb.fromJson(payload, QMessageGennyMSG.class);
 		try {
+			message = jsonb.fromJson(payload, QMessageGennyMSG.class);
 			userToken = new GennyToken(message.getToken());
 		} catch (Exception e) {
-			log.error("Bad Token Received!!!");
+			log.error(ANSIColour.RED+"Message Deserialisation Failed!!!!!"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+ExceptionUtils.getStackTrace(e)+ANSIColour.RESET);
 		}
 
-		MessageProcessor.processGenericMessage(message, beUtils);
-		// try {
-		// } catch (Exception e) {
-		// 	log.error(ANSIColour.RED+"Message Deserialisation Failed!!!!!"+ANSIColour.RESET);
-		// 	log.error(ANSIColour.RED+e+ANSIColour.RESET);
-		// }
+		if (message != null && userToken != null) {
 
-		// if (message != null && userToken != null) {
-		// 	// Try Catch to stop consumer from dying upon error
-		// 	try {
-		// 	} catch (Exception e) {
-		// 		log.error(ANSIColour.RED+"Message Processing Failed!!!!!"+ANSIColour.RESET);
-		// 		log.error(ANSIColour.RED+e+ANSIColour.RESET);
-		// 	}
-		// }
+			// update the beUtils with new token
+			beUtils = new BaseEntityUtils(serviceToken, userToken);
+
+			// Try Catch to stop consumer from dying upon error
+			try {
+				MessageProcessor.processGenericMessage(message, beUtils);
+			} catch (Exception e) {
+				log.error(ANSIColour.RED+"Message Processing Failed!!!!!"+ANSIColour.RESET);
+				log.error(ANSIColour.RED+ExceptionUtils.getStackTrace(e)+ANSIColour.RESET);
+			}
+		}
 	}
 }
