@@ -13,11 +13,6 @@ import org.eclipse.microprofile.reactive.messaging.Emitter;
 @ApplicationScoped
 public class InternalProducer {
 
-  @Inject @Channel("search_eventsout") Emitter<String> searchEvents;
-  public Emitter<String> getToSearchEvents() {
-    return searchEvents;
-  }
-
   @Inject @Channel("webcmdsout") Emitter<String> webCmds;
   public Emitter<String> getToWebCmds() {
     return webCmds;
