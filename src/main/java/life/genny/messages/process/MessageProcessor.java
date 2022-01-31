@@ -49,6 +49,10 @@ public class MessageProcessor {
 		GennyToken serviceToken = beUtils.getServiceToken();
 		String realm = beUtils.getGennyToken().getRealm();
 
+		log.info("serviceToken keycloakUrl = " + serviceToken.getKeycloakUrl());
+		log.info("serviceToken realm = " + serviceToken.getRealm());
+		log.info("serviceToken token = " + serviceToken.getToken());
+
 		log.debug("Realm is " + realm + " - Incoming Message :: " + message.toString());
 
 		if (message == null) {
