@@ -184,7 +184,7 @@ public class MessageProcessor {
 					log.error("Could not fetch Token: " + e.getStackTrace());
 				}
 				// Encode URL and put back in the map
-				String url = MsgUtils.encodeUrl(GennySettings.projectUrl+"/home", parentCode, code, targetCode, accessToken);
+				String url = MsgUtils.encodedUrlBuilder(GennySettings.projectUrl+"/home", parentCode, code, targetCode, accessToken);
 				baseEntityContextMap.put("URL", url);
 			}
 

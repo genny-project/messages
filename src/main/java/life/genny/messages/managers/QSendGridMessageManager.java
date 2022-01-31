@@ -51,16 +51,17 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 
 		String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
-		
-		
+
+		log.info("Timezone returned from recipient BE " + recipientBe.getCode() + " is:: " + timezone);
+
 		// test data
 		log.info("Showing what is in recipient BE");
 		for (EntityAttribute ea : recipientBe.getBaseEntityAttributes()) {
-			log.info(ea);		
+			log.info(ea);
 		}
-		
+
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
-		
+
 		if (recipient != null) {
 			recipient = recipient.trim();
 		}

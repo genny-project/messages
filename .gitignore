@@ -17,3 +17,4 @@ src/main/resources/messages-git.properties
 .classpath
 /bin/
 .factorypath
+*.iml
