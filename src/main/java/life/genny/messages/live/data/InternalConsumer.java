@@ -22,7 +22,7 @@ import life.genny.qwandaq.models.ANSIColour;
 import life.genny.qwandaq.models.GennyToken;
 import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.CacheUtils;
-import life.genny.qwandaq.utils.DatabaseUtils;
+// import life.genny.qwandaq.utils.DatabaseUtils;
 import life.genny.qwandaq.utils.DefUtils;
 import life.genny.qwandaq.utils.KeycloakUtils;
 import life.genny.qwandaq.utils.QwandaUtils;
@@ -71,7 +71,7 @@ public class InternalConsumer {
 		beUtils = new BaseEntityUtils(serviceToken);
 
 		// Establish connection to DB and cache, and init utilities
-		DatabaseUtils.init(entityManager);
+		// DatabaseUtils.init(entityManager);
 		CacheUtils.init(cache);
 		QwandaUtils.init(serviceToken);
 		// DefUtils.init(beUtils);
