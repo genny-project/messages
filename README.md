@@ -4,7 +4,7 @@ External Message Server used by the Genny-project. Used to send Emails, SMS and 
 
 ---
 
-# EMAIL SERVICE
+## EMAIL
 
 Following are the attribute values to be added (to the Project-BaseEntity) in your project-specific sheet for using email-service for your project :
 
@@ -22,7 +22,7 @@ The above attributes are sufficient for Gmail SMTP. Incase of Amazon Email accou
 
 To send an email to a recipient, the Person-BaseEntity should have the **PRI_EMAIL** attribute.
 
-# SMS Service
+## SMS
 
 We use [Twilio](https://www.twilio.com/) for SMS-services in Genny. The following are the values to be added in your project-specific sheet as project-specific attributes for using TWILIO SMS-service for your project :
 
