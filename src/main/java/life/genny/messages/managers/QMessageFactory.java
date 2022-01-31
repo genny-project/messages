@@ -2,14 +2,13 @@ package life.genny.messages.managers;
 
 import java.lang.invoke.MethodHandles;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import life.genny.qwanda.message.QBaseMSGMessageType;
+import org.jboss.logging.Logger;
+
+import life.genny.qwandaq.message.QBaseMSGMessageType;
 
 public class QMessageFactory {
 	
-	private static final Logger log = LoggerFactory
-			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	private static final Logger log = Logger.getLogger(QMessageFactory.class);
 	
 	public QMessageProvider getMessageProvider(QBaseMSGMessageType messageType)
 	  {
@@ -20,7 +19,7 @@ public class QMessageFactory {
 	    	provider = new QSMSMessageManager();
 	    	break;
 	    case EMAIL:
-	    	provider = new QVertxMailManager();
+	    	provider = new QEmailMessageManager();
 	    	break;
 	    case TOAST:
 	    	provider = new QToastMessageManager();

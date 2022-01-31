@@ -6,16 +6,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.attribute.EntityAttribute;
-import life.genny.qwandautils.MergeUtil;
-import life.genny.qwandautils.ANSIColour;
-import life.genny.utils.BaseEntityUtils;
-import life.genny.qwandautils.GennySettings;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+
+import org.jboss.logging.Logger;
 
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -25,10 +19,17 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 
+import life.genny.qwandaq.attribute.EntityAttribute;
+import life.genny.qwandaq.entity.BaseEntity;
+import life.genny.qwandaq.utils.MergeUtils;
+import life.genny.qwandaq.utils.BaseEntityUtils;
+import life.genny.qwandaq.utils.KafkaUtils;
+import life.genny.qwandaq.models.GennySettings;
+import life.genny.qwandaq.models.ANSIColour;
+
 public class QSendGridMessageManager implements QMessageProvider {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(MethodHandles.lookup().lookupClass().getCanonicalName());
+	private static final Logger log = Logger.getLogger(QErrorManager.class);
 
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
@@ -37,8 +38,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 		BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
-
-		recipientBe = beUtils.getBaseEntityByCode(recipientBe.getCode(), true);
+		
+		recipientBe = beUtils.getBaseEntityByCode(recipientBe.getCode());
 
 		if (templateBe == null) {
 			log.error(ANSIColour.RED+"TemplateBE passed is NULL!!!!"+ANSIColour.RESET);
@@ -59,7 +60,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 			log.info(ea);
 		}
 
-
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
 
 		if (recipient != null) {
@@ -69,13 +69,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 			timezone = "UTC";
 		}
 		log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
-
-
-
-
-
-
-
 
 		if (recipient == null) {
 			log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
@@ -113,7 +106,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 							if (attrVal.getClass().equals(LocalDate.class)) {
 								if (contextMap.containsKey("DATEFORMAT")) {
 									String format = (String) contextMap.get("DATEFORMAT");
-									valueString = MergeUtil.getFormattedDateString((LocalDate) attrVal, format);
+									valueString = MergeUtils.getFormattedDateString((LocalDate) attrVal, format);
 								} else {
 									log.info("No DATEFORMAT key present in context map, defaulting to stringified date");
 								}
@@ -125,9 +118,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 									ZonedDateTime zonedDateTime = dtt.atZone(ZoneId.of("UTC"));
 									ZonedDateTime converted = zonedDateTime.withZoneSameInstant(ZoneId.of(timezone));
-									LocalDateTime zonedLocalDateTime = converted.toLocalDateTime();
 
-									valueString = MergeUtil.getFormattedDateTimeString(zonedLocalDateTime, format);
+									valueString = MergeUtils.getFormattedZonedDateTimeString(converted, format);
 
 								} else {
 									log.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");

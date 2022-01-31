@@ -1,10 +1,8 @@
 package life.genny.messages.managers;
 
 import java.util.Map;
-import life.genny.qwanda.message.QBaseMSGMessage;
-import life.genny.message.QMessageGennyMSG;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.utils.BaseEntityUtils;
+import life.genny.qwandaq.entity.BaseEntity;
+import life.genny.qwandaq.utils.BaseEntityUtils;
 
 public interface QMessageProvider {
 	
