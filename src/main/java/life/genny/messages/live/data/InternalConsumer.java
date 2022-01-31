@@ -99,22 +99,27 @@ public class InternalConsumer {
 		GennyToken userToken = null;
 
 		// Try Catch to stop consumer from dying upon error
+		message = jsonb.fromJson(payload, QMessageGennyMSG.class);
 		try {
-			message = jsonb.fromJson(payload, QMessageGennyMSG.class);
 			userToken = new GennyToken(message.getToken());
 		} catch (Exception e) {
-			log.error(ANSIColour.RED+"Message Deserialisation Failed!!!!!"+ANSIColour.RESET);
-			log.error(ANSIColour.RED+e+ANSIColour.RESET);
+			log.error("Bad Token Received!!!");
 		}
 
-		if (message != null && userToken != null) {
-			// Try Catch to stop consumer from dying upon error
-			try {
-				MessageProcessor.processGenericMessage(message, beUtils);
-			} catch (Exception e) {
-				log.error(ANSIColour.RED+"Message Processing Failed!!!!!"+ANSIColour.RESET);
-				log.error(ANSIColour.RED+e+ANSIColour.RESET);
-			}
-		}
+		MessageProcessor.processGenericMessage(message, beUtils);
+		// try {
+		// } catch (Exception e) {
+		// 	log.error(ANSIColour.RED+"Message Deserialisation Failed!!!!!"+ANSIColour.RESET);
+		// 	log.error(ANSIColour.RED+e+ANSIColour.RESET);
+		// }
+
+		// if (message != null && userToken != null) {
+		// 	// Try Catch to stop consumer from dying upon error
+		// 	try {
+		// 	} catch (Exception e) {
+		// 		log.error(ANSIColour.RED+"Message Processing Failed!!!!!"+ANSIColour.RESET);
+		// 		log.error(ANSIColour.RED+e+ANSIColour.RESET);
+		// 	}
+		// }
 	}
 }
