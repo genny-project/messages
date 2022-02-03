@@ -90,12 +90,14 @@ public class InternalConsumer {
 		log.info("Received EVENT :" + (System.getenv("PROJECT_REALM") == null ? "tokenRealm" : System.getenv("PROJECT_REALM")));
 
 		// Log entire payload for debugging purposes
-		log.debug(payload);
+		
 
 		log.info("################################################################");
 		log.info(">>>>>>>>>>>>>>>>>> PROCESSING NEW MESSAGE <<<<<<<<<<<<<<<<<<<<<<");
 		log.info("################################################################");
 
+		log.info("payload ---->"+payload);
+		
 		QMessageGennyMSG message = null;
 		GennyToken userToken = null;
 
