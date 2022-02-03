@@ -80,16 +80,14 @@ public class MessageProcessor {
 			String cc = templateBe.getValue("PRI_CC", null);
 			String bcc = templateBe.getValue("PRI_BCC", null);
 
-			// remove unwanted characters
-			cc = beUtils.cleanUpAttributeValue(cc);
-			bcc = beUtils.cleanUpAttributeValue(bcc);
-
 			if (cc != null) {
 				log.debug("Using CC from template BaseEntity");
+				cc = beUtils.cleanUpAttributeValue(cc);
 				message.getMessageContextMap().put("CC", cc);
 			}
 			if (bcc != null) {
 				log.debug("Using BCC from template BaseEntity");
+				bcc = beUtils.cleanUpAttributeValue(bcc);
 				message.getMessageContextMap().put("BCC", bcc);
 			}
 		}
