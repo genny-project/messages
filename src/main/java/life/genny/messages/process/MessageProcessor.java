@@ -1,26 +1,31 @@
 package life.genny.messages.process;
 
-import life.genny.message.QMessageGennyMSG;
-import life.genny.messages.managers.QMessageFactory;
-import life.genny.messages.managers.QMessageProvider;
-import life.genny.messages.util.MsgUtils;
-import life.genny.models.GennyToken;
-import life.genny.qwanda.attribute.Attribute;
-import life.genny.qwanda.attribute.EntityAttribute;
-import life.genny.qwanda.entity.BaseEntity;
-import life.genny.qwanda.message.QBaseMSGMessageType;
-import life.genny.qwandautils.ANSIColour;
-import life.genny.qwandautils.GennySettings;
-import life.genny.qwandautils.KeycloakUtils;
-import life.genny.qwandautils.MergeUtil;
-import life.genny.utils.BaseEntityUtils;
-import life.genny.utils.RulesUtils;
-import life.genny.utils.VertxUtils;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.io.IOException;
+
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import life.genny.messages.managers.QMessageFactory;
+import life.genny.messages.managers.QMessageProvider;
+import life.genny.qwandaq.models.GennyToken;
+import life.genny.qwandaq.entity.BaseEntity;
+import life.genny.qwandaq.attribute.EntityAttribute;
+import life.genny.qwandaq.attribute.Attribute;
+import life.genny.qwandaq.message.QBaseMSGMessageType;
+import life.genny.qwandaq.message.QMessageGennyMSG;
+import life.genny.qwandaq.utils.KeycloakUtils;
+import life.genny.qwandaq.utils.MergeUtils;
+import life.genny.qwandaq.utils.BaseEntityUtils;
+import life.genny.qwandaq.models.GennySettings;
+import life.genny.qwandaq.models.ANSIColour;
+import life.genny.qwandaq.utils.QwandaUtils;
+import life.genny.messages.util.MsgUtils;
 
 public class MessageProcessor {
 
@@ -30,30 +35,28 @@ public class MessageProcessor {
 
 	/**
 	 * Generic Message Handling method.
-	 * 
+	 *
 	 * @param message
 	 * @param serviceToken
 	 * @param userToken
 	 */
-	public static void processGenericMessage(QMessageGennyMSG message, GennyToken serviceToken, GennyToken userToken) {
+	public static void processGenericMessage(QMessageGennyMSG message, BaseEntityUtils beUtils) {
 
 		// Begin recording duration
 		long start = System.currentTimeMillis();
+
+		GennyToken userToken = beUtils.getGennyToken();
+		GennyToken serviceToken = beUtils.getServiceToken();
+		String realm = beUtils.getGennyToken().getRealm();
+
+		log.debug("Realm is " + realm + " - Incoming Message :: " + message.toString());
 
 		if (message == null) {
 			log.error(ANSIColour.RED + "GENNY COM MESSAGE IS NULL" + ANSIColour.RESET);
 		}
 
-		log.debug("Incoming Message ::" + message.toString());
-
-		// Init utility objects
-		BaseEntityUtils beUtils = new BaseEntityUtils(userToken);
-		beUtils.setServiceToken(serviceToken);
-		String realm = beUtils.getGennyToken().getRealm();
-		log.info("Realm is " + realm + " amd  serviceToken set");
-
 		BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_"+realm.toUpperCase());
-		
+
 		try {
 			log.warn("*** HORRIBLE ACC HACK TO DELAY FOR 10 SEC TO ALLOW CACHE ITEM TO BE COMPLETE");
 			Thread.sleep(10000);
@@ -77,14 +80,16 @@ public class MessageProcessor {
 			String cc = templateBe.getValue("PRI_CC", null);
 			String bcc = templateBe.getValue("PRI_BCC", null);
 
-			// if (cc != null) {
-			// 	log.debug("Using CC from template BaseEntity");
-			// 	message.getMessageContextMap().put("CC", cc);
-			// }
-			// if (bcc != null) {
-			// 	log.debug("Using BCC from template BaseEntity");
-			// 	message.getMessageContextMap().put("BCC", bcc);
-			// }
+			if (cc != null) {
+				log.debug("Using CC from template BaseEntity");
+				cc = beUtils.cleanUpAttributeValue(cc);
+				message.getMessageContextMap().put("CC", cc);
+			}
+			if (bcc != null) {
+				log.debug("Using BCC from template BaseEntity");
+				bcc = beUtils.cleanUpAttributeValue(bcc);
+				message.getMessageContextMap().put("BCC", bcc);
+			}
 		}
 
 		// Create context map with BaseEntities
@@ -100,7 +105,7 @@ public class MessageProcessor {
 			// Handle any default context associations
 			String contextAssociations = templateBe.getValue("PRI_CONTEXT_ASSOCIATIONS", null);
 			if (contextAssociations != null) {
-				MergeUtil.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations, false);
+				MergeUtils.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations, false);
 			}
 
 			// Check for Default Message
@@ -109,11 +114,10 @@ public class MessageProcessor {
 				List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
 				messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
 			}
-
 		}
 
-		Attribute emailAttr = RulesUtils.getAttribute("PRI_EMAIL", userToken.getToken());
-		Attribute mobileAttr = RulesUtils.getAttribute("PRI_MOBILE", userToken.getToken());
+		Attribute emailAttr = QwandaUtils.getAttribute("PRI_EMAIL");
+		Attribute mobileAttr = QwandaUtils.getAttribute("PRI_MOBILE");
 
 		for (String recipient : recipientArr) {
 
@@ -177,7 +181,7 @@ public class MessageProcessor {
 				String accessToken = null;
 				try {
 					log.info("Fetching Token for " + recipientBe.getCode());
-					accessToken = KeycloakUtils.getImpersonatedToken(serviceToken.getKeycloakUrl(), serviceToken.getRealm(), projectBe, recipientBe, serviceToken.getToken());
+					accessToken = KeycloakUtils.getImpersonatedToken(GennySettings.keycloakUrl, serviceToken.getRealm(), projectBe, recipientBe, serviceToken.getToken());
 				} catch (IOException e) {
 					log.error("Could not fetch Token: " + e.getStackTrace());
 				}
@@ -192,9 +196,12 @@ public class MessageProcessor {
 				/* Get Message Provider */
 				QMessageProvider provider = messageFactory.getMessageProvider(msgType);
 
-				/* check if unsubscription list for the template code has the userCode */
-				Boolean isUserUnsubscribed = VertxUtils.checkIfAttributeValueContainsString(unsubscriptionBe,
-						templateCode, recipientBe.getCode());
+				Boolean isUserUnsubscribed = false;
+				if (unsubscriptionBe != null) {
+					/* check if unsubscription list for the template code has the userCode */
+					String templateAssociation = unsubscriptionBe.getValue(templateCode, "");
+					isUserUnsubscribed = templateAssociation.contains(recipientBe.getCode());
+				}
 
 				if (provider != null) {
 					/*
@@ -222,28 +229,28 @@ public class MessageProcessor {
 	}
 
 	private static HashMap<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils, QMessageGennyMSG message) {
-		
+
 		HashMap<String, Object> baseEntityContextMap = new HashMap<>();
-		
+
 		for (Map.Entry<String, String> entry : message.getMessageContextMap().entrySet())
 		{
 			String key = entry.getKey();
-		    String value = entry.getValue();
+			String value = entry.getValue();
 
 			String logStr = "key: " + key + ", value: " + (key.toUpperCase().equals("PASSWORD") ? "REDACTED" : value);
 			log.info(logStr);
-		    
-		    if ((value != null) && (value.length() > 4)) {
+
+			if ((value != null) && (value.length() > 4)) {
 
 				// MUST CONTAIN A BE CODE
-		    	if (value.matches("[A-Z]{3}\\_.*") && !key.startsWith("URL")) {
+				if (value.matches("[A-Z]{3}\\_.*") && !key.startsWith("URL")) {
 					// Create Array of Codes
 					String[] codeArr = beUtils.cleanUpAttributeValue(value).split(",");
 					log.info("Fetching contextCodeArray "+codeArr);
 					// Convert to BEs
 					BaseEntity[] beArray = Arrays.stream(codeArr)
-						.map(itemCode -> (BaseEntity) beUtils.getBaseEntityByCode(itemCode))
-						.toArray(BaseEntity[]::new);
+							.map(itemCode -> (BaseEntity) beUtils.getBaseEntityByCode(itemCode))
+							.toArray(BaseEntity[]::new);
 
 					if (beArray.length == 1) {
 						baseEntityContextMap.put(entry.getKey().toUpperCase(), beArray[0]);
@@ -254,13 +261,13 @@ public class MessageProcessor {
 					continue;
 
 				}
-		    }
-		    
+			}
+
 			// By Default, add it as is
 			baseEntityContextMap.put(entry.getKey().toUpperCase(), value);
 		}
-		
+
 		return baseEntityContextMap;
 	}
-	
+
 }
