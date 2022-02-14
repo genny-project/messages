@@ -188,6 +188,7 @@ public class MessageProcessor {
 				}
 				// Encode URL and put back in the map
 				String url = MsgUtils.encodedUrlBuilder(GennySettings.projectUrl+"/home", parentCode, code, targetCode, accessToken);
+				System.out.println("###########URL: "+url);
 				baseEntityContextMap.put("URL", url);
 			}
 
