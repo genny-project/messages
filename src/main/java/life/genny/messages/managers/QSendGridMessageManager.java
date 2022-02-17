@@ -140,7 +140,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 		Email from = new Email(sendGridEmailSender, sendGridEmailNameSender);
 		Email to = new Email(recipient);
 
-		String urlBasedAttribute = GennySettings.projectUrl.replace("https://","").replace(".gada.io","").replace("-","_").toUpperCase();
+		String urlBasedAttribute = GennySettings.projectUrl().replace("https://","").replace(".gada.io","").replace("-","_").toUpperCase();
 		log.info("Searching for email attr " + urlBasedAttribute);
 		String dedicatedTestEmail = projectBe.getValue("EML_" + urlBasedAttribute, null);
 		if (dedicatedTestEmail != null) {
