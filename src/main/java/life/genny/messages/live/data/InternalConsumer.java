@@ -66,7 +66,7 @@ public class InternalConsumer {
     void onStart(@Observes StartupEvent ev) {
 
         log.info("The application is starting...");
-		serviceToken = new KeycloakUtils().getToken(keycloakUrl, keycloakRealm, clientId, secret, serviceUsername, servicePassword, null);
+		serviceToken = KeycloakUtils.getToken(keycloakUrl, keycloakRealm, clientId, secret, serviceUsername, servicePassword, null);
 
 		// Init Utility Objects
 		beUtils = new BaseEntityUtils(serviceToken);
