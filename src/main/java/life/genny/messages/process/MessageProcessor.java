@@ -180,14 +180,14 @@ public class MessageProcessor {
                     log.info("realm: " + serviceToken.getRealm());
                     log.info("project code: " + projectBe.getCode());
                     log.info("recipient code: " + recipientBe.getCode());
-                    log.info("token: " + userToken.getToken());
+                    log.info("token: " + serviceToken.getToken());
 
                     accessToken = KeycloakUtils.getImpersonatedToken(
                             GennySettings.keycloakUrl(),
                             serviceToken.getRealm(),
                             projectBe,
                             recipientBe,
-                            userToken.getToken()
+                            serviceToken.getToken()
                     );
 
 
