@@ -180,15 +180,23 @@ public class MessageProcessor {
 				// Fetch access token
 				String accessToken = null;
 				try {
-					log.info("Fetching Token for " + recipientBe.getCode());
-					accessToken = KeycloakUtils.getImpersonatedToken(GennySettings.keycloakUrl(), serviceToken.getRealm(), projectBe, recipientBe, serviceToken.getToken());
+					log.info("Fetching Token from " + GennySettings.keycloakUrl() + " for user " 
+							+ recipientBe.getCode() + " with realm " + serviceToken.getRealm());
+
+					accessToken = KeycloakUtils.getImpersonatedToken(
+							GennySettings.keycloakUrl(),
+							serviceToken.getRealm(), 
+							projectBe, 
+							recipientBe, 
+							serviceToken.getToken()
+							);
 				} catch (IOException e) {
 					log.error("Could not fetch Token!");
 					log.error(e);
 				}
 				// Encode URL and put back in the map
 				String url = MsgUtils.encodedUrlBuilder(GennySettings.projectUrl+"/home", parentCode, code, targetCode, accessToken);
-				System.out.println("###########URL: "+url);
+				log.info("Access URL: " + url);
 				baseEntityContextMap.put("URL", url);
 			}
 
