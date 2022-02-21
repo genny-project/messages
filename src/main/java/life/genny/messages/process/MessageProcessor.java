@@ -1,7 +1,5 @@
 package life.genny.messages.process;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import life.genny.messages.managers.QMessageFactory;
 import life.genny.messages.managers.QMessageProvider;
 import life.genny.messages.util.MsgUtils;
@@ -178,12 +176,10 @@ public class MessageProcessor {
                 try {
                     log.info("Fetching Token from " + GennySettings.keycloakUrl() + " for user "
                             + recipientBe.getCode() + " with realm " + serviceToken.getRealm());
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
                     System.out.println("url: " + GennySettings.keycloakUrl());
                     System.out.println("realm: " + serviceToken.getRealm());
-                    System.out.println("projectBe: " + objectWriter.writeValueAsString(projectBe));
-                    System.out.println("recipientBe: " + objectWriter.writeValueAsString(recipientBe));
+                    System.out.println("project code: " + projectBe.getCode());
+                    System.out.println("recipient code: " + recipientBe.getCode());
                     System.out.println("token: " + serviceToken.getToken());
 
                     accessToken = KeycloakUtils.getImpersonatedToken(
