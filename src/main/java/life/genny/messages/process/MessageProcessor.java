@@ -62,7 +62,7 @@ public class MessageProcessor {
 
         List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
 
-        String[] recipientArr = message.getRecipientArr();
+		String[] recipientArr = message.getRecipientArr();
         List<BaseEntity> recipientBeList = new ArrayList<BaseEntity>();
 
         BaseEntity templateBe = null;
@@ -176,18 +176,18 @@ public class MessageProcessor {
                 try {
                     log.info("Fetching Token from " + GennySettings.keycloakUrl() + " for user "
                             + recipientBe.getCode() + " with realm " + serviceToken.getRealm());
-                    System.out.println("url: " + GennySettings.keycloakUrl());
-                    System.out.println("realm: " + serviceToken.getRealm());
-                    System.out.println("project code: " + projectBe.getCode());
-                    System.out.println("recipient code: " + recipientBe.getCode());
-                    System.out.println("token: " + serviceToken.getToken());
+                    log.info("url: " + GennySettings.keycloakUrl());
+                    log.info("realm: " + serviceToken.getRealm());
+                    log.info("project code: " + projectBe.getCode());
+                    log.info("recipient code: " + recipientBe.getCode());
+                    log.info("token: " + serviceToken.getToken());
 
                     accessToken = KeycloakUtils.getImpersonatedToken(
                             GennySettings.keycloakUrl(),
                             serviceToken.getRealm(),
                             projectBe,
                             recipientBe,
-                            serviceToken.getToken()
+                            userToken.getToken()
                     );
 
 
