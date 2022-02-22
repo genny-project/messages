@@ -51,12 +51,12 @@ public class MessageProcessor {
 
         BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_" + realm.toUpperCase());
 
-        try {
-            log.warn("*** HORRIBLE ACC HACK TO DELAY FOR 10 SEC TO ALLOW CACHE ITEM TO BE COMPLETE");
-            Thread.sleep(10000);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        } /* TODO: horrible hack by ACC to give the be time to save - should use Shleemy , hopefully updated cache will help */
+        // try {
+        //     log.warn("*** HORRIBLE ACC HACK TO DELAY FOR 10 SEC TO ALLOW CACHE ITEM TO BE COMPLETE");
+        //     Thread.sleep(10000);
+        // } catch (InterruptedException e1) {
+        //     e1.printStackTrace();
+        // } /* TODO: horrible hack by ACC to give the be time to save - should use Shleemy , hopefully updated cache will help */
 
 
         List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
@@ -171,13 +171,8 @@ public class MessageProcessor {
                     targetCode = componentArray[2];
                 }
 
-				log.info("Fetching Token from " + GennySettings.keycloakUrl() + " for user "
+				log.info("Fetching Token from " + serviceToken.getKeycloakUrl() + " for user "
 						+ recipientBe.getCode() + " with realm " + serviceToken.getRealm());
-				log.info("url: " + GennySettings.keycloakUrl());
-				log.info("realm: " + serviceToken.getRealm());
-				log.info("project code: " + projectBe.getCode());
-				log.info("recipient code: " + recipientBe.getCode());
-				log.info("token: " + serviceToken.getToken());
 
                 // Fetch access token
 				String accessToken = KeycloakUtils.getImpersonatedToken(recipientBe, serviceToken, projectBe);
