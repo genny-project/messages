@@ -14,6 +14,7 @@ import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.message.QCmdMessage;
 import life.genny.qwandaq.utils.MergeUtils;
 import life.genny.qwandaq.utils.BaseEntityUtils;
+import life.genny.qwandaq.utils.KafkaUtils;
 
 @ApplicationScoped
 public class QToastMessageManager implements QMessageProvider{
@@ -64,14 +65,15 @@ public class QToastMessageManager implements QMessageProvider{
 		// Mail Merging Data
 		body = MergeUtils.merge(body, contextMap);
 
+		// build toast command msg
 		QCmdMessage msg = new QCmdMessage("TOAST", style);
 		msg.setMessage(body);
 		msg.setToken(beUtils.getGennyToken().getToken());
 		msg.setSend(true);
 
+		// send to frontend
 		String json = jsonb.toJson(msg);
-
-		producer.getToWebCmds().send(json);
+		KafkaUtils.writeMsg("webcmds", json);
 	}
 
 }
