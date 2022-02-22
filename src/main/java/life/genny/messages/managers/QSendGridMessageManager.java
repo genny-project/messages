@@ -55,9 +55,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 		log.info("Timezone returned from recipient BE " + recipientBe.getCode() + " is:: " + timezone);
 
 		// test data
-		log.info("Showing what is in recipient BE");
+		log.info("Showing what is in recipient BE, code=" + recipientBe.getCode());
 		for (EntityAttribute ea : recipientBe.getBaseEntityAttributes()) {
-			log.info(ea);
+			log.info("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
 		}
 
 		String recipient = recipientBe.getValue("PRI_EMAIL", null);
