@@ -16,6 +16,7 @@ import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.persistence.EntityManager;
 
+import life.genny.messages.intf.KafkaBean;
 import life.genny.messages.process.MessageProcessor;
 import life.genny.qwandaq.data.GennyCache;
 import life.genny.qwandaq.message.QMessageGennyMSG;
@@ -25,6 +26,7 @@ import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.CacheUtils;
 import life.genny.qwandaq.utils.DatabaseUtils;
 import life.genny.qwandaq.utils.DefUtils;
+import life.genny.qwandaq.utils.KafkaUtils;
 import life.genny.qwandaq.utils.KeycloakUtils;
 import life.genny.qwandaq.utils.QwandaUtils;
 
@@ -57,6 +59,9 @@ public class InternalConsumer {
 	@Inject
 	GennyCache cache;
 
+	@Inject
+	KafkaBean kafkaBean;
+
 	GennyToken serviceToken;
 
 	BaseEntityUtils beUtils;
@@ -75,6 +80,7 @@ public class InternalConsumer {
 		DatabaseUtils.init(entityManager);
 		CacheUtils.init(cache);
 		QwandaUtils.init(serviceToken);
+		KafkaUtils.init(kafkaBean);
 		// DefUtils.init(beUtils);
 
 		log.info("[*] Consumer Ready!");

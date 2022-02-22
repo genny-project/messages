@@ -17,19 +17,19 @@ import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.KafkaUtils;
 
 @ApplicationScoped
-public class QToastMessageManager implements QMessageProvider{
+public class QToastMessageManager implements QMessageProvider {
 	
 	private static final Logger log = Logger.getLogger(QToastMessageManager.class);
 
 	@Inject
 	InternalProducer producer;
 
-	Jsonb jsonb = JsonbBuilder.create();
+	static Jsonb jsonb = JsonbBuilder.create();
 
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
 		
-		log.info("About to send toast message");
+		log.info("About to send TOAST message!");
 		
 		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 
