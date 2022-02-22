@@ -55,7 +55,6 @@ public class MessageProcessor {
             log.warn("*** HORRIBLE ACC HACK TO DELAY FOR 10 SEC TO ALLOW CACHE ITEM TO BE COMPLETE");
             Thread.sleep(10000);
         } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         } /* TODO: horrible hack by ACC to give the be time to save - should use Shleemy , hopefully updated cache will help */
 
@@ -171,30 +170,18 @@ public class MessageProcessor {
                 if (componentArray.length > 2) {
                     targetCode = componentArray[2];
                 }
+
+				log.info("Fetching Token from " + GennySettings.keycloakUrl() + " for user "
+						+ recipientBe.getCode() + " with realm " + serviceToken.getRealm());
+				log.info("url: " + GennySettings.keycloakUrl());
+				log.info("realm: " + serviceToken.getRealm());
+				log.info("project code: " + projectBe.getCode());
+				log.info("recipient code: " + recipientBe.getCode());
+				log.info("token: " + serviceToken.getToken());
+
                 // Fetch access token
-                String accessToken = null;
-                try {
-                    log.info("Fetching Token from " + GennySettings.keycloakUrl() + " for user "
-                            + recipientBe.getCode() + " with realm " + serviceToken.getRealm());
-                    log.info("url: " + GennySettings.keycloakUrl());
-                    log.info("realm: " + serviceToken.getRealm());
-                    log.info("project code: " + projectBe.getCode());
-                    log.info("recipient code: " + recipientBe.getCode());
-                    log.info("token: " + serviceToken.getToken());
+				String accessToken = KeycloakUtils.getImpersonatedToken(recipientBe, serviceToken, projectBe);
 
-                    accessToken = KeycloakUtils.getImpersonatedToken(
-                            GennySettings.keycloakUrl(),
-                            serviceToken.getRealm(),
-                            projectBe,
-                            recipientBe,
-                            serviceToken.getToken()
-                    );
-
-
-                } catch (IOException e) {
-                    log.error("Could not fetch Token!");
-                    log.error(e);
-                }
                 // Encode URL and put back in the map
                 String url = MsgUtils.encodedUrlBuilder(GennySettings.projectUrl + "/home", parentCode, code, targetCode, accessToken);
                 log.info("Access URL: " + url);
