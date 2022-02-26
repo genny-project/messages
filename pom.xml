@@ -12,10 +12,10 @@
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <quarkus-plugin.version>2.7.1.Final</quarkus-plugin.version>
+    <quarkus-plugin.version>2.7.2.Final</quarkus-plugin.version>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-    <quarkus.platform.version>2.7.1.Final</quarkus.platform.version>
+    <quarkus.platform.version>2.7.2.Final</quarkus.platform.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <testcontainers.version>1.16.0</testcontainers.version>
 	<twilio.version>8.23.0</twilio.version>
@@ -35,34 +35,8 @@
   <dependencies>
     <dependency>
       <groupId>life.genny</groupId>
-      <artifactId>qwandaq</artifactId>
+      <artifactId>serviceq</artifactId>
       <version>${genny.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>xml-apis</artifactId>
-          <groupId>xml-apis</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-jsonb</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-rest-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-jackson</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -77,26 +51,6 @@
       <groupId>org.testcontainers</groupId>
       <artifactId>kafka</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-smallrye-openapi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-smallrye-health</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-oidc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-kubernetes</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-arc</artifactId>
     </dependency>
 	<dependency>
 		<groupId>io.quarkus</groupId>
