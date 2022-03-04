@@ -3,13 +3,11 @@ package life.genny.messages.managers;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 
 import org.jboss.logging.Logger;
 
-import life.genny.messages.live.data.InternalProducer;
 import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.message.QCmdMessage;
 import life.genny.qwandaq.utils.MergeUtils;
@@ -20,9 +18,6 @@ import life.genny.qwandaq.utils.KafkaUtils;
 public class QToastMessageManager implements QMessageProvider {
 	
 	private static final Logger log = Logger.getLogger(QToastMessageManager.class);
-
-	@Inject
-	InternalProducer producer;
 
 	static Jsonb jsonb = JsonbBuilder.create();
 
