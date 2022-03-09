@@ -67,8 +67,7 @@ public class QToastMessageManager implements QMessageProvider {
 		msg.setSend(true);
 
 		// send to frontend
-		String json = jsonb.toJson(msg);
-		KafkaUtils.writeMsg("webcmds", json);
+		KafkaUtils.writeMsg("webcmds", msg);
 	}
 
 }
