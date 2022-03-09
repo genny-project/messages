@@ -105,8 +105,12 @@ public class MessageProcessor {
             if (Arrays.stream(message.getMessageTypeArr()).anyMatch(item -> item == QBaseMSGMessageType.DEFAULT)) {
                 // Use default if told to do so
                 List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
-                messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
-            }
+                try {
+					messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
+				} catch (Exception e) {
+					log.error(e.getLocalizedMessage());
+				}
+           }
         }
 
         Attribute emailAttr = QwandaUtils.getAttribute("PRI_EMAIL");
