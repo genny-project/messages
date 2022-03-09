@@ -16,10 +16,10 @@
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
     <quarkus.platform.version>2.7.3.Final</quarkus.platform.version>
+    <sendgrid.version>4.6.3</sendgrid.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <testcontainers.version>1.16.0</testcontainers.version>
-	<twilio.version>8.23.0</twilio.version>
-	<sendgrid.version>4.6.3</sendgrid.version>
+    <twilio.version>8.23.0</twilio.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -44,6 +44,10 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-health</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5</artifactId>
       <scope>test</scope>
     </dependency>
@@ -52,20 +56,20 @@
       <artifactId>kafka</artifactId>
       <scope>test</scope>
     </dependency>
-	<dependency>
-		<groupId>io.quarkus</groupId>
-		<artifactId>quarkus-mailer</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>com.twilio.sdk</groupId>
-		<artifactId>twilio</artifactId>
-		<version>${twilio.version}</version>
-	</dependency>
-	<dependency>
-		<groupId>com.sendgrid</groupId>
-		<artifactId>sendgrid-java</artifactId>
-		<version>${sendgrid.version}</version>
-	</dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-mailer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.twilio.sdk</groupId>
+      <artifactId>twilio</artifactId>
+      <version>${twilio.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sendgrid</groupId>
+      <artifactId>sendgrid-java</artifactId>
+      <version>${sendgrid.version}</version>
+    </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-metrics</artifactId>
