@@ -1,16 +1,5 @@
 package life.genny.messages.managers;
 
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.util.Map;
-import java.util.HashMap;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-
-import org.jboss.logging.Logger;
-
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
@@ -18,14 +7,21 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
-
 import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.entity.BaseEntity;
-import life.genny.qwandaq.utils.MergeUtils;
-import life.genny.qwandaq.utils.BaseEntityUtils;
-import life.genny.qwandaq.utils.KafkaUtils;
-import life.genny.qwandaq.models.GennySettings;
 import life.genny.qwandaq.models.ANSIColour;
+import life.genny.qwandaq.models.GennySettings;
+import life.genny.qwandaq.utils.BaseEntityUtils;
+import life.genny.qwandaq.utils.MergeUtils;
+import org.jboss.logging.Logger;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 public class QSendGridMessageManager implements QMessageProvider {
 
@@ -120,6 +116,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 									ZonedDateTime converted = zonedDateTime.withZoneSameInstant(ZoneId.of(timezone));
 
 									valueString = MergeUtils.getFormattedZonedDateTimeString(converted, format);
+									log.info("date format");
+									log.info("formatted date: "+  valueString);
 
 								} else {
 									log.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");
