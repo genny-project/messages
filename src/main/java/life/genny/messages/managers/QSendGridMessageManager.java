@@ -12,7 +12,7 @@ import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.models.ANSIColour;
 import life.genny.qwandaq.models.GennySettings;
 import life.genny.qwandaq.utils.BaseEntityUtils;
-import life.genny.qwandaq.utils.MergeUtils;
+import life.genny.qwandaq.utils.TimeUtils;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
@@ -102,7 +102,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 							if (attrVal.getClass().equals(LocalDate.class)) {
 								if (contextMap.containsKey("DATEFORMAT")) {
 									String format = (String) contextMap.get("DATEFORMAT");
-									valueString = MergeUtils.getFormattedDateString((LocalDate) attrVal, format);
+									valueString = TimeUtils.formatDate((LocalDate) attrVal, format);
 								} else {
 									log.info("No DATEFORMAT key present in context map, defaulting to stringified date");
 								}
@@ -115,7 +115,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 									ZonedDateTime zonedDateTime = dtt.atZone(ZoneId.of("UTC"));
 									ZonedDateTime converted = zonedDateTime.withZoneSameInstant(ZoneId.of(timezone));
 
-									valueString = MergeUtils.getFormattedZonedDateTimeString(converted, format);
+									valueString = TimeUtils.formatZonedDateTime(converted, format);
 									log.info("date format");
 									log.info("formatted date: "+  valueString);
 								} else {
