@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.ApplicationScoped;
+
 public class MessageProcessor {
 
     private static final Logger log = Logger.getLogger(MessageProcessor.class);
@@ -52,16 +54,17 @@ public class MessageProcessor {
         BaseEntity projectBe = beUtils.getBaseEntityByCode("PRJ_" + realm.toUpperCase());
 
         // try {
-        //     log.warn("*** HORRIBLE ACC HACK TO DELAY FOR 10 SEC TO ALLOW CACHE ITEM TO BE COMPLETE");
-        //     Thread.sleep(10000);
+        // log.warn("*** HORRIBLE ACC HACK TO DELAY FOR 10 SEC TO ALLOW CACHE ITEM TO BE
+        // COMPLETE");
+        // Thread.sleep(10000);
         // } catch (InterruptedException e1) {
-        //     e1.printStackTrace();
-        // } /* TODO: horrible hack by ACC to give the be time to save - should use Shleemy , hopefully updated cache will help */
-
+        // e1.printStackTrace();
+        // } /* TODO: horrible hack by ACC to give the be time to save - should use
+        // Shleemy , hopefully updated cache will help */
 
         List<QBaseMSGMessageType> messageTypeList = Arrays.asList(message.getMessageTypeArr());
 
-		String[] recipientArr = message.getRecipientArr();
+        String[] recipientArr = message.getRecipientArr();
         List<BaseEntity> recipientBeList = new ArrayList<BaseEntity>();
 
         BaseEntity templateBe = null;
@@ -106,15 +109,17 @@ public class MessageProcessor {
                 // Use default if told to do so
                 List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
                 try {
-					messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item)).collect(Collectors.toList());
-				} catch (Exception e) {
-					log.error(e.getLocalizedMessage());
-				}
+                    messageTypeList = typeList.stream().map(item -> QBaseMSGMessageType.valueOf(item))
+                            .collect(Collectors.toList());
+                } catch (Exception e) {
+                    log.error(e.getLocalizedMessage());
+                }
             }
         }
 
-        Attribute emailAttr = QwandaUtils.getAttribute("PRI_EMAIL");
-        Attribute mobileAttr = QwandaUtils.getAttribute("PRI_MOBILE");
+        QwandaUtils qwandaUtils = new QwandaUtils();
+        Attribute emailAttr = qwandaUtils.getAttribute("PRI_EMAIL");
+        Attribute mobileAttr = qwandaUtils.getAttribute("PRI_MOBILE");
 
         for (String recipient : recipientArr) {
 
@@ -150,7 +155,6 @@ public class MessageProcessor {
         log.info("unsubscribe be :: " + unsubscriptionBe);
         String templateCode = message.getTemplateCode() + "_UNSUBSCRIBE";
 
-
         /* Iterating and triggering email to each recipient individually */
         for (BaseEntity recipientBe : recipientBeList) {
 
@@ -175,14 +179,15 @@ public class MessageProcessor {
                     targetCode = componentArray[2];
                 }
 
-				log.info("Fetching Token from " + serviceToken.getKeycloakUrl() + " for user "
-						+ recipientBe.getCode() + " with realm " + serviceToken.getRealm());
+                log.info("Fetching Token from " + serviceToken.getKeycloakUrl() + " for user "
+                        + recipientBe.getCode() + " with realm " + serviceToken.getRealm());
 
                 // Fetch access token
-				String accessToken = KeycloakUtils.getImpersonatedToken(recipientBe, serviceToken, projectBe);
+                String accessToken = KeycloakUtils.getImpersonatedToken(recipientBe, serviceToken, projectBe);
 
                 // Encode URL and put back in the map
-                String url = MsgUtils.encodedUrlBuilder(GennySettings.projectUrl + "/home", parentCode, code, targetCode, accessToken);
+                String url = MsgUtils.encodedUrlBuilder(GennySettings.projectUrl + "/home", parentCode, code,
+                        targetCode, accessToken);
                 log.info("Access URL: " + url);
                 baseEntityContextMap.put("URL", url);
             }
@@ -216,7 +221,8 @@ public class MessageProcessor {
                         provider.sendMessage(beUtils, templateBe, baseEntityContextMap);
                     }
                 } else {
-                    log.error(ANSIColour.RED + ">>>>>> Provider is NULL for entity: " + ", msgType: " + msgType.toString() + " <<<<<<<<<" + ANSIColour.RESET);
+                    log.error(ANSIColour.RED + ">>>>>> Provider is NULL for entity: " + ", msgType: "
+                            + msgType.toString() + " <<<<<<<<<" + ANSIColour.RESET);
                 }
             }
         }
@@ -225,7 +231,8 @@ public class MessageProcessor {
         log.info("FINISHED PROCESSING MESSAGE :: time taken = " + String.valueOf(duration));
     }
 
-    private static HashMap<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils, QMessageGennyMSG message) {
+    private static HashMap<String, Object> createBaseEntityContextMap(BaseEntityUtils beUtils,
+            QMessageGennyMSG message) {
 
         HashMap<String, Object> baseEntityContextMap = new HashMap<>();
 
