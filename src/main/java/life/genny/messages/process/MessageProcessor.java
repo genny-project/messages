@@ -117,9 +117,9 @@ public class MessageProcessor {
             }
         }
 
-        QwandaUtils qwandaUtils = new QwandaUtils();
-        Attribute emailAttr = qwandaUtils.getAttribute("PRI_EMAIL");
-        Attribute mobileAttr = qwandaUtils.getAttribute("PRI_MOBILE");
+        // QwandaUtils qwandaUtils = new QwandaUtils();
+        Attribute emailAttr = QwandaUtils.getAttribute("PRI_EMAIL");
+        Attribute mobileAttr = QwandaUtils.getAttribute("PRI_MOBILE");
 
         for (String recipient : recipientArr) {
 
