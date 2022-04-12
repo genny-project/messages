@@ -122,7 +122,6 @@ public class MessageProcessor {
         }
 
         // TODO: This needs something way better
-        qwandaUtils.init(serviceToken);
         log.info("MESSAGES retrieving PRI_EMAIL");
         Attribute emailAttr = qwandaUtils.getAttribute("PRI_EMAIL");
         log.info("MESSAGES retrieving PRI_MOBILE");
