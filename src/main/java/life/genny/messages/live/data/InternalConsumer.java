@@ -71,7 +71,7 @@ public class InternalConsumer {
 
 			// Try Catch to stop consumer from dying upon error
 			try {
-				MessageProcessor.processGenericMessage(message, service.getBeUtils());
+				MessageProcessor.processGenericMessage(message, service);
 			} catch (Exception e) {
 				log.error(ANSIColour.RED+"Message Processing Failed!!!!!"+ANSIColour.RESET);
 				log.error(ANSIColour.RED+ExceptionUtils.getStackTrace(e)+ANSIColour.RESET);

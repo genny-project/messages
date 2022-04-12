@@ -15,6 +15,8 @@ import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.KeycloakUtils;
 import life.genny.qwandaq.utils.MergeUtils;
 import life.genny.qwandaq.utils.QwandaUtils;
+import life.genny.serviceq.Service;
+
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
@@ -36,7 +38,9 @@ public class MessageProcessor {
      * @param serviceToken
      * @param userToken
      */
-    public static void processGenericMessage(QMessageGennyMSG message, BaseEntityUtils beUtils) {
+    public static void processGenericMessage(QMessageGennyMSG message, Service service) {
+        BaseEntityUtils beUtils = service.getBeUtils();
+        QwandaUtils qwandaUtils = service.getQwandaUtils();
 
         // Begin recording duration
         long start = System.currentTimeMillis();
@@ -117,7 +121,8 @@ public class MessageProcessor {
             }
         }
 
-        QwandaUtils qwandaUtils = new QwandaUtils();
+        // TODO: This needs something way better
+        qwandaUtils.init(serviceToken);
         log.info("MESSAGES retrieving PRI_EMAIL");
         Attribute emailAttr = qwandaUtils.getAttribute("PRI_EMAIL");
         log.info("MESSAGES retrieving PRI_MOBILE");
