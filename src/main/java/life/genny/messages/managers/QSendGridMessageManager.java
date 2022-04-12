@@ -13,6 +13,7 @@ import life.genny.qwandaq.models.ANSIColour;
 import life.genny.qwandaq.models.GennySettings;
 import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.TimeUtils;
+import org.glassfish.json.JsonUtil;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
@@ -199,6 +200,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 
 		for (String key : templateData.keySet()) {
+			log.info("key: "+ key);
+			log.info("value: "+ templateData.get(key));
 			personalization.addDynamicTemplateData(key, templateData.get(key));
 		}
 

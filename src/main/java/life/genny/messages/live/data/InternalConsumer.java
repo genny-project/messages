@@ -56,6 +56,7 @@ public class InternalConsumer {
 
 		// Try Catch to stop consumer from dying upon error
 		try {
+
 			message = jsonb.fromJson(payload, QMessageGennyMSG.class);
 			userToken = new GennyToken(message.getToken());
 		} catch (Exception e) {
