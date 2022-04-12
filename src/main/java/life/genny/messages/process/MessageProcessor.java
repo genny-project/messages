@@ -117,11 +117,11 @@ public class MessageProcessor {
             }
         }
 
-        // QwandaUtils qwandaUtils = new QwandaUtils();
+        QwandaUtils qwandaUtils = new QwandaUtils();
         log.info("MESSAGES retrieving PRI_EMAIL");
-        Attribute emailAttr = QwandaUtils.getAttribute("PRI_EMAIL");
+        Attribute emailAttr = qwandaUtils.getAttribute("PRI_EMAIL");
         log.info("MESSAGES retrieving PRI_MOBILE");
-        Attribute mobileAttr = QwandaUtils.getAttribute("PRI_MOBILE");
+        Attribute mobileAttr = qwandaUtils.getAttribute("PRI_MOBILE");
         log.info("Finished fetching attribs");
         // TODO: Remove these logs once we have fixed NPE
 
