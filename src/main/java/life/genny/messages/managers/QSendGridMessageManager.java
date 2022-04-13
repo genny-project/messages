@@ -38,10 +38,10 @@ public class QSendGridMessageManager implements QMessageProvider {
 		request.setEndpoint("mail/send");
 
 		Runnable sendGridRunnable = () -> {
-			log.info("Sending " + request.getBody());
 			Response response;
 			try {
 				request.setBody(mail.build());
+				log.info("Sending through a separate thread " + request.getBody());
 				response = sendGrid.api(request);
 				log.info(response.getStatusCode());
 				log.info(response.getBody());
