@@ -16,6 +16,9 @@ import life.genny.qwandaq.utils.TimeUtils;
 import org.glassfish.json.JsonUtil;
 import org.jboss.logging.Logger;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +28,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QSendGridMessageManager implements QMessageProvider {
+
+	// Concurrency for sendgrid api. Just putting it here to start with
+	ExecutorService executor = Executors.newFixedThreadPool(10);
+
+	public void executeSendMessage(SendGrid sendGrid, String recipient, Mail mail) {
+		Request request = new Request();
+		request.setMethod(Method.POST);
+		request.setEndpoint("mail/send");
+
+		Runnable sendGridRunnable = () -> {
+			log.info("Sending " + request.getBody());
+			Response response;
+			try {
+				request.setBody(mail.build());
+				response = sendGrid.api(request);
+				log.info(response.getStatusCode());
+				log.info(response.getBody());
+				log.info(response.getHeaders());
+
+				log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipient + "!"+ANSIColour.RESET);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				log.error("Failed to send message: " + request.toString());
+				e.printStackTrace();
+			}
+		};
+
+		executor.execute(sendGridRunnable);
+	}
 
 	private static final Logger log = Logger.getLogger(QSendGridMessageManager.class);
 
@@ -210,21 +242,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 		mail.setTemplateId(templateId);
 		mail.setFrom(from);
 
-		Request request = new Request();
-		try {
-			request.setMethod(Method.POST);
-			request.setEndpoint("mail/send");
-			request.setBody(mail.build());
-			Response response = sg.api(request);
-			log.info(response.getStatusCode());
-			log.info(response.getBody());
-			log.info(response.getHeaders());
-
-			log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipient + "!"+ANSIColour.RESET);
-		} catch (IOException e) {
-			log.error(e);
-		}
-
+		executeSendMessage(sg, recipient, mail);
 	}
 
 }

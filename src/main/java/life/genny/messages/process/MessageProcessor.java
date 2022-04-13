@@ -19,6 +19,7 @@ import life.genny.serviceq.Service;
 
 import org.jboss.logging.Logger;
 
+
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -122,11 +123,8 @@ public class MessageProcessor {
         }
 
         // TODO: This needs something way better
-        log.info("MESSAGES retrieving PRI_EMAIL");
         Attribute emailAttr = qwandaUtils.getAttribute("PRI_EMAIL");
-        log.info("MESSAGES retrieving PRI_MOBILE");
         Attribute mobileAttr = qwandaUtils.getAttribute("PRI_MOBILE");
-        log.info("Finished fetching attribs");
         // TODO: Remove these logs once we have fixed NPE
 
         for (String recipient : recipientArr) {
