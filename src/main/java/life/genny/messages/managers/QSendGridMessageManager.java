@@ -42,13 +42,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 			try {
 				request.setBody(mail.build());
 				response = sendGrid.api(request);
-				log.info(response.getStatusCode());
-				log.info(response.getBody());
-				log.info(response.getHeaders());
+				log.info("Response Code: " + response.getStatusCode());
+				log.info("Headers: " + response.getHeaders());
 
 				log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipient + "!"+ANSIColour.RESET);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				log.error("Failed to send message: " + request.toString());
 				e.printStackTrace();
 			}
@@ -231,8 +229,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 
 		for (String key : templateData.keySet()) {
-			log.info("key: "+ key);
-			log.info("value: "+ templateData.get(key));
+			log.debug("key: "+ key);
+			log.debug("value: "+ templateData.get(key));
 			personalization.addDynamicTemplateData(key, templateData.get(key));
 		}
 
