@@ -41,7 +41,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 			Response response;
 			try {
 				request.setBody(mail.build());
-				log.info("Sending through a separate thread " + request.getBody());
 				response = sendGrid.api(request);
 				log.info(response.getStatusCode());
 				log.info(response.getBody());
