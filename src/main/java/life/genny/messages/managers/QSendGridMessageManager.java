@@ -22,10 +22,42 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class QSendGridMessageManager implements QMessageProvider {
 
 	private static final Logger log = Logger.getLogger(QSendGridMessageManager.class);
+
+
+	// Concurrency for sendgrid api. Just putting it here to start with
+	ExecutorService executor = Executors.newFixedThreadPool(10);
+
+	public void executeSendMessage(SendGrid sendGrid, String recipient, Mail mail) {
+		Request request = new Request();
+		request.setMethod(Method.POST);
+		request.setEndpoint("mail/send");
+
+		log.info("Sending on new thread to: " + recipient);
+
+		Runnable sendGridRunnable = () -> {
+			log.info("Starting thread!");
+			Response response;
+			try {
+				request.setBody(mail.build());
+				response = sendGrid.api(request);
+				log.info("Response Code: " + response.getStatusCode());
+				log.info("Headers: " + response.getHeaders());
+
+				log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipient + "!"+ANSIColour.RESET);
+			} catch (IOException e) {
+				log.error("Failed to send message: " + request.toString());
+				e.printStackTrace();
+			}
+		};
+
+		executor.execute(sendGridRunnable);
+	}
 
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
@@ -208,21 +240,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 		mail.setTemplateId(templateId);
 		mail.setFrom(from);
 
-		Request request = new Request();
-		try {
-			request.setMethod(Method.POST);
-			request.setEndpoint("mail/send");
-			request.setBody(mail.build());
-			Response response = sg.api(request);
-			log.info(response.getStatusCode());
-			log.info(response.getBody());
-			log.info(response.getHeaders());
-
-			log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipient + "!"+ANSIColour.RESET);
-		} catch (IOException e) {
-			log.error(e);
-		}
-
+		executeSendMessage(sg, recipient, mail);
 	}
 
 }
