@@ -37,7 +37,10 @@ public class QSendGridMessageManager implements QMessageProvider {
 		request.setMethod(Method.POST);
 		request.setEndpoint("mail/send");
 
+		log.info("Sending on new thread to: " + recipient);
+
 		Runnable sendGridRunnable = () -> {
+			log.info("Starting thread!");
 			Response response;
 			try {
 				request.setBody(mail.build());
