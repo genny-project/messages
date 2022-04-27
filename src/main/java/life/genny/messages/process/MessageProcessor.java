@@ -48,9 +48,9 @@ public class MessageProcessor {
 
         GennyToken userToken = beUtils.getGennyToken();
         GennyToken serviceToken = beUtils.getServiceToken();
-        String realm = beUtils.getGennyToken().getRealm();
+        String realm = userToken.getRealm();
 
-        log.debug("Realm is " + realm + " - Incoming Message :: " + message.toString());
+        log.info("Realm is " + realm + " - Incoming Message :: " + message.toString());
 
         if (message == null) {
             log.error(ANSIColour.RED + "GENNY COM MESSAGE IS NULL" + ANSIColour.RESET);
