@@ -7,13 +7,13 @@ import org.jboss.logging.Logger;
 import life.genny.qwandaq.message.QBaseMSGMessageType;
 
 public class QMessageFactory {
-	
+
 	private static final Logger log = Logger.getLogger(QMessageFactory.class);
-	
+
 	public QMessageProvider getMessageProvider(QBaseMSGMessageType messageType)
 	  {
 		QMessageProvider provider;
-		log.info("message type::"+messageType.toString());
+		log.info("message type:: " + messageType.toString());
 	    switch(messageType) {
 	    case SMS:
 	    	provider = new QSMSMessageManager();
@@ -36,11 +36,11 @@ public class QMessageFactory {
 	    	break;
 	    default:
 			// Default to Error Manager if no proper message is found
-	    	provider = new QErrorManager();    
+	    	provider = new QErrorManager();
 	    }
-	    
+
 	    return provider;
-	    	
+
 	  }
 
 }
