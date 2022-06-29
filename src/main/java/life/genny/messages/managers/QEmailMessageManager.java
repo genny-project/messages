@@ -1,8 +1,10 @@
 package life.genny.messages.managers;
 
+import java.net.http.HttpResponse;
 import java.util.Map;
 import javax.inject.Inject;
 
+import life.genny.qwandaq.utils.HttpUtils;
 import org.jboss.logging.Logger;
 
 import io.quarkus.mailer.Mail;
@@ -71,9 +73,15 @@ public class QEmailMessageManager implements QMessageProvider {
 
 		try {
 
-			mailer.send(Mail.withText(targetEmail, subject, body));
-			log.info(ANSIColour.GREEN + "Email to " + targetEmail +" is sent" + ANSIColour.RESET);
+//			mailer.send(Mail.withText(targetEmail, subject, body));
 
+			String sendGridApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
+
+			HttpResponse<String> post = HttpUtils.post("https://api.sendgrid.com/v3/mail/send", body, sendGridApiKey);
+
+			log.info(ANSIColour.GREEN + "Email to " + targetEmail +" is sent" + ANSIColour.RESET);
+			log.info(ANSIColour.GREEN + "Post response " + post);
+			
 		} catch (Exception e) {
 			log.error("ERROR", e);
 		} 
