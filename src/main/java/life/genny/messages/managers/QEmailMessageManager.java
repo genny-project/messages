@@ -73,9 +73,11 @@ public class QEmailMessageManager implements QMessageProvider {
 
 		// Mail Merging Data
 //		body = MergeUtils.merge(body, contextMap);
-		Integer randStr = (int) Math.random();
+//		Integer randStr = (int) Math.random();
 
-		String bodyContainer = "{\"personalizations\":[{\"to\":[{\"email\":\"mrrahulmaxcontact@gmail.com\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World "+ randStr +"!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"Body--> "+ body +"!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
+		String bodyContainer = "{\"personalizations\":[{\"to\":[{\"email\":\"" + targetEmail +"\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"Body--> "+ body + "!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
+		String ccEmail = "mrrahulmaxcontact@gmail.com";
+		String ccBodyContainer = "{\"personalizations\":[{\"to\":[{\"email\":\"" + ccEmail +"\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"CC Body--> "+ body + "!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
 
 		try {
 
@@ -86,7 +88,10 @@ public class QEmailMessageManager implements QMessageProvider {
 			HttpResponse<String> post = HttpUtils.post("https://api.sendgrid.com/v3/mail/send", bodyContainer, sendGridApiKey);
 
 			log.info(ANSIColour.GREEN + "Email to " + targetEmail +" is sent" + ANSIColour.RESET);
-			log.info(ANSIColour.GREEN + "Post response -> " + post);
+			log.info(ANSIColour.GREEN + "targetEmail Post response -> " + post);
+
+			HttpResponse<String> ccPost = HttpUtils.post("https://api.sendgrid.com/v3/mail/send", ccBodyContainer, sendGridApiKey);
+			log.info(ANSIColour.GREEN + "CC targetEmail Post response -> " + ccPost);
 
 		} catch (Exception e) {
 			log.error("ERROR -> ", e);
