@@ -1,15 +1,11 @@
 package life.genny.messages.managers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sendgrid.Method;
-import com.sendgrid.Request;
-import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
-import io.smallrye.openapi.api.util.MergeUtil;
 import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.models.ANSIColour;
@@ -18,7 +14,6 @@ import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.MergeUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -237,6 +232,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		content.setType("text/html");
 		String merged = MergeUtils.merge(body, contextMap);
 		content.setValue(merged);
+		mail.addContent(content);
 		mail.setFrom(from);
 
 		sendRequest(mail,sendGridApiKey);
