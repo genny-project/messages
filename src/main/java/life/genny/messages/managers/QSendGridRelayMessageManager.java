@@ -225,14 +225,14 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		}
 
 		for (String key : templateData.keySet()) {
-			personalization.addDynamicTemplateData(key, templateData.get(key));
+//			personalization.addDynamicTemplateData(key, templateData.get(key));
 		}
 
 		Mail mail = new Mail();
 		mail.addPersonalization(personalization);
 		Content content = new Content();
 		content.setType("text/html");
-		String merged = MergeUtils.merge(body, contextMap);
+		String merged = MergeUtils.merge(body, templateData);
 		System.out.println("merged: "+merged);
 		content.setValue(merged);
 		mail.addContent(content);
