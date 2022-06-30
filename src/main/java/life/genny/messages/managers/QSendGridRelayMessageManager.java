@@ -233,7 +233,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		mail.addPersonalization(personalization);
 
 		body = StringEscapeUtils.unescapeHtml4(body);
-		body = body.replaceAll("[\\n\\t ]", "");
+		body = body.replaceAll("\n", "");
 		System.out.println("body unescaped: "+ body);
 		Content content = new Content();
 		content.setType("text/html");
