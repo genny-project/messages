@@ -97,6 +97,8 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 
 		String subject = templateBe.getValue("PRI_SUBJECT", null);
 		String body = templateBe.getValue("PRI_BODY", null);
+
+		System.out.println("#### BODY: "+ body);
 		String sendGridEmailSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_SENDER");
 		String sendGridEmailNameSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_NAME_SENDER");
 		String sendGridApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
