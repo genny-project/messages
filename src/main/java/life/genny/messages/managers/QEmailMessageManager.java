@@ -35,12 +35,15 @@ public class QEmailMessageManager implements QMessageProvider {
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
 		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 
-		if (target == null) {
-			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
+		if(projectBe != null) {
+			log.error(ANSIColour.GREEN+"projectBe is -> " + projectBe.getCode());
+		} else {
+			log.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
 			return;
 		}
-		if (projectBe == null) {
-			log.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
+
+		if (target == null) {
+			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 			return;
 		}
 
@@ -77,7 +80,7 @@ public class QEmailMessageManager implements QMessageProvider {
 
 //			mailer.send(Mail.withText(targetEmail, subject, body));
 
-			String sendGridApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
+			String sendGridApiKey = projectBe.getValueAsString("ENV_MUQ_SENDGRID_API_KEY");
 
 			HttpResponse<String> post = HttpUtils.post("https://api.sendgrid.com/v3/mail/send", body, sendGridApiKey);
 
