@@ -12,7 +12,6 @@ import life.genny.qwandaq.models.ANSIColour;
 import life.genny.qwandaq.models.GennySettings;
 import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.MergeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jboss.logging.Logger;
 
@@ -234,7 +233,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		mail.addPersonalization(personalization);
 
 		body = StringEscapeUtils.unescapeHtml4(body);
-		body = StringUtils.normalizeSpace(body);
+		body = body.replaceAll("[\\n\\t ]", "");
 		System.out.println("body unescaped: "+ body);
 		Content content = new Content();
 		content.setType("text/html");
