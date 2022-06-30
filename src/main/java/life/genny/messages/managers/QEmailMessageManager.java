@@ -73,8 +73,9 @@ public class QEmailMessageManager implements QMessageProvider {
 
 		// Mail Merging Data
 //		body = MergeUtils.merge(body, contextMap);
+		Integer randStr = (int) Math.random();
 
-		body = "test email from QEmailMessageManager";
+		body = "{\"personalizations\":[{\"to\":[{\"email\":\"mrrahulmaxcontact@gmail.com\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World "+ randStr +"!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"Body--> "+ randStr +"!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
 
 		try {
 
