@@ -1,8 +1,10 @@
 package life.genny.messages.managers;
 
+import java.net.http.HttpResponse;
 import java.util.Map;
 import javax.inject.Inject;
 
+import life.genny.qwandaq.utils.HttpUtils;
 import org.jboss.logging.Logger;
 
 import io.quarkus.mailer.Mail;
@@ -33,12 +35,15 @@ public class QEmailMessageManager implements QMessageProvider {
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
 		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
 
-		if (target == null) {
-			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
+		if(projectBe != null) {
+			log.error(ANSIColour.GREEN+"projectBe is -> " + projectBe.getCode());
+		} else {
+			log.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
 			return;
 		}
-		if (projectBe == null) {
-			log.error(ANSIColour.RED+"ProjectBe is NULL"+ANSIColour.RESET);
+
+		if (target == null) {
+			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 			return;
 		}
 
@@ -67,15 +72,23 @@ public class QEmailMessageManager implements QMessageProvider {
 		}
 
 		// Mail Merging Data
-		body = MergeUtils.merge(body, contextMap);
+//		body = MergeUtils.merge(body, contextMap);
+
+		body = "test email from QEmailMessageManager";
 
 		try {
 
-			mailer.send(Mail.withText(targetEmail, subject, body));
-			log.info(ANSIColour.GREEN + "Email to " + targetEmail +" is sent" + ANSIColour.RESET);
+//			mailer.send(Mail.withText(targetEmail, subject, body));
 
+			String sendGridApiKey = projectBe.getValueAsString("ENV_MUQ_SENDGRID_API_KEY");
+
+			HttpResponse<String> post = HttpUtils.post("https://api.sendgrid.com/v3/mail/send", body, sendGridApiKey);
+
+			log.info(ANSIColour.GREEN + "Email to " + targetEmail +" is sent" + ANSIColour.RESET);
+			log.info(ANSIColour.GREEN + "Post response -> " + post);
+			
 		} catch (Exception e) {
-			log.error("ERROR", e);
+			log.error("ERROR -> ", e);
 		} 
 
 	}
