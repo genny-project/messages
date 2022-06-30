@@ -16,12 +16,12 @@ import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.models.ANSIColour;
 
 public class QEmailMessageManager implements QMessageProvider {
-	
-	
+
+
 	public static final String FILE_TYPE = "application/";
-	
+
 	public static final String MESSAGE_BOTH_DRIVER_OWNER = "BOTH";
-	
+
 	private static final Logger log = Logger.getLogger(QEmailMessageManager.class);
 
 	@Inject
@@ -75,7 +75,7 @@ public class QEmailMessageManager implements QMessageProvider {
 //		body = MergeUtils.merge(body, contextMap);
 		Integer randStr = (int) Math.random();
 
-		body = "{\"personalizations\":[{\"to\":[{\"email\":\"mrrahulmaxcontact@gmail.com\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World "+ randStr +"!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"Body--> "+ randStr +"!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
+		String bodyContainer = "{\"personalizations\":[{\"to\":[{\"email\":\"mrrahulmaxcontact@gmail.com\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World "+ randStr +"!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"Body--> "+ body +"!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
 
 		try {
 
@@ -83,14 +83,14 @@ public class QEmailMessageManager implements QMessageProvider {
 
 			String sendGridApiKey = projectBe.getValueAsString("ENV_MUQ_SENDGRID_API_KEY");
 
-			HttpResponse<String> post = HttpUtils.post("https://api.sendgrid.com/v3/mail/send", body, sendGridApiKey);
+			HttpResponse<String> post = HttpUtils.post("https://api.sendgrid.com/v3/mail/send", bodyContainer, sendGridApiKey);
 
 			log.info(ANSIColour.GREEN + "Email to " + targetEmail +" is sent" + ANSIColour.RESET);
 			log.info(ANSIColour.GREEN + "Post response -> " + post);
-			
+
 		} catch (Exception e) {
 			log.error("ERROR -> ", e);
-		} 
+		}
 
 	}
 }
