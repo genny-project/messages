@@ -98,7 +98,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		String subject = templateBe.getValue("PRI_SUBJECT", null);
 		String body = templateBe.getValue("PRI_BODY", null);
 
-		System.out.println("#### BODY: "+ body);
+		log.info("#### BODY: "+ body);
 		String sendGridEmailSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_SENDER");
 		String sendGridEmailNameSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_NAME_SENDER");
 		String sendGridApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
@@ -233,6 +233,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		Content content = new Content();
 		content.setType("text/html");
 		String merged = MergeUtils.merge(body, contextMap);
+		System.out.println("merged: "+merged);
 		content.setValue(merged);
 		mail.addContent(content);
 		mail.setFrom(from);
@@ -245,6 +246,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		try {
 			String requestBody = new ObjectMapper().writeValueAsString(mail);
 			System.out.println("####### requestBody: "+requestBody);
+			System.out.println("####### apiKey:"+apiKey);
 
 			Optional<Map<String, String>> additionalHeaders = Optional.of(Map.of("Authorization", "Bearer " + apiKey));
 
@@ -253,6 +255,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 
 			HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 			int statusCode = httpResponse.statusCode();
+			System.out.println("####### response: "+httpResponse.body());
 			System.out.println("####### statusCode: "+statusCode);
 		} catch (Exception ex) {
 			System.out.println("Exception: " + ex.getMessage());
