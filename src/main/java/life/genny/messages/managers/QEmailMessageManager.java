@@ -69,7 +69,9 @@ public class QEmailMessageManager implements QMessageProvider {
 		}
 
 		// Mail Merging Data
-		body = MergeUtils.merge(body, contextMap);
+//		body = MergeUtils.merge(body, contextMap);
+
+		body = "test email from QEmailMessageManager";
 
 		try {
 
@@ -80,10 +82,10 @@ public class QEmailMessageManager implements QMessageProvider {
 			HttpResponse<String> post = HttpUtils.post("https://api.sendgrid.com/v3/mail/send", body, sendGridApiKey);
 
 			log.info(ANSIColour.GREEN + "Email to " + targetEmail +" is sent" + ANSIColour.RESET);
-			log.info(ANSIColour.GREEN + "Post response " + post);
+			log.info(ANSIColour.GREEN + "Post response -> " + post);
 			
 		} catch (Exception e) {
-			log.error("ERROR", e);
+			log.error("ERROR -> ", e);
 		} 
 
 	}
