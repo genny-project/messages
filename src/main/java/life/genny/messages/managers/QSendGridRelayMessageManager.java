@@ -1,6 +1,8 @@
 package life.genny.messages.managers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -15,6 +17,8 @@ import life.genny.qwandaq.utils.MergeUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jboss.logging.Logger;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -237,13 +241,26 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		Content content = new Content();
 		content.setType("text/html");
 		System.out.println("contextMap: "+ contextMap);
-		String merged = MergeUtils.merge(body, finalData);
-		System.out.println("merged: "+merged);
-		content.setValue(merged);
-		mail.addContent(content);
-		mail.setFrom(from);
+//		String merged = MergeUtils.merge(body, finalData);
 
-		sendRequest(mail,sendGridApiKey);
+		PebbleEngine engine = new PebbleEngine.Builder().build();
+		PebbleTemplate compiledTemplate =  engine.getLiteralTemplate(body);
+
+		Writer writer = new StringWriter();
+		try {
+			compiledTemplate.evaluate(writer, finalData);
+
+			String output = writer.toString();
+			System.out.println(output);
+			System.out.println("merged: " + output);
+			content.setValue(output);
+			mail.addContent(content);
+			mail.setFrom(from);
+
+			sendRequest(mail, sendGridApiKey);
+		}catch (Exception ex){
+			System.out.println("Exception: "+ ex.getMessage());
+		}
 	}
 
 	private void sendRequest(Mail mail, String apiKey) {
