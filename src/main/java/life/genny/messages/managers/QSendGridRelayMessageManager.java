@@ -238,29 +238,16 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 
 		body = StringEscapeUtils.unescapeHtml4(body);
 		System.out.println("body unescaped: "+ body);
-		body = body.replaceAll("(?m)^[\\s&&[^\\n]]+|[\\s+&&[^\\n]]+$", "")
-				.replaceAll("\n", " ");
-		System.out.println("body formatted: "+ body);
+		body = parseToTemplate(body, finalData);
+
 		Content content = new Content();
 		content.setType("text/html");
-		System.out.println("contextMap: "+ contextMap);
+		content.setValue(body);
 
-		try {
-			PebbleEngine engine = new PebbleEngine.Builder().build();
-			PebbleTemplate compiledTemplate =  engine.getLiteralTemplate(body);
+		mail.addContent(content);
+		mail.setFrom(from);
 
-			Writer writer = new StringWriter();
-			compiledTemplate.evaluate(writer, finalData);
-			String output = writer.toString();
-			System.out.println(output);
-			System.out.println("merged: " + output);
-			content.setValue(output);
-			mail.addContent(content);
-			mail.setFrom(from);
-			sendRequest(mail, sendGridApiKey);
-		}catch (Exception ex){
-			System.out.println("Exception: "+ ex.getMessage());
-		}
+		sendRequest(mail, sendGridApiKey);
 	}
 
 	private void sendRequest(Mail mail, String apiKey) {
@@ -281,6 +268,23 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 			System.out.println("####### statusCode: "+statusCode);
 		} catch (Exception ex) {
 			System.out.println("Exception: " + ex.getMessage());
+		}
+	}
+
+	private String parseToTemplate(String template, Map<String,Object> data){
+		try {
+			System.out.println("##### template: " + template);
+			PebbleEngine engine = new PebbleEngine.Builder().build();
+			PebbleTemplate compiledTemplate =  engine.getLiteralTemplate(template);
+
+			Writer writer = new StringWriter();
+			compiledTemplate.evaluate(writer, data);
+			String output = writer.toString();
+			System.out.println("##### parsed template: " + output);
+			return output;
+		}catch (Exception ex){
+			System.out.println("Exception: "+ ex.getMessage());
+			return null;
 		}
 	}
 }
