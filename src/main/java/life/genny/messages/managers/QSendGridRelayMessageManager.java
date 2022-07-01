@@ -224,9 +224,9 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 				}
 			}
 		}
-
+		Map<String, Object> finalData = new HashMap<>();
 		for (String key : templateData.keySet()) {
-//			personalization.addDynamicTemplateData(key, templateData.get(key));
+			finalData.put(key, templateData.get(key));
 		}
 
 		Mail mail = new Mail();
@@ -237,7 +237,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 		Content content = new Content();
 		content.setType("text/html");
 		System.out.println("contextMap: "+ contextMap);
-		String merged = MergeUtils.merge(body, contextMap);
+		String merged = MergeUtils.merge(body, finalData);
 		System.out.println("merged: "+merged);
 		content.setValue(merged);
 		mail.addContent(content);
