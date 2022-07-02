@@ -12,7 +12,6 @@ import life.genny.qwandaq.utils.MergeUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jboss.logging.Logger;
 
-import javax.inject.Inject;
 import javax.json.*;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -27,9 +26,6 @@ import java.util.Map;
 public class QSendGridRelayMessageManager implements QMessageProvider {
 
     private static final Logger log = Logger.getLogger(QSendGridRelayMessageManager.class);
-
-    @Inject
-    PebbleEngine engine;
 
     @Override
     public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
@@ -290,6 +286,7 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
     private String parseToTemplate(String template, Map<String, Object> data) {
         try {
             System.out.println("##### template: " + template);
+            PebbleEngine engine = new PebbleEngine.Builder().build();
             PebbleTemplate compiledTemplate = engine.getLiteralTemplate(template);
 
             Writer writer = new StringWriter();
