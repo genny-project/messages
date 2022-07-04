@@ -1,7 +1,12 @@
 package life.genny.messages.managers;
 
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.jknack.handlebars.*;
+import com.github.jknack.handlebars.context.FieldValueResolver;
+import com.github.jknack.handlebars.context.JavaBeanValueResolver;
+import com.github.jknack.handlebars.context.MapValueResolver;
+import com.github.jknack.handlebars.context.MethodValueResolver;
 import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.models.ANSIColour;
@@ -13,8 +18,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.jboss.logging.Logger;
 
 import javax.json.*;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -285,13 +288,25 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
 
     private String parseToTemplate(String template, Map<String, Object> data) {
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
             System.out.println("##### template: " + template);
-            PebbleEngine engine = new PebbleEngine.Builder().build();
-            PebbleTemplate compiledTemplate = engine.getLiteralTemplate(template);
 
-            Writer writer = new StringWriter();
-            compiledTemplate.evaluate(writer, data);
-            String output = writer.toString();
+            JsonNode jsonNode = objectMapper.valueToTree(data);
+            Handlebars handlebars = new Handlebars();
+            handlebars.registerHelper("json", Jackson2Helper.INSTANCE);
+
+            Context context = Context
+                    .newBuilder(jsonNode)
+                    .resolver(
+                            JsonNodeValueResolver.INSTANCE,
+                            JavaBeanValueResolver.INSTANCE,
+                            FieldValueResolver.INSTANCE,
+                            MapValueResolver.INSTANCE,
+                            MethodValueResolver.INSTANCE
+                    )
+                    .build();
+            Template handleBarTemplate = handlebars.compileInline(template);
+            String output = handleBarTemplate.apply(context);
             System.out.println("##### parsed template: " + output);
             return output;
         } catch (Exception ex) {
@@ -299,4 +314,6 @@ public class QSendGridRelayMessageManager implements QMessageProvider {
             return null;
         }
     }
+
+
 }
