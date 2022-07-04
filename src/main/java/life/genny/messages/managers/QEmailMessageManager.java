@@ -72,7 +72,7 @@ public class QEmailMessageManager implements QMessageProvider {
 		}
 
 		// Mail Merging Data
-//		body = MergeUtils.merge(body, contextMap);
+		body = MergeUtils.merge(body, contextMap);
 //		Integer randStr = (int) Math.random();
 
 		String bodyContainer = "{\"personalizations\":[{\"to\":[{\"email\":\"" + targetEmail +"\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"Body--> "+ body + "!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
