@@ -98,8 +98,11 @@ public class MessageProcessor {
             // Handle any default context associations
             String contextAssociations = templateBe.getValue("PRI_CONTEXT_ASSOCIATIONS", null);
             log.info("PRI_CONTEXT_ASSOCIATIONS is -> " + contextAssociations);
-            if (contextAssociations != null) {
+
+            if (contextAssociations != null || !contextAssociations.isEmpty()) {
                 MergeUtils.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations, false);
+            } else {
+                log.info("PRI_CONTEXT_ASSOCIATIONS is empty!");
             }
 
             // Check for Default Message
