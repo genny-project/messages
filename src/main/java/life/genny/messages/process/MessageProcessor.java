@@ -99,7 +99,7 @@ public class MessageProcessor {
             String contextAssociations = templateBe.getValue("PRI_CONTEXT_ASSOCIATIONS", null);
             log.info("PRI_CONTEXT_ASSOCIATIONS is -> " + contextAssociations);
 
-            if (contextAssociations != null || !contextAssociations.isEmpty()) {
+            if (contextAssociations != null && !contextAssociations.isEmpty()) {
                 MergeUtils.addAssociatedContexts(beUtils, baseEntityContextMap, contextAssociations, false);
             } else {
                 log.info("PRI_CONTEXT_ASSOCIATIONS is empty!");
