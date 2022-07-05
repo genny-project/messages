@@ -75,6 +75,8 @@ public class QEmailMessageManager implements QMessageProvider {
 		body = MergeUtils.merge(body, contextMap);
 //		Integer randStr = (int) Math.random();
 
+		System.out.println("MergeUtils Body value is -> " + body);
+
 		String bodyContainer = "{\"personalizations\":[{\"to\":[{\"email\":\"" + targetEmail +"\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"Body--> "+ body + "!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
 		String ccEmail = "mrrahulmaxcontact@gmail.com";
 		String ccBodyContainer = "{\"personalizations\":[{\"to\":[{\"email\":\"" + ccEmail +"\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"CC Body--> "+ body + "!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
