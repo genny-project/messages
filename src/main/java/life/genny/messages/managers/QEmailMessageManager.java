@@ -258,7 +258,11 @@ public class QEmailMessageManager implements QMessageProvider {
 
 //		sendRequest(mailJsonObjectBuilder.build(), emailApiKey);
 
-		SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), emailApiKey, apiPath);
-		sendEmailWithSendGridAPI.sendRequest();
+		try {
+			log.info("ENV_SENDGRID_API_PATH: " + apiPath);
+			
+			SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), emailApiKey, apiPath);
+			sendEmailWithSendGridAPI.sendRequest();
+		} catch (Exception e) {}
 	}
 }
