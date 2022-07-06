@@ -72,6 +72,7 @@ public class QEmailMessageManager implements QMessageProvider {
 		String emailSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_SENDER");
 		String emailNameSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_NAME_SENDER");
 		String emailApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
+		String apiPath = projectBe.getValueAsString("ENV_SENDGRID_API_PATH");
 
 		log.info("The name for email sender " + emailSender);
 		// Build a general data map from context BEs
@@ -257,7 +258,7 @@ public class QEmailMessageManager implements QMessageProvider {
 
 //		sendRequest(mailJsonObjectBuilder.build(), emailApiKey);
 
-		SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), emailApiKey);
+		SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), emailApiKey, apiPath);
 		sendEmailWithSendGridAPI.sendRequest();
 	}
 }

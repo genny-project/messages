@@ -10,18 +10,20 @@ import java.net.http.HttpResponse;
 public class SendEmailWithSendGridAPI {
     private JsonObject mail;
     private String apiKey;
+    private String path;
+
     private static final Logger log = Logger.getLogger(QEmailMessageManager.class);
 
-    public SendEmailWithSendGridAPI(JsonObject mail, String apiKey) {
+    public SendEmailWithSendGridAPI(JsonObject mail, String apiKey, String path) {
         this.mail = mail;
         this.apiKey = apiKey;
+        this.path = path;
     }
 
     public void sendRequest() {
         log.info("Sending email with SendGrid API");
 
         // TODO: Fetch from env
-        String path = "https://api.sendgrid.com/v3/mail/send";
         try {
             String requestBody = mail.toString();
 //            System.out.println("####### requestBody: " + requestBody);
