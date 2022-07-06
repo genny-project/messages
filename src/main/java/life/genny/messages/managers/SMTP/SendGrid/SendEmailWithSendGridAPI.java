@@ -18,13 +18,13 @@ public class SendEmailWithSendGridAPI {
     }
 
     public void sendRequest() {
-        log.info("Sending email with SendGrid");
+        log.info("Sending email with SendGrid API");
 
         // TODO: Fetch from env
         String path = "https://api.sendgrid.com/v3/mail/send";
         try {
             String requestBody = mail.toString();
-            System.out.println("####### requestBody: " + requestBody);
+//            System.out.println("####### requestBody: " + requestBody);
 
             HttpResponse<String> httpResponse = HttpUtils.post(path, requestBody, apiKey);
             if (httpResponse != null) {

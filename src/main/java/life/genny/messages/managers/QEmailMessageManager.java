@@ -76,11 +76,11 @@ public class QEmailMessageManager implements QMessageProvider {
 		String subject = templateBe.getValue("PRI_SUBJECT", null);
 		String body = templateBe.getValue("PRI_BODY", null);
 
-		String sendGridEmailSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_SENDER");
-		String sendGridEmailNameSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_NAME_SENDER");
-		String sendGridApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
+		String emailSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_SENDER");
+		String emailNameSender = projectBe.getValueAsString("ENV_SENDGRID_EMAIL_NAME_SENDER");
+		String emailApiKey = projectBe.getValueAsString("ENV_SENDGRID_API_KEY");
 
-		log.info("The name for email sender " + sendGridEmailNameSender);
+		log.info("The name for email sender " + emailSender);
 		// Build a general data map from context BEs
 		HashMap<String, Object> templateData = new HashMap<>();
 
@@ -141,8 +141,8 @@ public class QEmailMessageManager implements QMessageProvider {
 
 		JsonObject fromJsonObject = Json
 				.createObjectBuilder()
-				.add("name", sendGridEmailNameSender)
-				.add("email", sendGridEmailSender)
+				.add("name", emailNameSender)
+				.add("email", emailSender)
 				.build();
 
 		JsonObject toJsonObject = Json
@@ -262,9 +262,9 @@ public class QEmailMessageManager implements QMessageProvider {
 		contentArray.add(contentJson.build());
 		mailJsonObjectBuilder.add("content", contentArray.build());
 
-//		sendRequest(mailJsonObjectBuilder.build(), sendGridApiKey);
+//		sendRequest(mailJsonObjectBuilder.build(), emailApiKey);
 
-		SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), sendGridApiKey);
+		SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), emailApiKey);
 		sendEmailWithSendGridAPI.sendRequest();
 	}
 
