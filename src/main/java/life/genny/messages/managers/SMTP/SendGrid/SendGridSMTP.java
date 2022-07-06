@@ -1,4 +1,4 @@
-package life.genny.messages.managers.SMTP;
+package life.genny.messages.managers.SMTP.SendGrid;
 
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
@@ -21,7 +21,7 @@ import java.util.Properties;
 * Does not work with MFA
 */
 
-public class SendGrid {
+public class SendGridSMTP {
 
     private static final String SMTP_AUTH_USER = "";
     private static final String SMTP_AUTH_PWD  = "";
