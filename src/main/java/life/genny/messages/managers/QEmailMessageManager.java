@@ -1,9 +1,15 @@
 package life.genny.messages.managers;
 
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 
+import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.utils.HttpUtils;
 import org.jboss.logging.Logger;
 
@@ -33,7 +39,7 @@ public class QEmailMessageManager implements QMessageProvider {
 		log.info("Sending an Email Type Message...");
 
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
-		BaseEntity target = (BaseEntity) contextMap.get("RECIPIENT");
+		BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 
 		if(projectBe != null) {
 			log.error(ANSIColour.GREEN+"projectBe is -> " + projectBe.getCode());
@@ -42,15 +48,15 @@ public class QEmailMessageManager implements QMessageProvider {
 			return;
 		}
 
-		if (target == null) {
+		if (recipientBe == null) {
 			log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 			return;
 		}
 
-		String targetEmail = target.getValue("PRI_EMAIL", null);
+		String targetEmail = recipientBe.getValue("PRI_EMAIL", null);
 
 		if (targetEmail == null) {
-			log.error(ANSIColour.RED+"Target " + target.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
+			log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 			return;
 		}
 
@@ -71,11 +77,75 @@ public class QEmailMessageManager implements QMessageProvider {
 			return;
 		}
 
+		String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
+
+		log.info("Timezone returned from recipient BE " + recipientBe.getCode() + " is:: " + timezone);
+
 		// Mail Merging Data
+		// Build a general data map from context BEs
+		HashMap<String, Object> templateData = new HashMap<>();
+
+		for (String key : contextMap.keySet()) {
+
+			Object value = contextMap.get(key);
+
+			if (value.getClass().equals(BaseEntity.class)) {
+				log.info("Processing key as BASEENTITY: " + key);
+				BaseEntity be = (BaseEntity) value;
+				HashMap<String, String> deepReplacementMap = new HashMap<>();
+				for (EntityAttribute ea : be.getBaseEntityAttributes()) {
+
+					String attrCode = ea.getAttributeCode();
+					if (attrCode.startsWith("LNK") || attrCode.startsWith("PRI")) {
+						Object attrVal = ea.getValue();
+						if (attrVal != null) {
+
+							String valueString = attrVal.toString();
+
+							if (attrVal.getClass().equals(LocalDate.class)) {
+								if (contextMap.containsKey("DATEFORMAT")) {
+									String format = (String) contextMap.get("DATEFORMAT");
+									valueString = MergeUtils.getFormattedDateString((LocalDate) attrVal, format);
+								} else {
+									log.info("No DATEFORMAT key present in context map, defaulting to stringified date");
+								}
+							} else if (attrVal.getClass().equals(LocalDateTime.class)) {
+								if (contextMap.containsKey("DATETIMEFORMAT")) {
+
+									String format = (String) contextMap.get("DATETIMEFORMAT");
+									LocalDateTime dtt = (LocalDateTime) attrVal;
+
+									ZonedDateTime zonedDateTime = dtt.atZone(ZoneId.of("UTC"));
+									ZonedDateTime converted = zonedDateTime.withZoneSameInstant(ZoneId.of(timezone));
+
+									valueString = MergeUtils.getFormattedZonedDateTimeString(converted, format);
+									log.info("date format");
+									log.info("formatted date: "+  valueString);
+
+								} else {
+									log.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");
+								}
+							}
+							// templateData.put(key+"."+attrCode, valueString);
+							deepReplacementMap.put(attrCode, valueString);
+						}
+					}
+				}
+				templateData.put(key, deepReplacementMap);
+			} else if(value.getClass().equals(String.class)) {
+				log.info("Processing key as STRING: " + key);
+				templateData.put(key, (String) value);
+			}
+		}
+
+
+
 		body = MergeUtils.merge(body, contextMap);
 //		Integer randStr = (int) Math.random();
 
+		System.out.println("contextMap values are -> " + contextMap);
 		System.out.println("MergeUtils Body value is -> " + body);
+		System.out.println("templateData values are -> " + templateData);
 
 		String bodyContainer = "{\"personalizations\":[{\"to\":[{\"email\":\"" + targetEmail +"\",\"name\":\"Rahul Sam\"}],\"subject\":\"Hello, World!\"}],\"content\": [{\"type\": \"text/plain\", \"value\": \"Body--> "+ body + "!\"}],\"from\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"},\"reply_to\":{\"email\":\"rahul.samaranayake@outcomelife.com.au\",\"name\":\"Rahul samaranayake\"}}";
 		String ccEmail = "mrrahulmaxcontact@gmail.com";
