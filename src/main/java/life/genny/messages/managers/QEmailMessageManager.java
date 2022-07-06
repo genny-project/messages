@@ -75,6 +75,8 @@ public class QEmailMessageManager implements QMessageProvider {
 		String apiPath = projectBe.getValueAsString("ENV_SENDGRID_API_PATH");
 
 		log.info("The name for email sender " + emailSender);
+		log.info("The apiPath for API " + apiPath);
+
 		// Build a general data map from context BEs
 		HashMap<String, Object> templateData = new HashMap<>();
 
@@ -260,7 +262,7 @@ public class QEmailMessageManager implements QMessageProvider {
 
 		try {
 			log.info("ENV_SENDGRID_API_PATH: " + apiPath);
-			
+
 			SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), emailApiKey, apiPath);
 			sendEmailWithSendGridAPI.sendRequest();
 		} catch (Exception e) {}
