@@ -1,13 +1,6 @@
 package life.genny.messages.managers;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.jknack.handlebars.*;
-import com.github.jknack.handlebars.context.FieldValueResolver;
-import com.github.jknack.handlebars.context.JavaBeanValueResolver;
-import com.github.jknack.handlebars.context.MapValueResolver;
-import com.github.jknack.handlebars.context.MethodValueResolver;
 import life.genny.messages.managers.SMTP.SendGrid.SendEmailWithSendGridAPI;
+import life.genny.messages.util.MsgUtils;
 import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.models.ANSIColour;
@@ -255,7 +248,7 @@ public class QEmailMessageManager implements QMessageProvider {
 
 		body = StringEscapeUtils.unescapeHtml4(body);
 		System.out.println("body unescaped: " + body);
-		body = parseToTemplate(body, finalData);
+		body = MsgUtils.parseToTemplate(body, finalData);
 
 		contentJson.add("type", "text/html");
 		contentJson.add("value", body);
@@ -267,35 +260,4 @@ public class QEmailMessageManager implements QMessageProvider {
 		SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), emailApiKey);
 		sendEmailWithSendGridAPI.sendRequest();
 	}
-
-	private String parseToTemplate(String template, Map<String, Object> data) {
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			System.out.println("##### template: " + template);
-
-			JsonNode jsonNode = objectMapper.valueToTree(data);
-			Handlebars handlebars = new Handlebars();
-			handlebars.registerHelper("json", Jackson2Helper.INSTANCE);
-
-			Context context = Context
-					.newBuilder(jsonNode)
-					.resolver(
-							JsonNodeValueResolver.INSTANCE,
-							JavaBeanValueResolver.INSTANCE,
-							FieldValueResolver.INSTANCE,
-							MapValueResolver.INSTANCE,
-							MethodValueResolver.INSTANCE
-					)
-					.build();
-			Template handleBarTemplate = handlebars.compileInline(template);
-			String output = handleBarTemplate.apply(context);
-			System.out.println("##### parsed template: " + output);
-			return output;
-		} catch (Exception ex) {
-			System.out.println("Exception: " + ex.getMessage());
-			return null;
-		}
-	}
-
-
 }
