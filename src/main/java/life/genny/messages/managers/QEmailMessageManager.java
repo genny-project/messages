@@ -250,7 +250,7 @@ public class QEmailMessageManager implements QMessageProvider {
 		JsonObjectBuilder contentJson = Json.createObjectBuilder();
 
 		body = StringEscapeUtils.unescapeHtml4(body);
-		System.out.println("body unescaped: " + body);
+//		System.out.println("body unescaped: " + body);
 		body = MsgUtils.parseToTemplate(body, finalData);
 
 		contentJson.add("type", "text/html");
@@ -265,6 +265,8 @@ public class QEmailMessageManager implements QMessageProvider {
 
 			SendEmailWithSendGridAPI sendEmailWithSendGridAPI = new SendEmailWithSendGridAPI(mailJsonObjectBuilder.build(), emailApiKey, apiPath);
 			sendEmailWithSendGridAPI.sendRequest();
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			log.error("Email sending failed! Error -> " + e.getMessage());
+		}
 	}
 }
