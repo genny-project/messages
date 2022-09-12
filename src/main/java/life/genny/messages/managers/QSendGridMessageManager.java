@@ -89,7 +89,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			log.info("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
 		}
 
-		String recipient;
+		String recipient = null;
 		// send email to secondary email if it present.
 		if(recipientBe != null)
 		{
