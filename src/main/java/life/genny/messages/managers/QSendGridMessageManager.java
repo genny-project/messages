@@ -66,7 +66,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 		BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 		BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
-		
+
 		recipientBe = beUtils.getBaseEntityByCode(recipientBe.getCode());
 
 		if (templateBe == null) {
@@ -88,7 +88,19 @@ public class QSendGridMessageManager implements QMessageProvider {
 			log.info("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
 		}
 
-		String recipient = recipientBe.getValue("PRI_EMAIL", null);
+		String recipient;
+		// send email to secondary email if it present.
+		if(recipientBe) {
+			String additionalEmail = recipientBe.getValue("PRI_EMAIL_ADDITIONAL", null);
+			String primaryEmail = recipientBe.getValue("PRI_EMAIL", null);
+			if(additionalEmail != null && StringUtils.isNotEmpty(additionalEmail)) {
+				recipient = additionalEmail;
+			} else {
+				recipient = primaryEmail;
+			}
+		} else {
+			log.error(ANSIColour.RED + "recipientBe is NULL" + ANSIColour.RESET);
+		}
 
 		if (recipient != null) {
 			recipient = recipient.trim();
