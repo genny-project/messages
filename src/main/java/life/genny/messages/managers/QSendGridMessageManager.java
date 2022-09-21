@@ -78,8 +78,14 @@ public class QSendGridMessageManager implements QMessageProvider {
 				if(additionalEmail != null && StringUtils.isNotEmpty(additionalEmail))
 				{
 					recipient = additionalEmail;
-				} else{
+					
+				} else if (primaryEmail != null && StringUtils.isNotEmpty(primaryEmail)){
+					
 					recipient = primaryEmail;
+				
+				} else {
+					log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
+					return;
 				}
 			}
 
@@ -91,11 +97,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			}
 			log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
 
-			if (recipient == null) {
-				log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
-				return;
-			}
-
+			
 			String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
 			String subject = templateBe.getValue("PRI_SUBJECT", null);
 
