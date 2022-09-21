@@ -15,6 +15,7 @@ import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.TimeUtils;
 import org.glassfish.json.JsonUtil;
 import org.jboss.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,21 +69,19 @@ public class QSendGridMessageManager implements QMessageProvider {
 				log.info("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
 			}
 
-			String recipient = recipientBe.getValue("PRI_EMAIL", null);
+			// send email to secondary email if it present.
+			String recipient = null;
+			if (recipientBe != null)
+				recipient = findSendableEmail(recipientBe);
 
-			if (recipient != null) {
+			if (recipient != null)
 				recipient = recipient.trim();
-			}
-			if (timezone == null || timezone.replaceAll(" ", "").isEmpty()) {
+
+			if (timezone == null || timezone.replaceAll(" ", "").isEmpty())
 				timezone = "UTC";
-			}
+
 			log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
-
-			if (recipient == null) {
-				log.error(ANSIColour.RED+"Target " + recipientBe.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
-				return;
-			}
-
+			
 			String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
 			String subject = templateBe.getValue("PRI_SUBJECT", null);
 
@@ -244,6 +243,21 @@ public class QSendGridMessageManager implements QMessageProvider {
 		};
 		executor.execute(sendGridRunnable);
 	}
-	
 
+	public String findSendableEmail(BaseEntity recipient) {
+
+		// fetch additional email
+		String additionalEmail = recipient.getValue("PRI_EMAIL_ADDITIONAL", null);
+		if (additionalEmail != null && StringUtils.isNotEmpty(additionalEmail))
+			return additionalEmail;
+
+		// fetch primary email
+		String primaryEmail = recipient.getValue("PRI_EMAIL", null);
+		if (primaryEmail != null && StringUtils.isNotEmpty(primaryEmail))
+			return primaryEmail;
+
+		log.error(ANSIColour.RED+"Target " + recipient.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
+		return null;
+	}
+	
 }
