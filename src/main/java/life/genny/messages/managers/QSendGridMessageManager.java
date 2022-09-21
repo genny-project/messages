@@ -15,6 +15,7 @@ import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.TimeUtils;
 import org.glassfish.json.JsonUtil;
 import org.jboss.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,7 +69,19 @@ public class QSendGridMessageManager implements QMessageProvider {
 				log.info("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
 			}
 
-			String recipient = recipientBe.getValue("PRI_EMAIL", null);
+			String recipient = null;
+			// send email to secondary email if it present.
+			if(recipientBe != null)
+			{
+				String additionalEmail = recipientBe.getValue("PRI_EMAIL_ADDITIONAL", null);
+				String primaryEmail = recipientBe.getValue("PRI_EMAIL", null);
+				if(additionalEmail != null && StringUtils.isNotEmpty(additionalEmail))
+				{
+					recipient = additionalEmail;
+				} else{
+					recipient = primaryEmail;
+				}
+			}
 
 			if (recipient != null) {
 				recipient = recipient.trim();
