@@ -127,8 +127,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 										ZonedDateTime converted = zonedDateTime.withZoneSameInstant(ZoneId.of(timezone));
 
 										valueString = TimeUtils.formatZonedDateTime(converted, format);
+										valueString += " (" + timezone +" )";	// show converted timezone in email
 										log.info("date format");
-										log.info("formatted date: "+  valueString);
+										log.info("formatted date with timezone: " +  valueString);
 									} else {
 										log.info("No DATETIMEFORMAT key present in context map, defaulting to stringified dateTime");
 									}
