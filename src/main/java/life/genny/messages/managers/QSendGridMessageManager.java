@@ -234,8 +234,12 @@ public class QSendGridMessageManager implements QMessageProvider {
 				response = sg.api(request);
 				log.info("Response Code: " + response.getStatusCode());
 				log.info("Headers: " + response.getHeaders());
-
-				log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipient + "!"+ANSIColour.RESET);
+				int family = (int)Math.floor(response.getStatusCode() / 100);
+				if(family == 2) {
+					log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipient + "!"+ANSIColour.RESET);
+				} else {
+					log.error("Failed to Send Message. Got response: " + response.getStatusCode());
+				}
 			} catch (IOException e) {
 				log.error("Failed to send message: " + request.toString());
 				e.printStackTrace();
