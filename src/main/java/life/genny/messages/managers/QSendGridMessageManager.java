@@ -13,7 +13,7 @@ import life.genny.qwandaq.models.ANSIColour;
 import life.genny.qwandaq.models.GennySettings;
 import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.TimeUtils;
-import org.glassfish.json.JsonUtil;
+
 import org.jboss.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,46 +35,44 @@ public class QSendGridMessageManager implements QMessageProvider {
 	// Concurrency for sendgrid api. Just putting it here to start with
 	ExecutorService executor = Executors.newFixedThreadPool(10);
 
-	public void executeSendMessage(SendGrid sendGrid, String recipient, Mail mail) {
-
-	}
-
 	private static final Logger log = Logger.getLogger(QSendGridMessageManager.class);
 
 	@Override
 	public void sendMessage(BaseEntityUtils beUtils, BaseEntity templateBe, Map<String, Object> contextMap) {
+		log.info("SendGrid email type");
 
 		Runnable sendGridRunnable = () -> {
-			log.info("SendGrid email type");
+
+			log.info("Starting thread!");
 
 			BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 			BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
 
 			recipientBe = beUtils.getBaseEntityByCode(recipientBe.getCode());
 
-			if ((templateBe == null) || (recipientBe == null)) {
-				log.info("templateBe: " + templateBe);
-				log.info("RecipientBe: " + recipientBe);
-				log.error(ANSIColour.RED + "TemplateBE or recipientBe is NULL!" + ANSIColour.RESET);
+			if (templateBe == null) {
+				log.error(ANSIColour.RED + "templateBe is NULL!" + ANSIColour.RESET);
+				return;
+			}
+
+			if (recipientBe == null) {
+				log.error(ANSIColour.RED + "recipientBe is NULL!" + ANSIColour.RESET);
 				return;
 			}
 
 			// test data
-			log.info("Showing what is in recipient BE, code=" + recipientBe.getCode());
+			log.debug("Showing what is in recipient BE, code=" + recipientBe.getCode());
 			for (EntityAttribute ea : recipientBe.getBaseEntityAttributes()) {
-				log.info("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
+				log.debug("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
 			}
 
 			// send email to secondary email if it is present.
 			String recipientEmail = findSendableEmail(recipientBe);
-			log.info("recipientEmail: " + recipientEmail);
-
 			if (recipientEmail == null) {
 				log.error(ANSIColour.RED + "recipientEmail is NULL!" + ANSIColour.RESET);
 				return;
-			} else {
-				recipientEmail = recipientEmail.trim();
 			}
+			log.info("Sending Email to: " + recipientEmail);
 
 			String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
 			log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipientEmail + ", Timezone: " + timezone);
@@ -98,7 +96,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 				to = new Email(dedicatedTestEmail);
 			}
 
-			SendGrid sg = new SendGrid(sendGridApiKey);
 			Personalization personalization = new Personalization();
 			personalization.addTo(to);
 			personalization.setSubject(subject);
@@ -136,45 +133,107 @@ public class QSendGridMessageManager implements QMessageProvider {
 			Request request = new Request();
 			request.setMethod(Method.POST);
 			request.setEndpoint("mail/send");
-
-			log.info("Sending on new thread to: " + recipientEmail);
-			log.info("Starting thread!");
-
-			Response response;
 			try {
 				request.setBody(mail.build());
-				response = sg.api(request);
-				log.info("Response Code: " + response.getStatusCode());
-				log.info("Headers: " + response.getHeaders());
-
-				log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipientEmail + "!"+ANSIColour.RESET);
 			} catch (IOException e) {
 				log.error("Failed to send message: " + request.toString());
 				e.printStackTrace();
 			}
+			SendGrid sg = new SendGrid(sendGridApiKey);
+			Response response = sendAndHandleRequest(sg, request, recipientEmail);
+
 		};
 		executor.execute(sendGridRunnable);
 	}
 
-	public String findSendableEmail(BaseEntity recipient) {
+
+	/**
+	 * Send a SendGrid request (will log response if there are errors)
+	 * @param sg - {@link SendGrid} instance
+	 * @param request - a {@link Request} to send
+	 * @param recipientEmail - email to send to (for logging purposes)
+	 * @return - {@link Response} returned from SendGrid
+	 */
+	private Response sendAndHandleRequest(SendGrid sg, Request request, String recipientEmail) {
+
+		Response response;
+		try {
+			response = sg.api(request);
+
+			int statusCode = response.getStatusCode();
+			int statusFamily = (int)Math.floor(statusCode / 100);
+			if(statusFamily != 2) {// Not ok
+				log.error(ANSIColour.RED+"Error sending SendGrid message to " + recipientEmail + "!"+ANSIColour.RESET);
+				logResponse(response, log::error);
+			} else {
+				log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipientEmail + "!"+ANSIColour.RESET);
+				log.debug(ANSIColour.GREEN + " Got back " + response.getStatusCode());
+			}
+		} catch (IOException e) {
+			log.error("Error sending request to SendGrid!: " + request);
+			logRequest(request, log::error);
+			log.error("\n\nException: ");
+			e.printStackTrace();
+			return null;
+		}
+
+		return response;
+	}
+
+	/**
+	 * Log a SendGrid response
+	 * @param response
+	 * @param log - log level
+	 */
+	private void logResponse(Response response, LogCallback log) {
+		
+		log.log("Response Code: " + response.getStatusCode());
+		log.log("Headers: " + response.getHeaders());
+		logHeaders(response.getHeaders(), log);
+	}
+
+	/**
+	 * Log a SendGrid request
+	 * @param request
+	 * @param log - log level
+	 */
+	private void logRequest(Request request, LogCallback log) {
+		log.log("URI: " + request.getBaseUri() + "/" + request.getEndpoint());
+		log.log("Body: " + request.getBody());
+		logHeaders(request.getHeaders(), log);
+	}
+
+	/**
+	 * Log a set of headers
+	 * @param headers
+	 * @param log - log level
+	 */
+	private void logHeaders(Map<String, String> headers, LogCallback log) {
+		log.log("========Headers============");
+		for(String header : headers.keySet()) {
+			log.log("		" + header + " = " + headers.get(header));
+		}
+	}
+
+	private String findSendableEmail(BaseEntity recipient) {
 		// fetch additional email
 		String additionalEmail = recipient.getValue("PRI_EMAIL_ADDITIONAL", null);
 		/*isNotEmpty() does null checks as well*/
 		if (StringUtils.isNotEmpty(additionalEmail)) {
-			return additionalEmail;
+			return additionalEmail.trim();
 		}
 
 		// fetch primary email
 		String primaryEmail = recipient.getValue("PRI_EMAIL", null);
 		if (StringUtils.isNotEmpty(primaryEmail)) {
-			return primaryEmail;
+			return primaryEmail.trim();
 		}
 
 		log.error(ANSIColour.RED+"Target " + recipient.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 		return null;
 	}
 
-	public void setDynamicTemplateData(Map<String, Object> contextMap, Personalization personalization, String timezone) {
+	private void setDynamicTemplateData(Map<String, Object> contextMap, Personalization personalization, String timezone) {
 
 		for (String key : contextMap.keySet()) {
 			Object value = contextMap.get(key);
@@ -235,7 +294,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 		}
 	}
 
-	public List<String> getCarbonCopyEmails(Map<String, Object> contextMap, Email to, String toGet){
+	private List<String> getCarbonCopyEmails(Map<String, Object> contextMap, Email to, String toGet){
 		List<String> emails = new ArrayList<>();
 		Object value = contextMap.get(toGet);
 
@@ -260,5 +319,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 			}
 		}
 		return emails;
+	}
+
+	private interface LogCallback {
+		public void log(Object obj);
 	}
 }
