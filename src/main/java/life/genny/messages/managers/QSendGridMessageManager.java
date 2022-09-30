@@ -16,7 +16,10 @@ import life.genny.qwandaq.utils.TimeUtils;
 import org.glassfish.json.JsonUtil;
 import org.jboss.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
+import org.jose4j.json.internal.json_simple.JSONObject;
+import org.json.JSONObject;
 
+import javax.json.JsonObjectBuilder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -47,7 +50,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 			BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 			BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
-			
+
 			recipientBe = beUtils.getBaseEntityByCode(recipientBe.getCode());
 
 			if (templateBe == null) {
@@ -85,7 +88,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 				timezone = "UTC";
 
 			log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
-			
+
 			String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
 			String subject = templateBe.getValue("PRI_SUBJECT", null);
 
@@ -169,6 +172,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			personalization.addTo(to);
 			personalization.setSubject(subject);
 
+			System.out.println(new JSONObject(personalization));
 			// Hande CC and BCC
 			Object ccVal = contextMap.get("CC");
 			Object bccVal = contextMap.get("BCC");
@@ -267,5 +271,5 @@ public class QSendGridMessageManager implements QMessageProvider {
 		log.error(ANSIColour.RED+"Target " + recipient.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 		return null;
 	}
-	
+
 }
