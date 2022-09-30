@@ -16,7 +16,6 @@ import life.genny.qwandaq.utils.TimeUtils;
 import org.glassfish.json.JsonUtil;
 import org.jboss.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
-import org.jose4j.json.internal.json_simple.JSONObject;
 import org.json.JSONObject;
 
 import javax.json.JsonObjectBuilder;
