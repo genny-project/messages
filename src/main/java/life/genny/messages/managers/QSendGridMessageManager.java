@@ -171,8 +171,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 			Personalization personalization = new Personalization();
 			personalization.addTo(to);
 			personalization.setSubject(subject);
-
-			System.out.println(new JSONObject(personalization));
 			// Hande CC and BCC
 			Object ccVal = contextMap.get("CC");
 			Object bccVal = contextMap.get("BCC");
