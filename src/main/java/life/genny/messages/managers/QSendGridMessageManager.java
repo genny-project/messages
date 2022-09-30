@@ -59,7 +59,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 				log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 			}
 
-			String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
+			String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", null);
+			/*Some BE using old timezone attr value*/
+			if (timezone == null) {
+				timezone = recipientBe.getValue("PRI_TIME_ZONE", "UTC");
+			}
 
 			log.info("Timezone returned from recipient BE " + recipientBe.getCode() + " is:: " + timezone);
 
@@ -111,6 +115,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 								String valueString = attrVal.toString();
 
 								if (attrVal.getClass().equals(LocalDate.class)) {
+									log.info("LocalDate valueString: " + valueString);
+
 									if (contextMap.containsKey("DATEFORMAT")) {
 										String format = (String) contextMap.get("DATEFORMAT");
 										valueString = TimeUtils.formatDate((LocalDate) attrVal, format);
@@ -118,8 +124,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 										log.info("No DATEFORMAT key present in context map, defaulting to stringified date");
 									}
 								} else if (attrVal.getClass().equals(LocalDateTime.class)) {
-									if (contextMap.containsKey("DATETIMEFORMAT")) {
+									log.info("LocalDateTime valueString: " + valueString);
 
+									if (contextMap.containsKey("DATETIMEFORMAT")) {
 										String format = (String) contextMap.get("DATETIMEFORMAT");
 										LocalDateTime dtt = (LocalDateTime) attrVal;
 
