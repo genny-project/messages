@@ -16,7 +16,9 @@ import life.genny.qwandaq.utils.TimeUtils;
 import org.glassfish.json.JsonUtil;
 import org.jboss.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 
+import javax.json.JsonObjectBuilder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -47,7 +49,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 			BaseEntity recipientBe = (BaseEntity) contextMap.get("RECIPIENT");
 			BaseEntity projectBe = (BaseEntity) contextMap.get("PROJECT");
-			
+
 			recipientBe = beUtils.getBaseEntityByCode(recipientBe.getCode());
 
 			if (templateBe == null) {
@@ -59,7 +61,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 				log.error(ANSIColour.RED+"Target is NULL"+ANSIColour.RESET);
 			}
 
-			String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
+			String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", null);
+			/*Some BE using old timezone attr value*/
+			if (timezone == null) {
+				timezone = recipientBe.getValue("PRI_TIME_ZONE", "UTC");
+			}
 
 			log.info("Timezone returned from recipient BE " + recipientBe.getCode() + " is:: " + timezone);
 
@@ -81,7 +87,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 				timezone = "UTC";
 
 			log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipient + ", Timezone: " + timezone);
-			
+
 			String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
 			String subject = templateBe.getValue("PRI_SUBJECT", null);
 
@@ -111,6 +117,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 								String valueString = attrVal.toString();
 
 								if (attrVal.getClass().equals(LocalDate.class)) {
+									log.info("LocalDate valueString: " + valueString);
+
 									if (contextMap.containsKey("DATEFORMAT")) {
 										String format = (String) contextMap.get("DATEFORMAT");
 										valueString = TimeUtils.formatDate((LocalDate) attrVal, format);
@@ -118,8 +126,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 										log.info("No DATEFORMAT key present in context map, defaulting to stringified date");
 									}
 								} else if (attrVal.getClass().equals(LocalDateTime.class)) {
-									if (contextMap.containsKey("DATETIMEFORMAT")) {
+									log.info("LocalDateTime valueString: " + valueString);
 
+									if (contextMap.containsKey("DATETIMEFORMAT")) {
 										String format = (String) contextMap.get("DATETIMEFORMAT");
 										LocalDateTime dtt = (LocalDateTime) attrVal;
 
@@ -161,7 +170,6 @@ public class QSendGridMessageManager implements QMessageProvider {
 			Personalization personalization = new Personalization();
 			personalization.addTo(to);
 			personalization.setSubject(subject);
-
 			// Hande CC and BCC
 			Object ccVal = contextMap.get("CC");
 			Object bccVal = contextMap.get("BCC");
@@ -264,5 +272,5 @@ public class QSendGridMessageManager implements QMessageProvider {
 		log.error(ANSIColour.RED+"Target " + recipient.getCode() + ", PRI_EMAIL is NULL"+ANSIColour.RESET);
 		return null;
 	}
-	
+
 }
