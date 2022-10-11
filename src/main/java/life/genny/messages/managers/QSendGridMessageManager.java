@@ -127,7 +127,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			// Build a general data map from context BEs and put in personalization
 			setDynamicTemplateData(contextMap, personalization, timezone);
 
-			Mail mail = new Mail();
+			CustomMail mail = new CustomMail();
 			mail.addPersonalization(personalization);
 			mail.setTemplateId(templateId);
 			mail.setFrom(from);
