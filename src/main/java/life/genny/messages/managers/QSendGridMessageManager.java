@@ -5,9 +5,9 @@ import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Email;
-import com.sendgrid.helpers.mail.objects.Personalization;
+import life.genny.messages.dto.Email;
+import life.genny.messages.dto.Mail;
+import life.genny.messages.dto.Personalization;
 import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.models.ANSIColour;
@@ -127,7 +127,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			// Build a general data map from context BEs and put in personalization
 			setDynamicTemplateData(contextMap, personalization, timezone);
 
-			CustomMail mail = new CustomMail();
+			Mail mail = new Mail();
 			mail.addPersonalization(personalization);
 			mail.setTemplateId(templateId);
 			mail.setFrom(from);
