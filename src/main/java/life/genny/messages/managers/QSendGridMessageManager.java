@@ -184,6 +184,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			response = sg.api(request);
 
 			int statusCode = response.getStatusCode();
+			log.info("SendGrid status code: "+ statusCode);
 			int statusFamily = (int)Math.floor(statusCode / 100);
 			if(statusFamily != 2) {// Not ok
 				log.error(ANSIColour.RED+"Error sending SendGrid message to " + recipientEmail + "!"+ANSIColour.RESET);
