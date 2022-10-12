@@ -5,9 +5,10 @@ import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
-import life.genny.messages.dto.Email;
-import life.genny.messages.dto.Mail;
-import life.genny.messages.dto.Personalization;
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import com.sendgrid.helpers.mail.objects.Email;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Personalization;
 import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.models.ANSIColour;
@@ -32,6 +33,26 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+// Sendgrid POJO classes where registered for reflection as native compilation will not serialize it without this.
+@RegisterForReflection(targets = {
+		com.sendgrid.helpers.mail.objects.ASM.class,
+		com.sendgrid.helpers.mail.objects.Attachments.class,
+		com.sendgrid.helpers.mail.objects.Attachments.Builder.class,
+		com.sendgrid.helpers.mail.objects.BccSettings.class,
+		com.sendgrid.helpers.mail.objects.ClickTrackingSetting.class,
+		com.sendgrid.helpers.mail.objects.Content.class,
+		com.sendgrid.helpers.mail.objects.Email.class,
+		com.sendgrid.helpers.mail.objects.FooterSetting.class,
+		com.sendgrid.helpers.mail.objects.GoogleAnalyticsSetting.class,
+		com.sendgrid.helpers.mail.objects.MailSettings.class,
+		com.sendgrid.helpers.mail.objects.OpenTrackingSetting.class,
+		com.sendgrid.helpers.mail.objects.Personalization.class,
+		com.sendgrid.helpers.mail.objects.Setting.class,
+		com.sendgrid.helpers.mail.objects.SpamCheckSetting.class,
+		com.sendgrid.helpers.mail.objects.SubscriptionTrackingSetting.class,
+		com.sendgrid.helpers.mail.objects.TrackingSettings.class,
+		com.sendgrid.helpers.mail.Mail.class,
+})
 public class QSendGridMessageManager implements QMessageProvider {
 
 	// Concurrency for sendgrid api. Just putting it here to start with
