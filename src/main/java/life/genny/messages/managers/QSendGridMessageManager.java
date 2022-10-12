@@ -190,7 +190,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 				log.error(ANSIColour.RED+"Error sending SendGrid message to " + recipientEmail + "!"+ANSIColour.RESET);
 				logResponse(response, log::error);
 			} else {
-				log.info(ANSIColour.GREEN+"SendGrid Message Sent to " + recipientEmail + "!"+ANSIColour.RESET);
+				log.info(ANSIColour.GREEN+" " + recipientEmail + "!"+ANSIColour.RESET);
 				log.debug(ANSIColour.GREEN + " Got back " + response.getStatusCode());
 			}
 		} catch (IOException e) {
