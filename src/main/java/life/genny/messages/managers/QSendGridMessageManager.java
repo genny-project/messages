@@ -153,10 +153,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 			mail.setTemplateId(templateId);
 			mail.setFrom(from);
 
-			System.out.println("Mail: " + mail);
-			System.out.println("personalization: " + personalization);
 			System.out.println("Mail JSON: " + new JSONObject(mail));
-			System.out.println("Mail Map: " + new JSONObject(mail).toMap());
 
 			Request request = new Request();
 			request.setMethod(Method.POST);
