@@ -79,6 +79,10 @@
       <artifactId>maven-shared-utils</artifactId>
     </dependency>
     <dependency>
+    <groupId>org.jboss.logmanager</groupId>
+    <artifactId>log4j2-jboss-logmanager</artifactId> 
+    </dependency>
+    <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20220924</version>
