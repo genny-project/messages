@@ -1,37 +1,33 @@
 package life.genny.messages.managers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
-import io.quarkus.runtime.annotations.RegisterForReflection;
-import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import life.genny.qwandaq.attribute.EntityAttribute;
 import life.genny.qwandaq.entity.BaseEntity;
 import life.genny.qwandaq.models.ANSIColour;
 import life.genny.qwandaq.models.GennySettings;
 import life.genny.qwandaq.utils.BaseEntityUtils;
 import life.genny.qwandaq.utils.TimeUtils;
-
-import org.jboss.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 // Sendgrid POJO classes where registered for reflection as native compilation will not serialize it without this.
 @RegisterForReflection(targets = {
@@ -84,9 +80,9 @@ public class QSendGridMessageManager implements QMessageProvider {
 			}
 
 			// test data
-			log.debug("Showing what is in recipient BE, code=" + recipientBe.getCode());
+			log.info("Showing what is in recipient BE, code=" + recipientBe.getCode());
 			for (EntityAttribute ea : recipientBe.getBaseEntityAttributes()) {
-				log.debug("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
+				log.info("attributeCode=" + ea.getAttributeCode() + ", value=" + ea.getObjectAsString());
 			}
 
 			// send email to secondary email if it is present.
@@ -97,7 +93,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 			}
 			log.info("Sending Email to: " + recipientEmail);
 
-			String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", "UTC");
+			String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", null);
+			/*Some BE using old timezone attr value*/
+			if (timezone == null) {
+				timezone = recipientBe.getValue("PRI_TIME_ZONE", "UTC");
+			}
 			log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipientEmail + ", Timezone: " + timezone);
 
 			String templateId = templateBe.getValue("PRI_SENDGRID_ID", null);
@@ -186,12 +186,11 @@ public class QSendGridMessageManager implements QMessageProvider {
 			int statusCode = response.getStatusCode();
 			log.info("SendGrid status code: "+ statusCode);
 			int statusFamily = (int)Math.floor(statusCode / 100);
-			if(statusFamily != 2) {// Not ok
+			if (statusFamily != 2) {// Not ok
 				log.error(ANSIColour.RED+"Error sending SendGrid message to " + recipientEmail + "!"+ANSIColour.RESET);
 				logResponse(response, log::error);
 			} else {
-				log.info(ANSIColour.GREEN+" " + recipientEmail + "!"+ANSIColour.RESET);
-				log.debug(ANSIColour.GREEN + " Got back " + response.getStatusCode());
+				log.info(ANSIColour.GREEN+"SendGrid message sent to " + recipientEmail + "!"+ANSIColour.RESET);
 			}
 		} catch (IOException e) {
 			log.error("Error sending request to SendGrid!: " + request);
@@ -262,8 +261,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 		for (String key : contextMap.keySet()) {
 			Object value = contextMap.get(key);
 
-			log.debug("contextMap key: "+ key);
-			log.debug("contextMap value: "+ value);
+			log.info("contextMap key: "+ key);
+			log.info("contextMap value: "+ value);
 
 			if (value.getClass().equals(BaseEntity.class)) {
 				log.info("Processing key as BASEENTITY: " + key);
@@ -281,6 +280,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 							String valueString = attrVal.toString();
 
 							if (attrVal.getClass().equals(LocalDate.class)) {
+								log.info("LocalDate valueString: " + valueString);
+
 								if (contextMap.containsKey("DATEFORMAT")) {
 									String format = (String) contextMap.get("DATEFORMAT");
 									valueString = TimeUtils.formatDate((LocalDate) attrVal, format);
@@ -290,6 +291,8 @@ public class QSendGridMessageManager implements QMessageProvider {
 									log.info("No DATEFORMAT key present in context map, defaulting to stringified date");
 								}
 							} else if (attrVal.getClass().equals(LocalDateTime.class)) {
+								log.info("LocalDateTime valueString: " + valueString);
+
 								if (contextMap.containsKey("DATETIMEFORMAT")) {
 									String format = (String) contextMap.get("DATETIMEFORMAT");
 									LocalDateTime dtt = (LocalDateTime) attrVal;
