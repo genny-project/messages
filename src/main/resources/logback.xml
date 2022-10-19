@@ -18,4 +18,3 @@
 	<logger name="io.vertx.core.impl.BlockedThreadChecker" level="OFF" />
 	<logger name="io.vertx.core.VertxException" level="OFF" />
 </configuration>
-
