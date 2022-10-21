@@ -95,7 +95,7 @@ public class QSendGridMessageManager implements QMessageProvider {
 
 			String timezone = recipientBe.getValue("PRI_TIMEZONE_ID", null);
 			/*Some BE using old timezone attr value*/
-			if (timezone == null) {
+			if (StringUtils.isEmpty(timezone)) {
 				timezone = recipientBe.getValue("PRI_TIME_ZONE", "UTC");
 			}
 			log.info("Recipient BeCode: " + recipientBe.getCode() + " Recipient Email: " + recipientEmail + ", Timezone: " + timezone);
