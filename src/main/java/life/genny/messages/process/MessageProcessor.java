@@ -113,7 +113,7 @@ public class MessageProcessor {
             if (Arrays.stream(message.getMessageTypeArr()).anyMatch(item -> item == QBaseMSGMessageType.DEFAULT)) {
                 // Use default if told to do so
                 List<String> typeList = beUtils.getBaseEntityCodeArrayFromLNKAttr(templateBe, "PRI_DEFAULT_MSG_TYPE");
-                String body  = templateBe.getValue("PRI_BODY", null);
+                String body  = templateBe.getValue("PRI_DEFAULT_MSG_TYPE", null);
                 System.out.println("### body: "+ body);
                 System.out.println("### typeList: "+ Arrays.asList(typeList));
                 try {
